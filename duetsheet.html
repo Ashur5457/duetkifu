@@ -178,6 +178,30 @@ main{min-width:0}
 .toc .tocl:hover{text-decoration:underline}
 .toc .lead{flex:1 1 20px;border-bottom:1px dotted var(--line)}
 .toc .pg{color:var(--muted);font-variant-numeric:tabular-nums}
+.toc .stc{font-weight:400}
+/* chapters and branches */
+.stc{display:inline-block;font:500 11.5px/1.5 var(--sans);padding:0 7px;border-radius:9px;border:1px solid currentColor;white-space:nowrap;vertical-align:middle}
+.st-active{--st:var(--accent)}.st-paused{--st:var(--c2)}.st-stopped{--st:var(--c0)}.st-done{--st:var(--ok)}
+.stc.st-active,.stc.st-paused,.stc.st-stopped,.stc.st-done{color:var(--st)}
+.btitle .stc{margin-left:10px}
+.brof{color:var(--muted);font-size:13px;margin:-2px 0 6px}
+#tree{max-width:980px}
+.treeintro{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.tlane{display:flex;flex-direction:column;gap:10px}
+.tbr{margin:0 0 0 22px;padding:2px 0 2px 18px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.tnode{background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--st,var(--line));border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.tnode.st-stopped{opacity:.78}
+.tnode .th{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.tnode .tt{border:0;background:none;padding:0;font:700 16px/1.35 var(--serif);color:var(--ink);cursor:pointer;text-align:left}
+.tnode .tt:hover{text-decoration:underline}
+.tnode .tm{color:var(--muted);font-size:13px}
+.tnode .tl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13.5px}
+.tnode .tl .k{color:var(--muted)}
+.tnode .tl.newhere{color:var(--c2);font-weight:600}
+.tnode .tl.newhere .k{color:var(--c2)}
+.tnode .tc{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13px;margin-top:2px}
+.tnode .tc select{font-size:13px;padding:2px 4px;max-width:260px}
+.tnode .tc .sp{flex:1}
 .btitle{font-size:18px;margin:0 0 6px;line-height:1.35}
 .md p{margin:0 0 .55em}.md p:last-child{margin-bottom:0}
 .md ul{margin:0 0 .55em;padding-left:1.3em}
@@ -369,7 +393,7 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #flow.compact .cgi.side::before{content:"\21B3";color:var(--muted);margin-left:-1.2em}
 #flow.compact .cgi .ty{color:var(--muted);flex:0 0 4.5em;font-size:12px}
 #flow.compact .cgi .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:none!important}
+body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.readonly #note-db{display:none!important}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:8px;font-size:14px;max-width:80vw}
 @media (max-width:1100px){.wrap{grid-template-columns:1fr}#panel{position:static;max-height:none}}
 </style>
@@ -380,6 +404,7 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
   <div class="seg" id="modes" role="group" aria-label="Mode">
     <button type="button" data-mode="view" aria-pressed="true">View</button>
     <button type="button" data-mode="edit" aria-pressed="false">Edit</button>
+    <button type="button" data-mode="tree" aria-pressed="false">Tree</button>
   </div>
   <span class="hint" id="hint"></span>
   <button type="button" class="btn issues" id="issuesBtn" hidden aria-label="Problems"></button>
@@ -401,6 +426,7 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
     </div>
     <nav class="thumbs" id="thumbs" aria-label="Pages"></nav>
   </section>
+  <section id="tree" aria-label="Tree" hidden><div id="treehost"></div></section>
   <section id="edit" aria-label="Edit" hidden>
     <div class="flowbar"><button type="button" class="btn small" id="compactBtn" aria-pressed="false">Reorder (titles only)</button></div>
     <div id="flow"></div>
@@ -1103,7 +1129,43 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "The data drawn in this chart": "這張圖畫出來的數據",
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要換數據、欄位、數據組或其他任何修改，請寫在下方的留言框（可參考「範例句」）。",
  "Draw around points on the chart with the mouse, or click one point.": "在圖上按住滑鼠畫一圈圈出資料點，或直接點一個點。",
- "Draw around a region of the figure with the mouse.": "在圖上按住滑鼠畫一圈，圈出一塊區域。"
+ "Draw around a region of the figure with the mouse.": "在圖上按住滑鼠畫一圈，圈出一塊區域。",
+ "Tree": "樹狀",
+ "The chapters as a tree of research branches, with their status and the data they use.": "把章節看成研究分支的樹狀圖，標出每一支的狀態和用到的數據。",
+ "status|Active": "進行中",
+ "status|Paused": "暫停",
+ "status|Stopped": "停止",
+ "status|Done": "完成",
+ "Status": "狀態",
+ "Chapter": "章節",
+ "Chapter status": "章節狀態",
+ "Datasets used": "用到的數據集",
+ "Branches": "分支",
+ "Branch": "分支",
+ "Branches from": "分支自",
+ "Branch of \"{t}\"": "「{t}」的分支",
+ "(main line)": "（主線）",
+ "Branch from here": "從這一章分出",
+ "Add a new chapter that branches from this one": "新增一個從這一章分出去的章節",
+ "New branch of \"{t}\"": "「{t}」的新分支",
+ "What this branch tries, and why.": "這個分支要試什麼、為什麼。",
+ "New in this branch": "這個分支才有",
+ "Computed by": "計算",
+ "Read this chapter": "閱讀這一章",
+ "page {n}": "第 {n} 頁",
+ "{n} charts": "{n} 張圖",
+ "{n} tables": "{n} 個表",
+ "{n} images": "{n} 張圖片",
+ "Each box is a chapter. Click a title to read it.": "每個方框是一章。點標題就會跳到那一章。",
+ "Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.": "每個方框是一章。可以設定狀態、從哪一章分出；點標題就會跳到那一章。閱讀順序不會改變。",
+ "Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.": "有標題的文字區塊就是章節。這份報告還沒有：請在編輯模式幫文字區塊加上標題。",
+ "Chapter \"{t}\" branches from \"{p}\", which is not a chapter of this report; it is shown on the main line.": "章節「{t}」的分支來源「{p}」不是這份報告的章節，先顯示在主線上。",
+ "Chapter \"{t}\" is part of a loop of branches; it is shown on the main line.": "章節「{t}」的分支關係繞成一圈，先顯示在主線上。",
+ "Chapter \"{t}\" has an unknown status \"{s}\"; it is shown as active.": "章節「{t}」的狀態「{s}」無法辨認，先當成進行中。",
+ "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "這個分支改用 […] 取代 […]，其他都和分支來源的那一章相同。",
+ "Compute this branch into new files, and do not change the files of the chapter it branches from.": "這個分支的計算結果存成新檔案，不要改動分支來源那一章的檔案。",
+ "Compare the result of this branch with the chapter it branches from, in one chart.": "把這個分支和分支來源那一章的結果畫在同一張圖比較。",
+ "Write down why this branch stopped, and what would make it worth reopening.": "寫下這個分支為什麼停下來，以及什麼情況下值得重開。"
 },
 "zh-Hans": {
  "_name": "简体中文",
@@ -1748,7 +1810,43 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "The data drawn in this chart": "这张图画出来的数据",
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要换数据、栏位、数据组或其他任何修改，请写在下方的留言框（可参考“范例句”）。",
  "Draw around points on the chart with the mouse, or click one point.": "在图上按住鼠标画一圈圈出数据点，或直接点击一个点。",
- "Draw around a region of the figure with the mouse.": "在图上按住鼠标画一圈，圈出一块区域。"
+ "Draw around a region of the figure with the mouse.": "在图上按住鼠标画一圈，圈出一块区域。",
+ "Tree": "树状",
+ "The chapters as a tree of research branches, with their status and the data they use.": "把章节看成研究分支的树状图，标出每一支的状态和用到的数据。",
+ "status|Active": "进行中",
+ "status|Paused": "暂停",
+ "status|Stopped": "停止",
+ "status|Done": "完成",
+ "Status": "状态",
+ "Chapter": "章节",
+ "Chapter status": "章节状态",
+ "Datasets used": "用到的数据集",
+ "Branches": "分支",
+ "Branch": "分支",
+ "Branches from": "分支自",
+ "Branch of \"{t}\"": "“{t}”的分支",
+ "(main line)": "（主线）",
+ "Branch from here": "从这一章分出",
+ "Add a new chapter that branches from this one": "新增一个从这一章分出去的章节",
+ "New branch of \"{t}\"": "“{t}”的新分支",
+ "What this branch tries, and why.": "这个分支要试什么、为什么。",
+ "New in this branch": "这个分支才有",
+ "Computed by": "计算",
+ "Read this chapter": "阅读这一章",
+ "page {n}": "第 {n} 页",
+ "{n} charts": "{n} 张图",
+ "{n} tables": "{n} 个表",
+ "{n} images": "{n} 张图片",
+ "Each box is a chapter. Click a title to read it.": "每个方框是一章。点标题就会跳到那一章。",
+ "Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.": "每个方框是一章。可以设置状态、从哪一章分出；点标题就会跳到那一章。阅读顺序不会改变。",
+ "Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.": "有标题的文字区块就是章节。这份报告还没有：请在编辑模式给文字区块加上标题。",
+ "Chapter \"{t}\" branches from \"{p}\", which is not a chapter of this report; it is shown on the main line.": "章节“{t}”的分支来源“{p}”不是这份报告的章节，先显示在主线上。",
+ "Chapter \"{t}\" is part of a loop of branches; it is shown on the main line.": "章节“{t}”的分支关系绕成一圈，先显示在主线上。",
+ "Chapter \"{t}\" has an unknown status \"{s}\"; it is shown as active.": "章节“{t}”的状态“{s}”无法识别，先当成进行中。",
+ "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "这个分支改用 […] 取代 […]，其他都和分支来源的那一章相同。",
+ "Compute this branch into new files, and do not change the files of the chapter it branches from.": "这个分支的计算结果存成新文件，不要改动分支来源那一章的文件。",
+ "Compare the result of this branch with the chapter it branches from, in one chart.": "把这个分支和分支来源那一章的结果画在同一张图比较。",
+ "Write down why this branch stopped, and what would make it worth reopening.": "写下这个分支为什么停下来，以及什么情况下值得重开。"
 },
 "ja": {
  "_name": "日本語",
@@ -2393,7 +2491,43 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "The data drawn in this chart": "このグラフに描かれたデータ",
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "データ、列、系列などを変えたいときは、下のコメント欄に書いてください（「依頼の例」を参照）。",
  "Draw around points on the chart with the mouse, or click one point.": "グラフ上でマウスを押したまま点を囲むか、1 つの点をクリックします。",
- "Draw around a region of the figure with the mouse.": "図の上でマウスを押したまま範囲を囲みます。"
+ "Draw around a region of the figure with the mouse.": "図の上でマウスを押したまま範囲を囲みます。",
+ "Tree": "ツリー",
+ "The chapters as a tree of research branches, with their status and the data they use.": "章をリサーチの分岐ツリーとして表示し、各分岐の状態と使ったデータを示します。",
+ "status|Active": "進行中",
+ "status|Paused": "一時停止",
+ "status|Stopped": "中止",
+ "status|Done": "完了",
+ "Status": "状態",
+ "Chapter": "章",
+ "Chapter status": "章の状態",
+ "Datasets used": "使ったデータセット",
+ "Branches": "分岐",
+ "Branch": "分岐",
+ "Branches from": "分岐元",
+ "Branch of \"{t}\"": "「{t}」からの分岐",
+ "(main line)": "（本線）",
+ "Branch from here": "ここから分岐",
+ "Add a new chapter that branches from this one": "この章から分岐する新しい章を追加",
+ "New branch of \"{t}\"": "「{t}」の新しい分岐",
+ "What this branch tries, and why.": "この分岐で何を試すか、その理由。",
+ "New in this branch": "この分岐で新しく使うもの",
+ "Computed by": "計算",
+ "Read this chapter": "この章を読む",
+ "page {n}": "{n} ページ",
+ "{n} charts": "図 {n} 点",
+ "{n} tables": "表 {n} 点",
+ "{n} images": "画像 {n} 点",
+ "Each box is a chapter. Click a title to read it.": "各ボックスが 1 つの章です。タイトルをクリックすると、その章を読めます。",
+ "Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.": "各ボックスが 1 つの章です。状態や分岐元を設定でき、タイトルをクリックするとその章を読めます。読む順番は変わりません。",
+ "Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.": "タイトルのあるテキストブロックが章になります。このレポートにはまだありません。編集モードでテキストブロックにタイトルを付けてください。",
+ "Chapter \"{t}\" branches from \"{p}\", which is not a chapter of this report; it is shown on the main line.": "章「{t}」の分岐元「{p}」はこのレポートの章ではないため、本線に表示します。",
+ "Chapter \"{t}\" is part of a loop of branches; it is shown on the main line.": "章「{t}」の分岐関係がループしているため、本線に表示します。",
+ "Chapter \"{t}\" has an unknown status \"{s}\"; it is shown as active.": "章「{t}」の状態「{s}」を認識できないため、進行中として表示します。",
+ "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "この分岐では […] の代わりに […] を使い、それ以外は分岐元の章と同じにしてください。",
+ "Compute this branch into new files, and do not change the files of the chapter it branches from.": "この分岐の計算結果は新しいファイルに保存し、分岐元の章のファイルは変えないでください。",
+ "Compare the result of this branch with the chapter it branches from, in one chart.": "この分岐と分岐元の章の結果を 1 つの図で比較してください。",
+ "Write down why this branch stopped, and what would make it worth reopening.": "この分岐を止めた理由と、どんな条件なら再開する価値があるかを書いてください。"
 },
 "ko": {
  "_name": "한국어",
@@ -3038,7 +3172,43 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "The data drawn in this chart": "이 차트에 그려진 데이터",
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "데이터, 열, 계열 등 다른 것을 바꾸려면 아래 댓글 상자에 적어 주세요 (\"요청 예시\" 참고).",
  "Draw around points on the chart with the mouse, or click one point.": "차트에서 마우스를 누른 채 점들을 둘러 그리거나, 점 하나를 클릭하세요.",
- "Draw around a region of the figure with the mouse.": "그림에서 마우스를 누른 채 영역을 둘러 그리세요."
+ "Draw around a region of the figure with the mouse.": "그림에서 마우스를 누른 채 영역을 둘러 그리세요.",
+ "Tree": "트리",
+ "The chapters as a tree of research branches, with their status and the data they use.": "장을 연구 분기 트리로 보여 주고, 각 분기의 상태와 사용한 데이터를 표시합니다.",
+ "status|Active": "진행 중",
+ "status|Paused": "일시 중지",
+ "status|Stopped": "중단",
+ "status|Done": "완료",
+ "Status": "상태",
+ "Chapter": "장",
+ "Chapter status": "장 상태",
+ "Datasets used": "사용한 데이터셋",
+ "Branches": "분기",
+ "Branch": "분기",
+ "Branches from": "분기 출처",
+ "Branch of \"{t}\"": "\"{t}\"의 분기",
+ "(main line)": "(본선)",
+ "Branch from here": "여기서 분기",
+ "Add a new chapter that branches from this one": "이 장에서 분기하는 새 장 추가",
+ "New branch of \"{t}\"": "\"{t}\"의 새 분기",
+ "What this branch tries, and why.": "이 분기에서 무엇을 시도하는지, 그리고 그 이유.",
+ "New in this branch": "이 분기에서 새로 쓰는 것",
+ "Computed by": "계산",
+ "Read this chapter": "이 장 읽기",
+ "page {n}": "{n}쪽",
+ "{n} charts": "차트 {n}개",
+ "{n} tables": "표 {n}개",
+ "{n} images": "이미지 {n}개",
+ "Each box is a chapter. Click a title to read it.": "각 상자가 하나의 장입니다. 제목을 클릭하면 그 장을 읽을 수 있습니다.",
+ "Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.": "각 상자가 하나의 장입니다. 상태와 분기 출처를 정할 수 있고, 제목을 클릭하면 그 장을 읽을 수 있습니다. 읽는 순서는 바뀌지 않습니다.",
+ "Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.": "제목이 있는 텍스트 블록이 장이 됩니다. 이 보고서에는 아직 없습니다. 편집 모드에서 텍스트 블록에 제목을 붙이세요.",
+ "Chapter \"{t}\" branches from \"{p}\", which is not a chapter of this report; it is shown on the main line.": "장 \"{t}\"의 분기 출처 \"{p}\"는 이 보고서의 장이 아니므로 본선에 표시합니다.",
+ "Chapter \"{t}\" is part of a loop of branches; it is shown on the main line.": "장 \"{t}\"의 분기 관계가 순환하므로 본선에 표시합니다.",
+ "Chapter \"{t}\" has an unknown status \"{s}\"; it is shown as active.": "장 \"{t}\"의 상태 \"{s}\"를 알 수 없어 진행 중으로 표시합니다.",
+ "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "이 분기에서는 […] 대신 […]를 쓰고, 나머지는 분기 출처 장과 같게 해 주세요.",
+ "Compute this branch into new files, and do not change the files of the chapter it branches from.": "이 분기의 계산 결과는 새 파일로 저장하고, 분기 출처 장의 파일은 바꾸지 마세요.",
+ "Compare the result of this branch with the chapter it branches from, in one chart.": "이 분기와 분기 출처 장의 결과를 한 차트에서 비교해 주세요.",
+ "Write down why this branch stopped, and what would make it worth reopening.": "이 분기를 멈춘 이유와, 어떤 경우에 다시 열 가치가 있는지 적어 주세요."
 },
 "es": {
  "_name": "Español",
@@ -3683,7 +3853,43 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "The data drawn in this chart": "Los datos dibujados en este gráfico",
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "Para cambiar los datos, las columnas, las series o cualquier otra cosa, escríbelo en el cuadro de comentarios de abajo (ver Ejemplos de peticiones).",
  "Draw around points on the chart with the mouse, or click one point.": "Rodea puntos del gráfico arrastrando el ratón, o haz clic en un solo punto.",
- "Draw around a region of the figure with the mouse.": "Rodea una región de la figura arrastrando el ratón."
+ "Draw around a region of the figure with the mouse.": "Rodea una región de la figura arrastrando el ratón.",
+ "Tree": "Árbol",
+ "The chapters as a tree of research branches, with their status and the data they use.": "Los capítulos como un árbol de ramas de investigación, con su estado y los datos que usan.",
+ "status|Active": "En curso",
+ "status|Paused": "En pausa",
+ "status|Stopped": "Detenida",
+ "status|Done": "Terminada",
+ "Status": "Estado",
+ "Chapter": "Capítulo",
+ "Chapter status": "Estado del capítulo",
+ "Datasets used": "Conjuntos de datos usados",
+ "Branches": "Ramas",
+ "Branch": "Rama",
+ "Branches from": "Rama de",
+ "Branch of \"{t}\"": "Rama de «{t}»",
+ "(main line)": "(línea principal)",
+ "Branch from here": "Crear rama desde aquí",
+ "Add a new chapter that branches from this one": "Añadir un capítulo nuevo que sea una rama de este",
+ "New branch of \"{t}\"": "Nueva rama de «{t}»",
+ "What this branch tries, and why.": "Qué prueba esta rama y por qué.",
+ "New in this branch": "Nuevo en esta rama",
+ "Computed by": "Calculado con",
+ "Read this chapter": "Leer este capítulo",
+ "page {n}": "página {n}",
+ "{n} charts": "{n} gráficos",
+ "{n} tables": "{n} tablas",
+ "{n} images": "{n} imágenes",
+ "Each box is a chapter. Click a title to read it.": "Cada recuadro es un capítulo. Haz clic en un título para leerlo.",
+ "Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.": "Cada recuadro es un capítulo. Indica su estado o de qué capítulo es rama; haz clic en un título para leerlo. El orden de lectura no cambia.",
+ "Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.": "Los bloques de texto con título son capítulos. Este informe aún no tiene: pon un título a un bloque de texto en el modo Editar.",
+ "Chapter \"{t}\" branches from \"{p}\", which is not a chapter of this report; it is shown on the main line.": "El capítulo «{t}» es rama de «{p}», que no es un capítulo de este informe; se muestra en la línea principal.",
+ "Chapter \"{t}\" is part of a loop of branches; it is shown on the main line.": "El capítulo «{t}» forma parte de un ciclo de ramas; se muestra en la línea principal.",
+ "Chapter \"{t}\" has an unknown status \"{s}\"; it is shown as active.": "El capítulo «{t}» tiene un estado desconocido «{s}»; se muestra como en curso.",
+ "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "En esta rama, usa […] en lugar de […]; deja todo lo demás como en el capítulo del que sale.",
+ "Compute this branch into new files, and do not change the files of the chapter it branches from.": "Guarda los cálculos de esta rama en archivos nuevos y no cambies los archivos del capítulo del que sale.",
+ "Compare the result of this branch with the chapter it branches from, in one chart.": "Compara el resultado de esta rama con el del capítulo del que sale, en un gráfico.",
+ "Write down why this branch stopped, and what would make it worth reopening.": "Escribe por qué se detuvo esta rama y qué haría que valiera la pena reabrirla."
 }
 }
 </script>
@@ -4064,7 +4270,8 @@ function buildTable(b,host){
 /* ---------- Blocks (view style) ---------- */
 function buildViewBlock(b,interactive){
   const d=h('div',{class:'blk','data-id':b.id});
-  if(b.title)d.append(h('h2',{class:'btitle',text:b.title}));
+  if(b.title)d.append(h('h2',{class:'btitle'},[b.title,isChapter(b)&&statusOf(b)!=='active'?statusChip(statusOf(b)):null]));
+  if(isChapter(b)){const c=chapters().byId.get(b.id);if(c&&c.explicit)d.append(h('p',{class:'brof',text:tr('Branch of "{t}"',{t:chapters().byId.get(c.parent).b.title})}))}
   if(b.type==='text')d.append(h('div',{class:'md',html:md(b.text)}));
   else if(b.type==='chart'){const svg=el('svg',{});d.append(svg);const G=drawChart(svg,b);if(G){S.geo[b.id]=G;if(interactive)bindDraw(G,svg)}}
   else if(b.type==='table')buildTable(b,d);
@@ -4078,11 +4285,15 @@ function buildViewBlock(b,interactive){
 function buildOutline(b){
   const all=orderedBlocks(),rest=all.slice(all.findIndex(x=>x.id===b.id)+1).filter(x=>x.title&&x.type!=='outline');
   if(!rest.length)return h('p',{class:'cap',text:tr('Blocks with a title after this one will be listed here.')});
-  let under=false; // indent figures and tables only once a heading is above them
-  return h('ol',{class:'toc'},rest.map(x=>{const p=pageOfBlock(x.id);if(x.type==='text')under=true;
-    return h('li',{class:under&&x.type!=='text'?'l2':'l1'},[
+  let under=false,depth=0; // indent figures and tables only once a heading is above them; chapters by their branch depth
+  const C=chapters();
+  return h('ol',{class:'toc'},rest.map(x=>{const p=pageOfBlock(x.id),c=x.type==='text'&&C.byId.get(x.id);if(x.type==='text'){under=true;depth=c?c.depth:depth}
+    const li=h('li',{class:under&&x.type!=='text'?'l2':'l1'},[
       h('button',{type:'button',class:'tocl',text:x.title,onclick:()=>jumpTo(x.id)}),
-      h('span',{class:'lead'}),h('span',{class:'pg',text:p>=0?String(p+1):''})])}));
+      c&&C.usesStatus?statusChip(statusOf(x)):null,
+      h('span',{class:'lead'}),h('span',{class:'pg',text:p>=0?String(p+1):''})]);
+    if(depth)li.style.paddingLeft=(depth*1.5+(under&&x.type!=='text'?1.5:0))+'em';
+    return li}));
 }
 /* Blocks that stay together. "avoid" goes under the previous block; "beside" starts a right-hand column next to the group. */
 function blockGroups(blocks){
@@ -4098,6 +4309,107 @@ function buildGroup(g,interactive){
   if(!g.side.length)return g.main.map(b=>buildViewBlock(b,interactive));
   const col=(cls,list)=>h('div',{class:'col '+cls},list.map(b=>buildViewBlock(b,interactive)));
   return [h('div',{class:'duo'},[col('main',g.main),col('side',g.side)])];
+}
+
+/* ---------- Chapters and branches (duetsheet/0.7) ----------
+   A chapter is a text block with a title; the blocks after it, up to the next chapter, belong to it.
+   parent: the chapter it branches from. Without one, a chapter follows the previous chapter of the main line
+   (the chapters without a parent), so an older report is one straight line.
+   status: active, paused, stopped or done (none means active). datasets: extra datasets the chapter uses. */
+const STATUSES=['active','paused','stopped','done'];
+const STATUS_TEXT={active:'Active',paused:'Paused',stopped:'Stopped',done:'Done'};
+const isChapter=b=>!!b&&b.type==='text'&&!!String(b.title||'').trim();
+const statusOf=b=>STATUSES.includes(b&&b.status)?b.status:'active';
+const statusChip=st=>h('span',{class:'stc st-'+st,text:trc('status',STATUS_TEXT[st])});
+function chapters(){ // rebuilt on every render
+  if(S.chapMemo)return S.chapMemo;
+  const list=[],byId=new Map(),problems=[];let cur=null;
+  orderedBlocks().forEach(b=>{if(isChapter(b)){cur={id:b.id,b,blocks:[b],explicit:null,parent:null,kids:[],depth:0};list.push(cur);byId.set(b.id,cur)}else if(cur)cur.blocks.push(b)});
+  list.forEach(c=>{const p=c.b.parent;if(p==null||p==='')return;
+    if(p===c.id||!byId.has(p)){problems.push(tr('Chapter "{t}" branches from "{p}", which is not a chapter of this report; it is shown on the main line.',{t:c.b.title,p:String(p)}));return}
+    c.explicit=p});
+  list.forEach(c=>{const seen=new Set([c.id]);for(let x=c.explicit;x;x=byId.get(x).explicit){
+    if(seen.has(x)){problems.push(tr('Chapter "{t}" is part of a loop of branches; it is shown on the main line.',{t:c.b.title}));c.explicit=null;break}seen.add(x)}});
+  list.forEach(c=>{if(c.b.status!=null&&c.b.status!==''&&!STATUSES.includes(c.b.status))problems.push(tr('Chapter "{t}" has an unknown status "{s}"; it is shown as active.',{t:c.b.title,s:String(c.b.status)}))});
+  let prevMain=null;
+  list.forEach(c=>{if(c.explicit)c.parent=c.explicit;else{c.parent=prevMain;c.main=true;prevMain=c.id}});
+  list.forEach(c=>{if(c.parent)byId.get(c.parent).kids.push(c)});
+  // the child that continues a chapter's line: the next main-line chapter, otherwise the first branch; the others branch off
+  list.forEach(c=>c.kids.sort((a,b)=>(b.main?1:0)-(a.main?1:0)));
+  const roots=list.filter(c=>!c.parent),walk=(c,d)=>{c.depth=d;c.kids.forEach((k,i)=>walk(k,i?d+1:d))};roots.forEach(c=>walk(c,0));
+  const usesStatus=list.some(c=>c.b.status!=null&&c.b.status!=='');
+  S.chapLogged=S.chapLogged||new Set();
+  problems.forEach(m=>{if(!S.chapLogged.has(m)){S.chapLogged.add(m);logIssue('warning',m)}});
+  return S.chapMemo={list,byId,roots,usesStatus,of:id=>{let c=null;for(const x of list){if(x.blocks.some(b=>b.id===id)){c=x;break}}return c}};
+}
+function chapterData(c){ // the datasets a chapter uses and every step they come from
+  if(c.data)return c.data;
+  const ids=new Set();c.blocks.forEach(b=>blockDatasetIds(b).forEach(id=>ids.add(id)));
+  (Array.isArray(c.b.datasets)?c.b.datasets:[]).forEach(id=>ids.add(id));
+  const datasets=[...ids].map(id=>S.datasets.get(id)).filter(Boolean);
+  const C=chain(),steps=new Set(),seen=new Set();
+  const up=p=>{p=normPath(p);if(seen.has(p))return;seen.add(p);const s=C.madeBy.get(p);if(!s||steps.has(s))return;steps.add(s);(s.inputs||[]).forEach(r=>r&&r.path&&up(r.path))};
+  datasets.forEach(d=>d.source&&d.source.path&&up(d.source.path));
+  const withSrc=datasets.filter(d=>d.source&&d.source.path);
+  return c.data={datasets,steps:[...steps].sort((a,b)=>(a.at||'')<(b.at||'')?-1:1),
+    state:withSrc.length?worst(withSrc.map(d=>C.datasetStatus(d).state)):null};
+}
+function chapterDiff(c){ // what a chapter uses that the chapter it branches from does not
+  const p=c.parent&&chapters().byId.get(c.parent);if(!p)return null;
+  const a=chapterData(c),b=chapterData(p),bs=new Set(b.steps.map(s=>s.id)),bd=new Set(b.datasets.map(d=>d.id));
+  return{steps:a.steps.filter(s=>!bs.has(s.id)),datasets:a.datasets.filter(d=>!bd.has(d.id)),parent:p};
+}
+async function saveChapter(b,patch){ // parent or status; an empty value removes the field
+  const n={...b};Object.entries(patch).forEach(([k,v])=>{if(v==null||v==='')delete n[k];else n[k]=v});
+  await saveBlock(n);
+}
+async function branchFrom(c){ // a new chapter after this one and its branches, so the branches already there keep their place
+  leaveField();
+  const id=uid('b-'),t=now();
+  const b={id,type:'text',title:tr('New branch of "{t}"',{t:c.b.title}),text:tr('What this branch tries, and why.'),caption:'',breakBefore:'page',parent:c.id,status:'active',createdAt:t};
+  const o=orderedBlocks().map(x=>x.id),sub=[],walk=x=>{sub.push(x);x.kids.forEach(k=>{if(k.explicit)walk(k)})};walk(c);
+  const at=Math.max(...sub.flatMap(x=>x.blocks.map(y=>o.indexOf(y.id))));o.splice(at+1,0,id);
+  S.blocks.set(id,b);S.meta={...S.meta,order:o};
+  await put('blocks/'+id,b);await put('report/meta',S.meta);
+  await recordChange({blockId:id,field:'add',before:null,after:typeName('text'),name:b.title});
+  setMode('edit');
+  const n=$(`.cw[data-id="${id}"]`);if(n){n.scrollIntoView({behavior:'smooth',block:'center'});const ti=n.querySelector('.ed-title');if(ti){ti.focus({preventScroll:true});ti.select()}}
+}
+function renderTree(){
+  const host=$('#treehost');host.replaceChildren();S.geo={};
+  const C=chapters();
+  if(!C.list.length){host.append(h('p',{class:'treeintro',text:tr('Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.')}));return}
+  host.append(h('p',{class:'treeintro',text:S.readonly?tr('Each box is a chapter. Click a title to read it.')
+    :tr('Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.')}));
+  const lane=(c,out)=>{for(let x=c;x;x=x.kids[0]&&x.kids[0].depth===x.depth?x.kids[0]:null){
+      out.push(treeNode(x));const br=x.kids.filter(k=>k.depth>x.depth);
+      if(br.length)out.push(h('div',{class:'tbr'},br.map(k=>{const l=[];lane(k,l);return h('div',{class:'tlane'},l)})))}
+    return out};
+  C.roots.forEach(r=>host.append(h('div',{class:'tlane'},lane(r,[]))));
+}
+function treeNode(c){
+  const C=chapters(),b=c.b,st=statusOf(b),data=chapterData(c),diff=chapterDiff(c),p=pageOfBlock(b.id);
+  const n={chart:0,table:0,image:0};c.blocks.forEach(x=>{if(n[x.type]!=null)n[x.type]++});
+  const counts=[n.chart?tr('{n} charts',{n:n.chart}):'',n.table?tr('{n} tables',{n:n.table}):'',n.image?tr('{n} images',{n:n.image}):''].filter(Boolean);
+  const kids=[h('div',{class:'th'},[statusChip(st),
+    h('button',{type:'button',class:'tt',text:b.title,title:tr('Read this chapter'),onclick:()=>{setMode('view');jumpTo(b.id)}}),
+    h('span',{class:'tm',text:[p>=0?tr('page {n}',{n:p+1}):'',...counts].filter(Boolean).join(' · ')})])];
+  if(c.explicit&&!c.main){const pc=C.byId.get(c.parent);kids.push(h('div',{class:'tl'},[h('span',{class:'k',text:tr('Branches from')}),h('span',{text:pc.b.title})]))}
+  if(data.datasets.length)kids.push(h('div',{class:'tl'},[data.state?dot(data.state):null,h('span',{class:'k',text:tr('Data')}),
+    h('span',{text:data.datasets.map(d=>d.title||d.id).join(tr(', '))})]));
+  if(data.steps.length)kids.push(h('div',{class:'tl'},[h('span',{class:'k',text:tr('Computed by')}),h('span',{text:data.steps.map(scriptName).join(' → ')})]));
+  if(diff&&c.explicit&&(diff.steps.length||diff.datasets.length)){
+    const parts=[...diff.steps.map(scriptName),...diff.datasets.map(d=>d.title||d.id)];
+    kids.push(h('div',{class:'tl newhere'},[h('span',{class:'k',text:tr('New in this branch')}),h('span',{text:parts.join(tr(', '))})]))}
+  if(!S.readonly){
+    const ss=h('select',{'aria-label':tr('Status'),onchange:e=>saveChapter(b,{status:e.target.value})},STATUSES.map(s=>h('option',{value:s,text:trc('status',STATUS_TEXT[s])})));ss.value=st;
+    const below=new Set();const mark=x=>{below.add(x.id);x.kids.forEach(k=>{if(k.explicit)mark(k)})};mark(c); // itself and its branches
+    const ps=h('select',{'aria-label':tr('Branches from'),onchange:e=>saveChapter(b,{parent:e.target.value})},
+      [h('option',{value:'',text:tr('(main line)')}),...C.list.filter(x=>!below.has(x.id)).map(x=>h('option',{value:x.id,text:x.b.title}))]);
+    ps.value=c.explicit||'';
+    kids.push(h('div',{class:'tc'},[h('label',{},[tr('Status')+' ',ss]),h('label',{},[tr('Branches from')+' ',ps]),h('span',{class:'sp'}),
+      h('button',{type:'button',class:'btn small',text:tr('Branch from here'),title:tr('Add a new chapter that branches from this one'),onclick:()=>branchFrom(c)})]))}
+  return h('div',{class:'tnode st-'+st,'data-id':b.id},kids);
 }
 
 /* ---------- Pagination: pages are computed from content, never stored ---------- */
@@ -4260,12 +4572,12 @@ async function put(path,data){try{await db.doc(path).set(data)}catch(e){fail(wri
 async function drop(path){try{await db.doc(path).delete()}catch(e){fail(writeErr(e),e)}}
 
 /* ---------- Change log: field definitions ---------- */
-const FIELDS=['title','text','caption','breakBefore',
+const FIELDS=['title','text','caption','breakBefore','parent','status','datasets',
   'chart.dataset','chart.series','chart.kind','chart.x','chart.y','chart.color','chart.xLabel','chart.yLabel','chart.yMin','chart.yMax','chart.logY',
   'table.dataset','table.sortBy','table.desc','table.limit','image.width','image.crop','image.src','image.asset',
   'image.source.tool','image.source.file','image.source.note','image.source.script','image.source.data'];
 const STYLE_FIELDS=['font.family','font.size','font.label','marker','line','ticks','frame','grid','palette','figure.preset','chartDefaults.kind','chartDefaults.logY'];
-const FIELD_LABEL={title:'Title',text:'Text',caption:'Caption',breakBefore:'Page break','style.writing':'Writing habits',
+const FIELD_LABEL={title:'Title',text:'Text',caption:'Caption',breakBefore:'Page break',parent:'Branches from',status:'Chapter status',datasets:'Datasets used','style.writing':'Writing habits',
   'chart.dataset':'Dataset','chart.series':'Data series','table.dataset':'Dataset',dataset:'Imported data',
   'chart.kind':'Chart type','chart.x':'X column','chart.y':'Y column','chart.color':'Colour by','chart.xLabel':'X axis label','chart.yLabel':'Y axis label',
   'chart.yMin':'Y min','chart.yMax':'Y max','chart.logY':'Y scale',
@@ -4278,9 +4590,12 @@ const FIELD_LABEL={title:'Title',text:'Text',caption:'Caption',breakBefore:'Page
 const fieldLabel=f=>FIELD_LABEL[f]?trc('field',FIELD_LABEL[f]):f;
 const TEXTLIKE=new Set(['title','text','caption','chart.xLabel','chart.yLabel','image.source.file','image.source.note','image.source.script','style.font.family']);
 function category(f){if(f==='title'||f==='text'||f==='caption')return tr('Text');if(f.startsWith('chart.'))return tr('Chart');if(f.startsWith('table.'))return tr('Table');
-  if(f.startsWith('image.'))return tr('Image');if(f.startsWith('style.'))return tr('Style');if(f==='breakBefore')return tr('Page break');if(f==='order')return tr('Order');if(f==='dataset')return tr('Data');return tr('Add/delete')}
+  if(f.startsWith('image.'))return tr('Image');if(f.startsWith('style.'))return tr('Style');if(f==='breakBefore')return tr('Page break');if(f==='parent'||f==='status'||f==='datasets')return tr('Branches');if(f==='order')return tr('Order');if(f==='dataset')return tr('Data');return tr('Add/delete')}
 function valueText(f,v,blockId){
   if(f==='dataset')return v?tr('{n} rows, {c} columns',{n:v.rows,c:v.columns}):tr('(none)');
+  if(f==='parent')return v?blockName(v):tr('(main line)');
+  if(f==='status')return trc('status',STATUS_TEXT[STATUSES.includes(v)?v:'active']);
+  if(f==='datasets')return Array.isArray(v)&&v.length?v.map(id=>{const d=S.datasets.get(id);return d?(d.title||d.id):id}).join(tr(', ')):tr('(none)');
   if(f==='chart.dataset'||f==='table.dataset'){const d=S.datasets.get(v);return d?(d.title||d.id):String(v??'')}
   if(f==='chart.series')return Array.isArray(v)&&v.length?v.map(s=>s.label||((S.datasets.get(s.dataset)||{}).title)||s.dataset).join(tr(', ')):tr('(none)');
   if((v==null||v==='')&&f==='style.font.family')return tr('Page default');
@@ -4497,7 +4812,7 @@ function commentBox(b){
   tools.push(h('span',{class:'sp'}));
   tools.push(h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:()=>submitDraft(b.id)}));
   tools.push(h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:()=>submitAndAsk(b.id)}));
-  box.append(ta,examplesFor(d.target&&d.target.kind!=='block'&&b.type==='chart'?'region':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},tools));
+  box.append(ta,examplesFor(d.target&&d.target.kind!=='block'&&b.type==='chart'?'region':isChapter(b)?'chapter':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},tools));
   if(visual)box.append(h('p',{class:'chint',text:b.type==='chart'?tr('Draw around points on the chart with the mouse, or click one point.'):tr('Draw around a region of the figure with the mouse.')}));
   return box;
 }
@@ -4526,7 +4841,9 @@ const EXAMPLES={
   region:[['',['Why are these points different? Compare them with the rest.','Mark these points and explain what they have in common.','Leave these points out and say why in the caption; keep the original data.','Fit these points separately from the rest.']]],
   table:[['',['Sort by […] and show the first […] rows.','Add units to the column headers.','Add a column with […].','Show the mean and standard deviation per […].']]],
   text:[['',['Make it shorter and keep the numbers.','Give the source dataset for every number.','Make the conclusion more cautious: separate what the data shows from interpretation.','Add a short method paragraph: how the numbers were computed.']]],
-  image:[['',['Replace it with […].','Crop the white space and enlarge […].','Write a caption that explains the axes and units.']]]};
+  image:[['',['Replace it with […].','Crop the white space and enlarge […].','Write a caption that explains the axes and units.']]],
+  chapter:[['Text',['Make it shorter and keep the numbers.','Give the source dataset for every number.','Make the conclusion more cautious: separate what the data shows from interpretation.','Add a short method paragraph: how the numbers were computed.']],
+    ['Branch',['In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.','Compute this branch into new files, and do not change the files of the chapter it branches from.','Compare the result of this branch with the chapter it branches from, in one chart.','Write down why this branch stopped, and what would make it worth reopening.']]]};
 function examplesFor(kind,ta,d){ // a closed list; a click puts the sentence into the comment box, to edit
   const groups=EXAMPLES[kind];if(!groups)return null;
   const insert=s=>{const v=ta.value,at=ta.selectionStart??v.length,pre=v.slice(0,at),sep=pre&&!/\s$/.test(pre)?' ':'';
@@ -4552,7 +4869,9 @@ function renderEdit(){
     const del=h('button',{type:'button',class:'btn small',text:tr('Delete')});
     del.onclick=()=>{if(del.dataset.arm){removeBlock(b.id)}else{del.dataset.arm='1';del.textContent=tr('Confirm delete?');setTimeout(()=>{if(del.isConnected){delete del.dataset.arm;del.textContent=tr('Delete')}},3000)}};
     card.append(h('div',{class:'chead'},[
-      h('span',{class:'hdl',title:tr('Drag to reorder'),text:'⠿'}),h('span',{text:typeName(b.type)}),
+      h('span',{class:'hdl',title:tr('Drag to reorder'),text:'⠿'}),h('span',{text:isChapter(b)?tr('Chapter'):typeName(b.type)}),
+      isChapter(b)&&(chapters().usesStatus||b.parent)?statusChip(statusOf(b)):null,
+      isChapter(b)&&chapters().byId.get(b.id).explicit?h('span',{class:'meta',text:tr('Branch of "{t}"',{t:blockName(chapters().byId.get(b.id).parent)})}):null,
       tooTall?h('span',{class:'warn',text:tr('Taller than one page; it will shrink or scroll in view mode')}):null,
       blockDatasetIds(b).some(id=>S.stale.has(id))?h('span',{class:'warn',text:tr('Source data changed since import')}):
         blockChainState(b)==='stale'?h('span',{class:'warn',text:tr('Needs recomputing')}):null,
@@ -5047,7 +5366,7 @@ function renderQuick(){
   const ta=h('textarea',{rows:'3',placeholder:tr('What should change here? Ctrl + Enter to send.')});ta.value=d.text;
   ta.addEventListener('input',()=>{d.text=ta.value});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendQuick()}});
-  kids.push(ta,examplesFor(b.type==='chart'?'region':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
+  kids.push(ta,examplesFor(b.type==='chart'?'region':isChapter(b)?'chapter':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
     h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:sendQuick}),
     h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:async()=>{if(await sendQuick())await askAgent()}})]));
   box.replaceChildren(...kids);box.hidden=false;
@@ -5069,26 +5388,27 @@ function editingNow(){const a=document.activeElement;return a&&a.closest&&a.clos
 function render(){
   if(!S.meta)return;
   if(editingNow()){S.deferred=true;return}
-  S.deferred=false;S.chainMemo=null;
+  S.deferred=false;S.chainMemo=null;S.chapMemo=null;
   const focusF=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fid;
   paginate();
   $('#doc-title').textContent=S.meta.title||'Duetsheet';document.title=(S.meta.title||'Duetsheet')+tr(' | Duetsheet');
-  $('#view').hidden=S.mode!=='view';$('#edit').hidden=S.mode!=='edit';
-  if(S.mode==='view')renderView();else renderEdit();
+  $('#view').hidden=S.mode!=='view';$('#edit').hidden=S.mode!=='edit';$('#tree').hidden=S.mode!=='tree';
+  if(S.mode==='view')renderView();else if(S.mode==='tree')renderTree();else renderEdit();
   renderPanel();
   if(focusF){const n=document.querySelector(`[data-fid="${CSS.escape(focusF)}"]`);if(n)n.focus({preventScroll:true})}
 }
 document.addEventListener('focusout',()=>setTimeout(()=>{if(S.deferred&&!editingNow())render()},0));
 
 /* ---------- Modes and buttons ---------- */
-const HINT={view:'Use the arrow keys or the buttons below to turn pages.',edit:'Edit directly; drag ⠿ to reorder; click the divider between blocks to change page breaks; leave comments under each block.'};
+const HINT={view:'Use the arrow keys or the buttons below to turn pages.',edit:'Edit directly; drag ⠿ to reorder; click the divider between blocks to change page breaks; leave comments under each block.',
+  tree:'The chapters as a tree of research branches, with their status and the data they use.'};
 function setMode(m){leaveField();S.mode=m;document.body.dataset.mode=m;if(S.draw){S.draw=null;document.body.dataset.draw=''}
   $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
-  document.body.classList.toggle('nopanel',m==='view'&&!S.panelInView);
+  document.body.classList.toggle('nopanel',m!=='edit'&&!S.panelInView);
   $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render()}
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
-$('#togglePanel').addEventListener('click',()=>{const hid=document.body.classList.toggle('nopanel');if(S.mode==='view')S.panelInView=!hid;render()});
-$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.tab=b.dataset.tab;if(S.mode==='view'&&document.body.classList.contains('nopanel')){document.body.classList.remove('nopanel');S.panelInView=true}renderPanel()}});
+$('#togglePanel').addEventListener('click',()=>{const hid=document.body.classList.toggle('nopanel');if(S.mode!=='edit')S.panelInView=!hid;render()});
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.tab=b.dataset.tab;if(S.mode!=='edit'&&document.body.classList.contains('nopanel')){document.body.classList.remove('nopanel');S.panelInView=true}renderPanel()}});
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.filter=b.dataset.f;renderPanel()}});
 $('#finishRound').addEventListener('click',finishRound);
 $('#toggleHist').addEventListener('click',()=>{S.showHist=!S.showHist;renderPanel()});
@@ -5214,7 +5534,7 @@ async function connectServer(){
 //   lang/        extra interface translations
 // An agent can edit report.json while the page is open: the page reloads it, and merges by document when both wrote.
 const FS_OK=typeof window.showDirectoryPicker==='function';
-const REPORT_FILE='report.json',SCHEMA='duetsheet/0.6';
+const REPORT_FILE='report.json',SCHEMA='duetsheet/0.7';
 const DATA_EXT=/\.(csv|tsv|txt|json)$/i,HABIT_EXT=/\.(svg|mplstyle|png|jpe?g|webp|gif|json)$/i,WRITE_EXT=/\.(md|txt|docx|pdf)$/i;
 const ASSET_EXT={'image/svg+xml':'svg','image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','text/csv':'csv','text/plain':'txt','application/json':'json'};
 function docsFromReport(j){

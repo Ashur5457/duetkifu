@@ -7,6 +7,7 @@
     python duetsheet.py step FOLDER --script S --in PATTERN --out PATTERN
                                             record a computation step: which script turned which files into which
     python duetsheet.py annotations FOLDER  print the open annotations with what they point at (compact JSON for agents)
+    python duetsheet.py tree FOLDER         print the chapters as a tree of research branches, with their status and data
     python duetsheet.py wait FOLDER         for an agent: wait until the user clicks "Ask the agent to revise", then exit
     python duetsheet.py agent-status FOLDER working|done|failed [--note TEXT]
                                             for an agent: tell the page what it is doing
@@ -30,8 +31,8 @@ Python 3.8 or later, standard library only.
 """
 import argparse, base64, datetime, glob, hashlib, hmac, http.server, json, mimetypes, os, pathlib, posixpath, re, secrets, shutil, socket, subprocess, sys, tempfile, threading, time, urllib.parse, webbrowser
 
-VERSION = '0.6.0'
-SCHEMA = 'duetsheet/0.6'
+VERSION = '0.7.0'
+SCHEMA = 'duetsheet/0.7'
 HERE = pathlib.Path(__file__).resolve().parent
 PAGE = HERE / 'duetsheet.html'
 SUBDIR = 'duetsheet'
@@ -216,6 +217,156 @@ def block_dataset_ids(b):
     if b.get('type') == 'table' and isinstance(b.get('table'), dict) and b['table'].get('dataset'):
         return [b['table']['dataset']]
     return []
+
+
+# ---------------------------------------------------------------- chapters and branches (duetsheet/0.7)
+
+STATUSES = ('active', 'paused', 'stopped', 'done')
+
+
+def ordered_blocks(rep):
+    """The blocks in reading order, as the page shows them: report.meta.order, then the rest by createdAt."""
+    blocks = rep.get('blocks') if isinstance(rep.get('blocks'), dict) else {}
+    meta = (rep.get('report') or {}).get('meta') if isinstance(rep.get('report'), dict) else None
+    order = meta.get('order') if isinstance(meta, dict) and isinstance(meta.get('order'), list) else []
+    out, seen = [], set()
+    for i in order:
+        if isinstance(i, str) and i not in seen and isinstance(blocks.get(i), dict):
+            seen.add(i)
+            out.append(blocks[i])
+    rest = [b for k, b in blocks.items() if k not in seen and isinstance(b, dict)]
+    return out + sorted(rest, key=lambda b: str(b.get('createdAt') or ''))
+
+
+def is_chapter(b):
+    return isinstance(b, dict) and b.get('type') == 'text' and bool(str(b.get('title') or '').strip())
+
+
+def chapters(rep):
+    """Chapters in reading order and a list of problems. A chapter is a text block with a title; the blocks after it,
+    up to the next chapter, belong to it. Without "parent" a chapter follows the previous chapter of the main line
+    (the chapters without a parent). Each chapter: {id, title, status, parent, explicit, main, depth, blocks, kids}."""
+    chs, by, problems, cur = [], {}, [], None
+    for b in ordered_blocks(rep):
+        if is_chapter(b):
+            cur = {'id': b.get('id'), 'title': b.get('title'), 'block': b, 'blocks': [b], 'explicit': None,
+                   'parent': None, 'main': False, 'depth': 0, 'kids': []}
+            chs.append(cur)
+            by[cur['id']] = cur
+        elif cur:
+            cur['blocks'].append(b)
+    for c in chs:
+        p = c['block'].get('parent')
+        if p in (None, ''):
+            continue
+        if p == c['id'] or p not in by:
+            problems.append(f'blocks.{c["id"]}.parent "{p}" is not another chapter (a text block with a title)')
+        else:
+            c['explicit'] = p
+    for c in chs:
+        seen, x = {c['id']}, c['explicit']
+        while x:
+            if x in seen:
+                problems.append(f'blocks.{c["id"]}.parent: the branches form a loop')
+                c['explicit'] = None
+                break
+            seen.add(x)
+            x = by[x]['explicit']
+    prev = None
+    for c in chs:
+        s = c['block'].get('status')
+        if s not in (None, '') and s not in STATUSES:
+            problems.append(f'blocks.{c["id"]}.status must be active, paused, stopped or done')
+        c['status'] = s if s in STATUSES else 'active'
+        if c['explicit']:
+            c['parent'] = c['explicit']
+        else:
+            c['parent'], c['main'], prev = prev, True, c['id']
+    for c in chs:
+        if c['parent']:
+            by[c['parent']]['kids'].append(c)
+    for c in chs:   # the child that continues a line: the next main-line chapter, else the first branch
+        c['kids'].sort(key=lambda k: not k['main'])
+    stack = [(c, 0) for c in reversed(chs) if not c['parent']]
+    while stack:
+        c, d = stack.pop()
+        c['depth'] = d
+        stack += [(k, d + (1 if i else 0)) for i, k in reversed(list(enumerate(c['kids'])))]
+    return chs, problems
+
+
+def chapter_data(rep, c):
+    """(dataset ids, step ids from the first computation to the last) that a chapter uses."""
+    datasets = rep.get('datasets') if isinstance(rep.get('datasets'), dict) else {}
+    extra = c['block'].get('datasets') if isinstance(c['block'].get('datasets'), list) else []
+    ids = list(dict.fromkeys([i for b in c['blocks'] for i in block_dataset_ids(b)] + [i for i in extra if isinstance(i, str)]))
+    steps = [s for s in (rep.get('steps') or {}).values() if isinstance(s, dict) and isinstance(s.get('outputs'), list)]
+    made = {}
+    for s in sorted(steps, key=lambda s: str(s.get('at') or '')):   # the latest step that wrote a file counts
+        for r in s['outputs']:
+            if isinstance(r, dict) and r.get('path'):
+                made[norm(r['path'])] = s
+    used, seen = {}, set()
+    todo = [((datasets.get(i) or {}).get('source') or {}).get('path') for i in ids]
+    while todo:
+        p = todo.pop()
+        if not isinstance(p, str) or norm(p) in seen:
+            continue
+        seen.add(norm(p))
+        s = made.get(norm(p))
+        if s and s.get('id') not in used:
+            used[s.get('id')] = s
+            todo += [r.get('path') for r in s.get('inputs') or [] if isinstance(r, dict)]
+    return ids, [s.get('id') for s in sorted(used.values(), key=lambda s: str(s.get('at') or ''))]
+
+
+def print_tree(root):
+    """The chapters as an indented tree: status, data, computations, and what a branch adds."""
+    project, _ = project_of(root)
+    try:
+        rep = json.loads((project / 'report.json').read_text(encoding='utf-8-sig'))
+    except (OSError, ValueError) as err:
+        say('ERROR', 'cannot read report.json:', err)
+        return 1
+    chs, problems = chapters(rep)
+    title = ((rep.get('report') or {}).get('meta') or {}).get('title') or ''
+    print(f'{title}: {len(chs)} chapter(s), {sum(1 for c in chs if c["explicit"])} branch(es)')
+    if not chs:
+        print('  no chapters yet: a chapter is a text block with a title')
+    by = {c['id']: c for c in chs}
+    data = {c['id']: chapter_data(rep, c) for c in chs}
+
+    def line(c):
+        ind = '    ' * c['depth']
+        print(f'{ind}{"+-" if c["explicit"] else "* "} [{c["status"]}] {c["title"]}  ({c["id"]})')
+        ids, steps = data[c['id']]
+        if c['explicit']:
+            print(f'{ind}     branches from: {by[c["parent"]]["title"]} ({c["parent"]})')
+        if ids:
+            print(f'{ind}     data: {", ".join(ids)}')
+        if steps:
+            print(f'{ind}     steps: {" -> ".join(steps)}')
+        if c['explicit']:
+            pids, psteps = data[c['parent']]
+            new = [s for s in steps if s not in psteps] + [i for i in ids if i not in pids]
+            if new:
+                print(f'{ind}     new in this branch: {", ".join(new)}')
+
+    def lane(c):
+        x = c
+        while x:
+            line(x)
+            for k in x['kids']:
+                if k['depth'] > x['depth']:
+                    lane(k)
+            x = x['kids'][0] if x['kids'] and x['kids'][0]['depth'] == x['depth'] else None
+
+    for c in chs:
+        if not c['parent']:
+            lane(c)
+    for p in problems:
+        say('ERROR', p)
+    return 1 if problems else 0
 
 
 def check_chain(project, root, rep, deep):
@@ -498,6 +649,23 @@ def check_report(project, root=None, deep=False):
             elif not str(im.get('src', '')).startswith('data:image/'):
                 errors.append(f'{where}.image needs "asset" or a data:image/ "src"')
 
+    chs, problems = chapters(rep)
+    errors += problems
+    for key, b in blocks.items():
+        if not isinstance(b, dict):
+            continue
+        for f in ('parent', 'status', 'datasets'):
+            if b.get(f) not in (None, '', []) and not is_chapter(b):
+                warnings.append(f'blocks.{key}.{f} is only used on chapters (text blocks with a title)')
+        if b.get('datasets') is not None:
+            if not isinstance(b['datasets'], list) or not all(isinstance(i, str) for i in b['datasets']):
+                errors.append(f'blocks.{key}.datasets must be a list of dataset ids')
+            else:
+                errors += [f'blocks.{key}.datasets: "{i}" is not in datasets' for i in b['datasets'] if i not in datasets]
+    if any(c['explicit'] or c['block'].get('status') for c in chs):
+        counts = ', '.join(f'{n} {s}' for s in STATUSES for n in [sum(1 for c in chs if c['status'] == s)] if n)
+        notes.append(f'{len(chs)} chapters, {sum(1 for c in chs if c["explicit"])} branches ({counts})')
+
     for key, a in (rep.get('annotations') or {}).items():
         if not isinstance(a, dict):
             continue
@@ -662,6 +830,7 @@ def open_annotations(root):
     blocks, datasets = rep.get('blocks') or {}, rep.get('datasets') or {}
     rounds, changes = (rep.get('rounds') or {}).values(), (rep.get('changes') or {}).values()
     last = max((r.get('at', '') for r in rounds if isinstance(r, dict)), default='')
+    chap_of = {b.get('id'): c for c in chapters(rep)[0] for b in c['blocks']}
     out = []
     for a in sorted((a for a in (rep.get('annotations') or {}).values() if isinstance(a, dict) and a.get('status') != 'done'),
                     key=lambda a: a.get('no', 0)):
@@ -671,6 +840,9 @@ def open_annotations(root):
         if isinstance(blk.get('image'), dict):   # no image data in the output
             blk['image'] = {k: v for k, v in blk['image'].items() if k != 'src'}
         item = {'annotation': a, 'block': blk}
+        ch = chap_of.get(t.get('blockId'))
+        if ch:   # the chapter (research branch) the block belongs to
+            item['chapter'] = {'id': ch['id'], 'title': ch['title'], 'status': ch['status'], 'branchesFrom': ch['explicit']}
         info = lambda ds: {'id': ds.get('id'), 'title': ds.get('title'), 'columns': ds.get('columns'),
                            'rows': len(ds.get('rows') or []), 'source': (ds.get('source') or {}).get('path')}
         dss = [datasets[i] for i in block_dataset_ids(b) if isinstance(datasets.get(i), dict)]
@@ -1225,7 +1397,7 @@ def make_shortcut(root, target):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description='Duetsheet launcher', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
-    ap.add_argument('args', nargs='*', help='[check | step | annotations | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
+    ap.add_argument('args', nargs='*', help='[check | step | annotations | tree | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
     ap.add_argument('--note', default='', help='step, agent-status: a short note')
     ap.add_argument('--port', type=int, default=0, help='port (default: first free port from 8765)')
     ap.add_argument('--no-browser', action='store_true', help='do not open a browser window')
@@ -1242,7 +1414,7 @@ def main(argv=None):
     st.add_argument('--by', default='claude', choices=('claude', 'user'), help='who ran it (claude stands for any agent)')
     ap.add_argument('--version', action='version', version=VERSION)
     a = ap.parse_args(argv)
-    cmds = ('check', 'step', 'annotations', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
+    cmds = ('check', 'step', 'annotations', 'tree', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
     cmd = a.args[0] if a.args and a.args[0] in cmds else 'serve'
     rest = a.args[1:] if a.args and a.args[0] == cmd else a.args
     if cmd == 'install-skill':
@@ -1263,6 +1435,8 @@ def main(argv=None):
         return record_step(root, a)
     if cmd == 'annotations':
         return open_annotations(root)
+    if cmd == 'tree':
+        return print_tree(root)
     if cmd == 'wait':
         return wait_for_request(root)
     if cmd == 'agent-status':
