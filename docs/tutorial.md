@@ -156,7 +156,7 @@ Switch to **Edit**. You can:
 - drag blocks to reorder them and click the dividers to control page breaks;
 - write a comment under any block, with preset tags such as **Use log scale** or **Highlight key points**.
 
-On a chart you can point at the exact data: click **Lasso on figure** (or **Box on figure**) and draw around points, or simply click one point. The comment then stores the data range and the ids of the points inside it, which is what the agent reads.
+On a chart you can point at the exact data: hold the mouse button and draw around points, as in a paint program (a line follows the mouse and closes when you let go), or simply click one point. For a rectangle, click **Box on figure** first. The comment then stores the data range and the ids of the points inside it, which is what the agent reads.
 
 ![A lasso and a single data point marked on a chart, with the comments in the panel](edit-annotate.png)
 

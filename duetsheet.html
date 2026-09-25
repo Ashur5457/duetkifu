@@ -216,6 +216,8 @@ g.over,g.pend,g.live{pointer-events:none}
 .hit{fill:transparent}
 .card.drawing{outline:3px solid var(--hl);outline-offset:2px}
 .card.drawing .hit,.card.drawing .imgw svg.ov{cursor:crosshair}
+#flow .card .hit,#flow .card .imgw svg.ov{cursor:crosshair}
+.trail{fill:none;stroke:var(--hl-stroke);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 body[data-draw="box"] .pt,body[data-draw="lasso"] .pt{pointer-events:none}
 .flash{animation:flash .5s 3}
 @keyframes flash{50%{opacity:.2}}
@@ -546,16 +548,13 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "This block has been deleted": "這個方塊已被刪除",
  "The image is too large or unreadable. Please choose a smaller image.": "圖片太大或無法讀取，請換一張較小的圖片。",
  "Drag a rectangle on this figure. Press Esc to cancel": "在這張圖上拖曳出矩形，按 Esc 取消",
- "Hold the mouse and draw a region on this figure. Press Esc to cancel": "在這張圖上按住滑鼠畫出範圍，按 Esc 取消",
  "Location: ": "位置：",
  "Clear": "清除",
  "Describe what to change (or just pick tags above). Ctrl + Enter to send.": "說明要怎麼改（可只選上方標籤）。Ctrl + Enter 送出。",
  "Box on figure": "在圖上框選",
- "Lasso on figure": "在圖上圈選",
  "Quote selected text": "引用選取的文字",
  "First select some text in the block above": "先在上方內文裡選取一段文字",
  "Send comment": "送出意見",
- "You can also click a data point on the chart to point at it.": "也可以直接點圖上的資料點，指定是哪一點。",
  "Write a comment or pick a tag first": "先寫下意見或選一個標籤",
  "Comment sent #": "已送出意見 #",
  "Page 1": "第 1 頁",
@@ -1102,7 +1101,9 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "Send and ask the agent": "送出並請 agent 修改",
  "Series": "數據組",
  "The data drawn in this chart": "這張圖畫出來的數據",
- "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要換數據、欄位、數據組或其他任何修改，請寫在下方的留言框（可參考「範例句」）。"
+ "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要換數據、欄位、數據組或其他任何修改，請寫在下方的留言框（可參考「範例句」）。",
+ "Draw around points on the chart with the mouse, or click one point.": "在圖上按住滑鼠畫一圈圈出資料點，或直接點一個點。",
+ "Draw around a region of the figure with the mouse.": "在圖上按住滑鼠畫一圈，圈出一塊區域。"
 },
 "zh-Hans": {
  "_name": "简体中文",
@@ -1192,16 +1193,13 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "This block has been deleted": "此区块已被删除",
  "The image is too large or unreadable. Please choose a smaller image.": "图片太大或无法读取，请换一张较小的图片。",
  "Drag a rectangle on this figure. Press Esc to cancel": "在这张图上拖出矩形，按 Esc 取消",
- "Hold the mouse and draw a region on this figure. Press Esc to cancel": "在这张图上按住鼠标画出范围，按 Esc 取消",
  "Location: ": "位置：",
  "Clear": "清除",
  "Describe what to change (or just pick tags above). Ctrl + Enter to send.": "说明要怎么改（也可以只选上方标签）。Ctrl + Enter 发送。",
  "Box on figure": "在图上框选",
- "Lasso on figure": "在图上圈选",
  "Quote selected text": "引用选中的文字",
  "First select some text in the block above": "请先在上方正文中选中一段文字",
  "Send comment": "发送意见",
- "You can also click a data point on the chart to point at it.": "也可以直接点击图上的数据点，指定是哪一个点。",
  "Write a comment or pick a tag first": "请先写下意见或选一个标签",
  "Comment sent #": "已发送意见 #",
  "Page 1": "第 1 页",
@@ -1748,7 +1746,9 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "Send and ask the agent": "发送并请 agent 修改",
  "Series": "数据组",
  "The data drawn in this chart": "这张图画出来的数据",
- "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要换数据、栏位、数据组或其他任何修改，请写在下方的留言框（可参考“范例句”）。"
+ "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要换数据、栏位、数据组或其他任何修改，请写在下方的留言框（可参考“范例句”）。",
+ "Draw around points on the chart with the mouse, or click one point.": "在图上按住鼠标画一圈圈出数据点，或直接点击一个点。",
+ "Draw around a region of the figure with the mouse.": "在图上按住鼠标画一圈，圈出一块区域。"
 },
 "ja": {
  "_name": "日本語",
@@ -1838,16 +1838,13 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "This block has been deleted": "このブロックは削除されています",
  "The image is too large or unreadable. Please choose a smaller image.": "画像が大きすぎるか読み込めません。小さい画像を選んでください。",
  "Drag a rectangle on this figure. Press Esc to cancel": "この図の上をドラッグして矩形を描きます。Esc でキャンセル",
- "Hold the mouse and draw a region on this figure. Press Esc to cancel": "マウスを押したまま、この図の上に範囲を描きます。Esc でキャンセル",
  "Location: ": "位置：",
  "Clear": "クリア",
  "Describe what to change (or just pick tags above). Ctrl + Enter to send.": "変更してほしい内容を書いてください（上のタグを選ぶだけでも可）。Ctrl + Enter で送信。",
  "Box on figure": "図を矩形で選択",
- "Lasso on figure": "図をなげなわで選択",
  "Quote selected text": "選択したテキストを引用",
  "First select some text in the block above": "先に上の本文でテキストを選択してください",
  "Send comment": "コメントを送信",
- "You can also click a data point on the chart to point at it.": "グラフ上のデータ点をクリックして指定することもできます。",
  "Write a comment or pick a tag first": "先にコメントを書くか、タグを選んでください",
  "Comment sent #": "コメントを送信しました #",
  "Page 1": "1 ページ目",
@@ -2394,7 +2391,9 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "Send and ask the agent": "送信してエージェントに依頼",
  "Series": "系列",
  "The data drawn in this chart": "このグラフに描かれたデータ",
- "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "データ、列、系列などを変えたいときは、下のコメント欄に書いてください（「依頼の例」を参照）。"
+ "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "データ、列、系列などを変えたいときは、下のコメント欄に書いてください（「依頼の例」を参照）。",
+ "Draw around points on the chart with the mouse, or click one point.": "グラフ上でマウスを押したまま点を囲むか、1 つの点をクリックします。",
+ "Draw around a region of the figure with the mouse.": "図の上でマウスを押したまま範囲を囲みます。"
 },
 "ko": {
  "_name": "한국어",
@@ -2484,16 +2483,13 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "This block has been deleted": "이 블록은 삭제되었습니다",
  "The image is too large or unreadable. Please choose a smaller image.": "이미지가 너무 크거나 읽을 수 없습니다. 더 작은 이미지를 선택하세요.",
  "Drag a rectangle on this figure. Press Esc to cancel": "이 그림 위에서 드래그하여 사각형을 그리세요. Esc로 취소",
- "Hold the mouse and draw a region on this figure. Press Esc to cancel": "마우스를 누른 채 이 그림 위에 영역을 그리세요. Esc로 취소",
  "Location: ": "위치: ",
  "Clear": "지우기",
  "Describe what to change (or just pick tags above). Ctrl + Enter to send.": "무엇을 바꿀지 적어 주세요 (위의 태그만 골라도 됩니다). Ctrl + Enter로 보내기.",
  "Box on figure": "그림에서 사각형 선택",
- "Lasso on figure": "그림에서 올가미 선택",
  "Quote selected text": "선택한 텍스트 인용",
  "First select some text in the block above": "먼저 위 본문에서 텍스트를 선택하세요",
  "Send comment": "의견 보내기",
- "You can also click a data point on the chart to point at it.": "차트의 데이터 점을 클릭해서 지정할 수도 있습니다.",
  "Write a comment or pick a tag first": "먼저 의견을 쓰거나 태그를 고르세요",
  "Comment sent #": "의견을 보냈습니다 #",
  "Page 1": "1페이지",
@@ -3040,7 +3036,9 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "Send and ask the agent": "보내고 에이전트에게 요청",
  "Series": "계열",
  "The data drawn in this chart": "이 차트에 그려진 데이터",
- "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "데이터, 열, 계열 등 다른 것을 바꾸려면 아래 댓글 상자에 적어 주세요 (\"요청 예시\" 참고)."
+ "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "데이터, 열, 계열 등 다른 것을 바꾸려면 아래 댓글 상자에 적어 주세요 (\"요청 예시\" 참고).",
+ "Draw around points on the chart with the mouse, or click one point.": "차트에서 마우스를 누른 채 점들을 둘러 그리거나, 점 하나를 클릭하세요.",
+ "Draw around a region of the figure with the mouse.": "그림에서 마우스를 누른 채 영역을 둘러 그리세요."
 },
 "es": {
  "_name": "Español",
@@ -3130,16 +3128,13 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "This block has been deleted": "Este bloque ha sido eliminado",
  "The image is too large or unreadable. Please choose a smaller image.": "La imagen es demasiado grande o no se puede leer. Elige una imagen más pequeña.",
  "Drag a rectangle on this figure. Press Esc to cancel": "Arrastra un rectángulo sobre esta figura. Pulsa Esc para cancelar",
- "Hold the mouse and draw a region on this figure. Press Esc to cancel": "Mantén pulsado el ratón y dibuja una región sobre esta figura. Pulsa Esc para cancelar",
  "Location: ": "Ubicación: ",
  "Clear": "Borrar",
  "Describe what to change (or just pick tags above). Ctrl + Enter to send.": "Describe qué cambiar (o elige solo etiquetas arriba). Ctrl + Enter para enviar.",
  "Box on figure": "Rectángulo en la figura",
- "Lasso on figure": "Lazo en la figura",
  "Quote selected text": "Citar el texto seleccionado",
  "First select some text in the block above": "Primero selecciona un fragmento de texto en el bloque de arriba",
  "Send comment": "Enviar comentario",
- "You can also click a data point on the chart to point at it.": "También puedes hacer clic en un punto del gráfico para señalarlo.",
  "Write a comment or pick a tag first": "Escribe un comentario o elige una etiqueta primero",
  "Comment sent #": "Comentario enviado #",
  "Page 1": "Página 1",
@@ -3686,7 +3681,9 @@ body.readonly #modes,body.readonly #togglePanel,body.readonly #note-db{display:n
  "Send and ask the agent": "Enviar y pedir al agente",
  "Series": "Serie",
  "The data drawn in this chart": "Los datos dibujados en este gráfico",
- "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "Para cambiar los datos, las columnas, las series o cualquier otra cosa, escríbelo en el cuadro de comentarios de abajo (ver Ejemplos de peticiones)."
+ "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "Para cambiar los datos, las columnas, las series o cualquier otra cosa, escríbelo en el cuadro de comentarios de abajo (ver Ejemplos de peticiones).",
+ "Draw around points on the chart with the mouse, or click one point.": "Rodea puntos del gráfico arrastrando el ratón, o haz clic en un solo punto.",
+ "Draw around a region of the figure with the mouse.": "Rodea una región de la figura arrastrando el ratón."
 }
 }
 </script>
@@ -4477,7 +4474,7 @@ const tagsText=a=>(a.tags||[]).map(tagText).join(tr(', '));
 const draftOf=id=>{if(!S.drafts.has(id))S.drafts.set(id,{text:'',tags:[],target:null});return S.drafts.get(id)};
 function startDraw(id,tool){S.draw=(S.draw&&S.draw.blockId===id&&S.draw.tool===tool)?null:{blockId:id,tool};
   document.body.dataset.draw=S.draw?S.draw.tool:'';render();
-  if(S.draw)toast(tool==='box'?tr('Drag a rectangle on this figure. Press Esc to cancel'):tr('Hold the mouse and draw a region on this figure. Press Esc to cancel'))}
+  if(S.draw)toast(tr('Drag a rectangle on this figure. Press Esc to cancel'))}
 function stopDraw(){S.draw=null;document.body.dataset.draw='';render()}
 function commentBox(b){
   const d=draftOf(b.id),visual=b.type==='chart'||b.type==='image';
@@ -4493,15 +4490,15 @@ function commentBox(b){
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();submitDraft(b.id)}});
   const tools=[];
   if(visual){
+    // a lasso needs no button: dragging on the figure draws it (see bindDraw)
     tools.push(h('button',{type:'button',class:'btn small','aria-pressed':String(!!(S.draw&&S.draw.blockId===b.id&&S.draw.tool==='box')),text:tr('Box on figure'),onclick:()=>startDraw(b.id,'box')}));
-    tools.push(h('button',{type:'button',class:'btn small','aria-pressed':String(!!(S.draw&&S.draw.blockId===b.id&&S.draw.tool==='lasso')),text:tr('Lasso on figure'),onclick:()=>startDraw(b.id,'lasso')}));
   }
   if(b.type==='text')tools.push(h('button',{type:'button',class:'btn small',text:tr('Quote selected text'),onclick:()=>{const q=S.lastSel[b.id];if(!q){toast(tr('First select some text in the block above'));return}d.target={kind:'block',blockId:b.id,quote:q};render()}}));
   tools.push(h('span',{class:'sp'}));
   tools.push(h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:()=>submitDraft(b.id)}));
   tools.push(h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:()=>submitAndAsk(b.id)}));
   box.append(ta,examplesFor(d.target&&d.target.kind!=='block'&&b.type==='chart'?'region':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},tools));
-  if(b.type==='chart')box.append(h('p',{class:'chint',text:tr('You can also click a data point on the chart to point at it.')}));
+  if(visual)box.append(h('p',{class:'chint',text:b.type==='chart'?tr('Draw around points on the chart with the mouse, or click one point.'):tr('Draw around a region of the figure with the mouse.')}));
   return box;
 }
 async function submitDraft(id){
@@ -4962,20 +4959,29 @@ function paintAllOverlays(){
 function polyArea(p){let s=0;for(let i=0;i<p.length;i++){const q=p[(i+1)%p.length];s+=p[i][0]*q[1]-q[0]*p[i][1]}return Math.abs(s)/2}
 function decimate(p,n){if(p.length<=n)return p;const st=(p.length-1)/(n-1),o=[];for(let i=0;i<n;i++)o.push(p[Math.round(i*st)]);return o}
 function inPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const[xi,yi]=P[i],[xj,yj]=P[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
+// In edit mode, dragging on a figure draws a free-hand lasso that follows the mouse, like a paint program; a click
+// without moving is left to the point click handler. "Box on figure" switches the next drag to a rectangle.
 function bindDraw(G,svg){
   let d=null;
-  const active=()=>S.mode==='edit'&&S.draw&&S.draw.blockId===G.b.id;
+  const active=()=>S.mode==='edit'&&(!S.draw||S.draw.blockId===G.b.id);
+  const scale=()=>G.space==='image'?G.W/680:1;
   const loc=e=>{const r=svg.getBoundingClientRect();return[clamp((e.clientX-r.left)*G.W/r.width,G.plot.x0,G.plot.x1),clamp((e.clientY-r.top)*G.H/r.height,G.plot.y0,G.plot.y1)]};
   svg.addEventListener('pointerdown',e=>{
     if(e.button!==0||!active())return;
     const p0=loc(e);if(G.space==='data'){const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)*G.W/r.width,y=(e.clientY-r.top)*G.H/r.height;
       if(x<G.plot.x0||x>G.plot.x1||y<G.plot.y0||y>G.plot.y1)return}
-    e.preventDefault();svg.setPointerCapture(e.pointerId);d={tool:S.draw.tool,start:p0,cur:p0,pts:[p0]};live()});
-  svg.addEventListener('pointermove',e=>{if(!d)return;const p=loc(e);d.cur=p;if(d.tool==='lasso'){const l=d.pts[d.pts.length-1];if(Math.hypot(p[0]-l[0],p[1]-l[1])>=(G.space==='image'?G.W/200:3))d.pts.push(p)}live()});
-  const end=e=>{if(!d)return;const dd=d;d=null;G.live.replaceChildren();if(e.type==='pointerup')finish(dd,e)};
+    const tool=S.draw?S.draw.tool:'lasso';
+    // capture the pointer only once the mouse moves, so a plain click still reaches the data point under it
+    d={tool,start:p0,cur:p0,pts:[p0],id:e.pointerId,moving:!!S.draw};
+    if(d.moving){e.preventDefault();svg.setPointerCapture(e.pointerId);live()}});
+  svg.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;const p=loc(e);d.cur=p;
+    if(!d.moving){if(Math.hypot(p[0]-d.start[0],p[1]-d.start[1])<5*scale())return;d.moving=true;try{svg.setPointerCapture(e.pointerId)}catch(x){}$('#tip').hidden=true}
+    if(d.tool==='lasso'){const l=d.pts[d.pts.length-1];if(Math.hypot(p[0]-l[0],p[1]-l[1])>=1.5*scale())d.pts.push(p)}
+    e.preventDefault();live()});
+  const end=e=>{if(!d||e.pointerId!==d.id)return;const dd=d;d=null;G.live.replaceChildren();if(e.type==='pointerup'&&dd.moving)finish(dd,e)};
   svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
   function live(){G.live.replaceChildren();if(d.tool==='box'){el('rect',{class:'shape pendshape',x:Math.min(d.start[0],d.cur[0]),y:Math.min(d.start[1],d.cur[1]),width:Math.abs(d.cur[0]-d.start[0]),height:Math.abs(d.cur[1]-d.start[1])},G.live)}
-    else if(d.pts.length>1)el('path',{class:'shape pendshape',d:'M'+d.pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')+' Z'},G.live)}
+    else if(d.pts.length>1)el('path',{class:'trail',d:'M'+d.pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')},G.live)} // an open trail; it closes when the mouse is released
   function finish(dd,ev){
     const scale=G.space==='image'?G.W/680:1;
     const base={blockId:G.b.id,space:G.space};if(G.space==='data'){base.xKey=G.xKey;base.yKey=G.yKey}
@@ -4990,7 +4996,7 @@ function bindDraw(G,svg){
       if(inside)Object.assign(t,inside((x,y)=>x>=xa[0]&&x<=xa[1]&&y>=ya[0]&&y<=ya[1]));
     }else{
       if(dd.pts.length<8||polyArea(dd.pts)<300*scale*scale){toast(tr('Lasso too small. Draw a larger closed shape'));return}
-      const poly=decimate(dd.pts,48).map(p=>[r3(G.ix(p[0])),r3(G.iy(p[1]))]);
+      const poly=decimate(dd.pts,200).map(p=>[r3(G.ix(p[0])),r3(G.iy(p[1]))]);
       t={...base,kind:'lasso',polygon:poly};if(inside)Object.assign(t,inside((x,y)=>inPoly(x,y,poly)));
     }
     draftOf(G.b.id).target=t;S.draw=null;document.body.dataset.draw='';render();
