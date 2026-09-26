@@ -10,6 +10,10 @@
     python duetsheet.py tree FOLDER         print the chapters as a tree of research branches, with their status and data
     python duetsheet.py kifu check FOLDER   check kifu.json, the research record next to report.json (also part of check)
     python duetsheet.py kifu tree FOLDER    print the moves of the research record as a tree
+    python duetsheet.py index FOLDER        build or update the search index of the folder (kept in ~/.duetsheet/index/)
+    python duetsheet.py find FOLDER "WORDS" search the text of every file in the folder; prints short excerpts
+    python duetsheet.py kifu show FOLDER MOVE
+                                            one move of the record with its data chain and excerpts of its source
     python duetsheet.py extract FOLDER REPORT.html|SLIDES.pptx
                                             write the figures and tables of a report or slide deck to files, as a step
     python duetsheet.py wait FOLDER         for an agent: wait until the user clicks "Ask the agent to revise", then exit
@@ -33,7 +37,7 @@ so an agent running this command sees them.
 
 Python 3.8 or later, standard library only.
 """
-import argparse, base64, csv, datetime, glob, hashlib, hmac, html.parser, http.server, json, mimetypes, os, pathlib, posixpath, re, secrets, shutil, socket, subprocess, sys, tempfile, threading, time, urllib.parse, webbrowser, zipfile
+import argparse, base64, csv, datetime, glob, hashlib, hmac, html.parser, http.server, json, mimetypes, os, pathlib, posixpath, re, secrets, shutil, socket, sqlite3, subprocess, sys, tempfile, threading, time, urllib.parse, webbrowser, zipfile
 import xml.etree.ElementTree as ET
 
 VERSION = '0.7.0'
@@ -1875,6 +1879,437 @@ def extract_report(root, report, note=''):
     say(f'{rel}: {nf} figure(s) and {nt} table(s) -> {base}/')
     return record_step(root, step)
 
+
+# ---------------------------------------------------------------- the search index
+# A project folder can hold thousands of files: instrument exports, workbooks of 100 MB, HTML reports of several MB
+# (mostly embedded images), slides, notes. Reading them to find one sentence costs an agent a lot. `index` keeps the
+# text of each file, cut into pieces with where each piece is (section, slide, sheet, move), in an SQLite database with
+# full-text search; `find` searches it and prints short excerpts, and `kifu show` prints one move with the excerpts of
+# its source. The database lives outside the project (~/.duetsheet/index/), because a sync client such as OneDrive
+# can lock or duplicate a database file; it can be deleted at any time and is rebuilt. A file is read again only when
+# its size or modification time changed. Nothing in the folder is changed.
+
+INDEX_DIR = pathlib.Path(os.environ.get('DUETSHEET_INDEX_DIR') or pathlib.Path.home() / '.duetsheet' / 'index')
+INDEX_VERSION = '1'
+PIECE = 1500          # characters per piece of text
+TEXT_EXT = {'.md', '.txt', '.py', '.r', '.m', '.jl', '.js', '.sh', '.ps1', '.bat', '.yaml', '.yml', '.toml', '.ini', '.cfg', '.log', '.tex', '.bib', '.rst'}
+IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp', '.tif', '.tiff'}
+SKIP_INDEX_DIRS = {'.git', 'node_modules', '__pycache__', '.ipynb_checkpoints'}
+
+
+def index_file(project):
+    p = project.resolve()
+    key = hashlib.sha1(str(p).lower().encode('utf-8')).hexdigest()[:12]
+    label = re.sub(r'[^\w.-]+', '_', (p.parent.name if p.name == SUBDIR else p.name))[:40]
+    return INDEX_DIR / f'{label}-{key}.sqlite'
+
+
+def pieces(text, loc=''):
+    """Cut text into pieces of about PIECE characters, at line ends where possible."""
+    text = re.sub(r'[ \t\r\f\v]+', ' ', text or '').strip()
+    text = re.sub(r'\n\s*\n+', '\n', text)
+    out, start = [], 0
+    while start < len(text):
+        end = min(len(text), start + PIECE)
+        if end < len(text):
+            cut = text.rfind('\n', start + PIECE // 2, end)
+            end = cut if cut > 0 else end
+        chunk = text[start:end].strip()
+        if chunk:
+            out.append((loc, chunk))
+        start = end
+    return out
+
+
+class HtmlText(html.parser.HTMLParser):
+    """The visible text of an HTML page, in pieces that start at each heading (loc: #id heading)."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.out, self.buf, self.loc, self.skip, self.head, self.sec = [], [], '', 0, None, ''
+
+    def flush(self):
+        self.out += pieces(''.join(self.buf), self.loc)
+        self.buf = []
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag in ('script', 'style', 'svg', 'canvas'):
+            self.skip += 1
+        if a.get('id') and tag in ('section', 'article', 'h1', 'h2', 'h3', 'h4'):
+            self.sec = a['id']
+        if tag in ('h1', 'h2', 'h3', 'h4'):
+            self.flush()
+            self.head = []
+        elif tag in ('p', 'div', 'li', 'tr', 'br', 'table', 'section', 'figure', 'figcaption'):
+            self.buf.append('\n')
+        elif tag in ('td', 'th'):
+            self.buf.append(' | ')
+
+    def handle_endtag(self, tag):
+        if tag in ('script', 'style', 'svg', 'canvas'):
+            self.skip = max(0, self.skip - 1)
+        elif tag in ('h1', 'h2', 'h3', 'h4') and self.head is not None:
+            h = ' '.join(''.join(self.head).split())[:120]
+            self.loc = (f'#{self.sec} ' if self.sec else '') + h
+            self.buf.append(h + '\n')
+            self.head = None
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        if self.head is not None:
+            self.head.append(data)
+        else:
+            self.buf.append(data)
+
+
+def xlsx_outline(path):
+    """Sheet names, their size (from <dimension>) and first row, without reading whole workbooks (they can be 100 MB)."""
+    S = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+    R = '{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
+    out = []
+    with zipfile.ZipFile(path) as z:
+        names = set(z.namelist())
+        wb = ET.fromstring(z.read('xl/workbook.xml'))
+        rels = {r.get('Id'): r.get('Target') for r in ET.fromstring(z.read('xl/_rels/workbook.xml.rels'))} if 'xl/_rels/workbook.xml.rels' in names else {}
+        firsts = []
+        for sh in wb.iter(S + 'sheet'):
+            target = rels.get(sh.get(R + 'id'), '')
+            target = posixpath.normpath(target.lstrip('/') if target.startswith('/') else posixpath.join('xl', target))
+            head, dim = b'', ''
+            if target in names:
+                with z.open(target) as f:
+                    head = f.read(262144)
+                m = re.search(rb'<dimension ref="([^"]+)"', head)
+                dim = m.group(1).decode() if m else ''
+            row = re.search(rb'<row[^>]*>(.*?)</row>', head, re.S)
+            cells = re.findall(rb'<c ([^>]*?)(?:/>|>(.*?)</c>)', row.group(1), re.S) if row else []
+            firsts.append((sh.get('name'), dim, cells))
+        need = {int(v) for _, _, cells in firsts for a, body in cells if b't="s"' in a
+                for v in re.findall(rb'<v>(\d+)</v>', body or b'')}
+        shared = {}
+        if need and 'xl/sharedStrings.xml' in names:
+            top = max(need)
+            with z.open('xl/sharedStrings.xml') as f:
+                i = 0
+                for ev, el in ET.iterparse(f):
+                    if el.tag == S + 'si':
+                        if i in need:
+                            shared[i] = ''.join(t.text or '' for t in el.iter(S + 't'))
+                        i += 1
+                        el.clear()
+                        if i > top:
+                            break
+        for name, dim, cells in firsts:
+            vals = []
+            for a, body in cells:
+                body = body or b''
+                v = re.search(rb'<v>(.*?)</v>', body, re.S)
+                if b't="s"' in a and v:
+                    vals.append(shared.get(int(v.group(1)), ''))
+                elif b't="inlineStr"' in a:
+                    vals.append(''.join(x.decode('utf-8', 'replace') for x in re.findall(rb'<t[^>]*>(.*?)</t>', body, re.S)))
+                elif v:
+                    vals.append(v.group(1).decode('utf-8', 'replace'))
+            out.append((name, dim, [html.unescape(x) for x in vals]))
+    return out
+
+
+def figure_caption(path):
+    """The heading and caption `extract` recorded for a figure or table file, if it came from a report."""
+    idx = path.parent / 'index.json'
+    if not idx.is_file():
+        return None
+    try:
+        for it in json.loads(idx.read_text(encoding='utf-8')).get('items', []):
+            if it.get('file') == path.name:
+                return ' | '.join(x for x in (it.get('heading'), it.get('caption')) if x)
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def read_for_index(path, rel):
+    """(kind, note, [(loc, text)]) for one file."""
+    ext = path.suffix.lower()
+    name = path.name.lower()
+    if ext in ('.html', '.htm'):
+        p = HtmlText()
+        p.feed(path.read_text(encoding='utf-8-sig', errors='replace'))
+        p.flush()
+        return 'report', '', p.out
+    if ext == '.md':
+        out, loc, buf = [], '', []
+        for line in path.read_text(encoding='utf-8-sig', errors='replace').splitlines():
+            if re.match(r'#{1,6} ', line):
+                out += pieces('\n'.join(buf), loc)
+                loc, buf = line.lstrip('#').strip()[:120], []
+            buf.append(line)
+        return 'text', '', out + pieces('\n'.join(buf), loc)
+    if ext in TEXT_EXT:
+        return ('script' if ext in ('.py', '.r', '.m', '.jl', '.js', '.sh', '.ps1', '.bat') else 'text'), '', pieces(path.read_text(encoding='utf-8-sig', errors='replace'))
+    if ext in ('.csv', '.tsv'):
+        size = path.stat().st_size
+        with open(path, encoding='utf-8-sig', errors='replace', newline='') as f:
+            lines = [ln for _, ln in zip(range(7), f)]
+        rows = list(csv.reader(lines, delimiter='\t' if ext == '.tsv' else ','))
+        n = None
+        if size < 50_000_000:
+            with open(path, 'rb') as f:
+                n = sum(1 for _ in f) - 1
+        note = f'{len(rows[0]) if rows else 0} columns' + (f', {n} rows' if n is not None else ', large file')
+        body = '\n'.join(' | '.join(r) for r in rows[:6])
+        cap = figure_caption(path)
+        return 'table', note, ([('caption', cap)] if cap else []) + [('columns', body[:PIECE])]
+    if ext == '.json':
+        if name == KIFU_FILE:
+            k = json.loads(path.read_text(encoding='utf-8-sig'))
+            out = []
+            meta = (k.get('kifu') or {}).get('meta') or {}
+            if meta.get('question'):
+                out.append(('question', f'{meta.get("question")}\n{meta.get("context") or ""}'))
+            for mid, m in (k.get('moves') or {}).items():
+                if isinstance(m, dict):
+                    res = m.get('result') if isinstance(m.get('result'), dict) else {}
+                    body = '\n'.join(str(x) for x in (m.get('title'), res.get('text'), m.get('why'), m.get('note'), m.get('reason'), m.get('population')) if x)
+                    out.append((f'move {mid}', body[:PIECE]))
+            return 'record', f'{len(k.get("moves") or {})} moves', out
+        if name == 'report.json':
+            r = json.loads(path.read_text(encoding='utf-8-sig'))
+            out = []
+            for bid, b in (r.get('blocks') or {}).items():
+                if isinstance(b, dict):
+                    body = '\n'.join(str(b.get(f) or '') for f in ('title', 'text', 'caption')).strip()
+                    if body:
+                        out += pieces(body, f'block {bid}')
+            for did, d in (r.get('datasets') or {}).items():
+                if isinstance(d, dict):
+                    cols = ', '.join(str(c.get('label') or c.get('key')) for c in d.get('columns') or [] if isinstance(c, dict))
+                    out.append((f'dataset {did}', f'{d.get("title") or did}: {cols}'[:PIECE]))
+            return 'report', f'{len(r.get("blocks") or {})} blocks', out
+        if name == 'index.json' and path.parent.parent.name == 'report_figures':
+            return 'data', '', []   # the captions are indexed with each figure and table
+        if path.stat().st_size < 1_000_000:
+            return 'data', '', pieces(path.read_text(encoding='utf-8-sig', errors='replace'))
+        return 'data', 'large JSON, not read', []
+    if ext == '.pptx':
+        A = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+        out = []
+        with zipfile.ZipFile(path) as z:
+            slides = sorted((int(m.group(1)), n) for n in z.namelist() for m in [re.fullmatch(r'ppt/slides/slide(\d+)\.xml', n)] if m)
+            for no, n in slides:
+                el = ET.fromstring(z.read(n))
+                out += pieces('\n'.join(''.join(t.text or '' for t in p.iter(A + 't')) for p in el.iter(A + 'p')), f'slide {no}')
+        return 'slides', f'{len(slides)} slides', out
+    if ext == '.docx':
+        W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+        out, loc, buf = [], '', []
+        with zipfile.ZipFile(path) as z:
+            for p in ET.fromstring(z.read('word/document.xml')).iter(W + 'p'):
+                text = ''.join(t.text or '' for t in p.iter(W + 't'))
+                style = p.find(f'{W}pPr/{W}pStyle')
+                if style is not None and re.match(r'(Heading|Title|\d)', style.get(W + 'val') or '') and text.strip():
+                    out += pieces('\n'.join(buf), loc)
+                    loc, buf = text.strip()[:120], []
+                buf.append(text)
+        return 'document', '', out + pieces('\n'.join(buf), loc)
+    if ext in ('.xlsx', '.xlsm'):
+        sheets = xlsx_outline(path)
+        return 'workbook', f'{len(sheets)} sheet(s)', [(f'sheet {n}', f'{n} ({d}): ' + ' | '.join(v)[:PIECE]) for n, d, v in sheets]
+    if ext in IMAGE_EXTS:
+        cap = figure_caption(path)
+        return 'figure', '', [('caption', cap)] if cap else []
+    if ext == '.pdf':
+        return 'pdf', 'text not indexed', []
+    return 'file', '', []
+
+
+def open_index(project):
+    """The index database of a project; (connection, has full-text search)."""
+    db = index_file(project)
+    db.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(str(db))
+    con.execute('CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT)')
+    ver = con.execute("SELECT value FROM meta WHERE key='version'").fetchone()
+    if not ver or ver[0] != INDEX_VERSION:   # built by another version: start again
+        con.executescript('DROP TABLE IF EXISTS files; DROP TABLE IF EXISTS chunks;')
+        con.execute("INSERT OR REPLACE INTO meta VALUES('version', ?)", (INDEX_VERSION,))
+    con.execute('CREATE TABLE IF NOT EXISTS files(path TEXT PRIMARY KEY, ext TEXT, size INTEGER, mtime INTEGER, kind TEXT, note TEXT)')
+    fts = True
+    try:
+        con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS chunks USING fts5(path UNINDEXED, loc UNINDEXED, body, tokenize='trigram')")
+    except sqlite3.OperationalError:   # SQLite older than 3.34: plain table, searched with LIKE
+        fts = False
+        con.execute('CREATE TABLE IF NOT EXISTS chunks(path TEXT, loc TEXT, body TEXT)')
+    con.commit()
+    return con, fts
+
+
+def update_index(root, quiet=False):
+    """Bring the index of the folder up to date; returns (connection, full-text search available)."""
+    project, _ = project_of(root)
+    con, fts = open_index(project)
+    known = {p: (s, m) for p, s, m in con.execute('SELECT path, size, mtime FROM files')}
+    seen, read, failed, t0 = set(), 0, [], time.time()
+    for dirpath, dirs, files in os.walk(root):
+        d = pathlib.Path(dirpath)
+        dirs[:] = [x for x in dirs if not x.startswith('.') and x not in SKIP_INDEX_DIRS and not (d == project and x == CACHE_FILE[0])]
+        for fn in files:
+            if fn.startswith('.') or fn.endswith('.duetsheet-tmp') or fn.startswith('~$'):
+                continue
+            p = d / fn
+            try:
+                st = p.stat()
+            except OSError:
+                continue
+            rel = norm(os.path.relpath(p, project))
+            seen.add(rel)
+            mtime = st.st_mtime_ns // 1_000_000
+            if known.get(rel) == (st.st_size, mtime):
+                continue
+            try:
+                kind, note, parts = read_for_index(p, rel)
+            except Exception as err:   # an unreadable file is listed without text, and reported
+                kind, note, parts = 'file', f'not read: {type(err).__name__}', []
+                failed.append(rel)
+            con.execute('DELETE FROM chunks WHERE path=?', (rel,))
+            con.executemany('INSERT INTO chunks(path, loc, body) VALUES(?,?,?)', [(rel, loc, body) for loc, body in parts if body])
+            con.execute('INSERT OR REPLACE INTO files VALUES(?,?,?,?,?,?)', (rel, p.suffix.lower(), st.st_size, mtime, kind, note))
+            read += 1
+            if read % 200 == 0:
+                con.commit()
+    gone = [p for p in known if p not in seen]
+    for p in gone:
+        con.execute('DELETE FROM files WHERE path=?', (p,))
+        con.execute('DELETE FROM chunks WHERE path=?', (p,))
+    con.commit()
+    if not quiet or read or gone:
+        n = con.execute('SELECT COUNT(*) FROM files').fetchone()[0]
+        say(f'Index: {n} files, {read} read, {len(gone)} removed ({time.time() - t0:.1f} s) -> {index_file(project)}')
+    if failed:
+        say('WARNING', f'{len(failed)} file(s) could not be read: {", ".join(failed[:5])}{" ..." if len(failed) > 5 else ""}')
+    return con, fts
+
+
+def search_index(con, fts, query, limit=20):
+    """[(path, loc, excerpt)] for the pieces that contain every word of the query."""
+    words = [w for w in query.split() if w]
+    if not words:
+        return []
+    if fts and all(len(w) >= 3 for w in words):   # trigram search needs at least 3 characters per word
+        q = ' '.join('"' + w.replace('"', '""') + '"' for w in words)
+        rows = con.execute("SELECT path, loc, snippet(chunks, 2, '[', ']', '...', 24) FROM chunks WHERE chunks MATCH ? ORDER BY bm25(chunks) LIMIT ?",
+                           (q, limit)).fetchall()
+        return [(p, l, ' '.join(s.split())) for p, l, s in rows]
+    # "+body": LIKE on a full-text table would otherwise be handed to the trigram index, which cannot match words under 3 characters
+    sql = 'SELECT path, loc, body FROM chunks WHERE ' + ' AND '.join(['+body LIKE ?'] * len(words)) + ' LIMIT ?'
+    out = []
+    for p, l, body in con.execute(sql, [f'%{w}%' for w in words] + [limit]).fetchall():
+        i = body.lower().find(words[0].lower())
+        s = body[max(0, i - 60):i + 100]
+        out.append((p, l, ('...' if i > 60 else '') + ' '.join(s.split()).replace(words[0], f'[{words[0]}]') + '...'))
+    return out
+
+
+def run_find(root, query, limit, refresh=True):
+    project, _ = project_of(root)
+    con, fts = update_index(root, quiet=True) if refresh else open_index(project)
+    names = con.execute("SELECT path, kind, note FROM files WHERE path LIKE ? ORDER BY path LIMIT 10", (f'%{query.strip()}%',)).fetchall()
+    hits = search_index(con, fts, query, limit)
+    if names:
+        print('Files named like it:')
+        for p, kind, note in names:
+            print(f'  {p}  ({kind}{", " + note if note else ""})')
+    if hits:
+        print(f'Text ({len(hits)}{"+" if len(hits) == limit else ""}):')
+        for p, loc, excerpt in hits:
+            print(f'  {p}' + (f'  [{loc}]' if loc else ''))
+            print(f'      {excerpt[:300]}')
+    if not names and not hits:
+        print(f'Nothing found for "{query}". (Paths are relative to the folder of report.json.)')
+    return 0
+
+
+def kifu_show(root, mid, refresh=True):
+    """One move, its place in the record, its data chain, and excerpts of its source from the index: what an agent
+    needs to work on it, in a few thousand characters instead of whole reports."""
+    project, _ = project_of(root)
+    kifu, err = read_json_file(project / KIFU_FILE)
+    if err or not isinstance(kifu, dict):
+        say('ERROR', err or f'{KIFU_FILE} is not an object')
+        return 1
+    moves = kifu.get('moves') if isinstance(kifu.get('moves'), dict) else {}
+    m = moves.get(mid)
+    if not isinstance(m, dict):
+        say('ERROR', f'no move "{mid}" in {KIFU_FILE}')
+        return 1
+    title = lambda i: f'{i} {(moves.get(i) or {}).get("title", "")}'.strip()
+    res = m.get('result') if isinstance(m.get('result'), dict) else {}
+    print(f'# {mid} {m.get("title", "")}   (#{m.get("no")}, {m.get("kind")}, {m.get("status")}' + (f', {m.get("outcome")}' if m.get('outcome') else '') + ')')
+    trig = m.get('trigger') if isinstance(m.get('trigger'), dict) else {}
+    print(f'when: {m.get("when") or m.get("at") or "?"}; started by: {trig.get("kind", "?")}' + (f' ({trig["who"]})' if trig.get('who') else '')
+          + (f'; group: {m["group"]}' if m.get('group') else ''))
+    if m.get('parent'):
+        print(f'follows: {title(m["parent"])}')
+    kids = sorted((i for i, o in moves.items() if isinstance(o, dict) and o.get('parent') == mid), key=lambda i: move_no(moves[i]))
+    if kids:
+        print('next moves: ' + '; '.join(title(i) for i in kids))
+    for l in m.get('links') or []:
+        if isinstance(l, dict):
+            print(f'{l.get("type")} -> {title(l.get("to"))}' + (f' ({l["note"]})' if l.get('note') else ''))
+    for i, o in moves.items():
+        for l in (o.get('links') or []) if isinstance(o, dict) else []:
+            if isinstance(l, dict) and l.get('to') == mid:
+                print(f'{l.get("type")} <- {title(i)}')
+    for label, v in (('result', res.get('text')), ('why', m.get('why')), ('note', m.get('note')), ('reason', m.get('reason')),
+                     ('cause', m.get('cause') and f'{m["cause"]}' + ('' if m.get('causeConfirmed', True) else ' (not confirmed)')),
+                     ('population', m.get('population'))):
+        if v:
+            print(f'{label}: {v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)}')
+    ev = m.get('evidence') if isinstance(m.get('evidence'), dict) else {}
+    print(f'data chain: {move_chain(m) or "not recorded"}')
+    rep, _ = read_json_file(project / 'report.json') if (project / 'report.json').is_file() else (None, None)
+    steps = (rep or {}).get('steps') or {}
+    for sid in ev.get('steps') or []:
+        s = steps.get(sid) or {}
+        print(f'  step {sid}: {((s.get("script") or {}).get("path")) or "(no script)"} -> {", ".join(o.get("path", "") for o in s.get("outputs") or [])[:200]}')
+    for c in ev.get('checks') or []:
+        if isinstance(c, dict):
+            print(f'  check: {c.get("claim")}: recorded {c.get("recorded")}, recomputed {c.get("recomputed")} ({c.get("match")})')
+    for f in ev.get('files') or []:
+        if isinstance(f, dict):
+            print(f'  {f.get("role", "file")}: {f.get("path")}' + (f'  - {f["note"][:160]}' if f.get('note') else ''))
+    if ev.get('noData'):
+        print(f'  no data: {ev["noData"]}')
+    src = m.get('source') if isinstance(m.get('source'), dict) else {}
+    if src:
+        print(f'source: {src.get("title", "")}' + (f' | {src["file"]}' if src.get('file') else '') + (f' #{src["section"]}' if src.get('section') else '')
+              + (f' | {src["url"]}' if src.get('url') else ''))
+    # excerpts from the index: the source section, then the tables the move points at
+    con, fts = update_index(root, quiet=True) if refresh else open_index(project)
+    shown = 0
+    if src.get('file'):
+        path = norm(src['file'])
+        rows = con.execute('SELECT loc, body FROM chunks WHERE path=?', (path,)).fetchall()
+        sec = str(src.get('section') or '')
+        pick = [r for r in rows if sec and re.match(rf'#(sec-)?{re.escape(sec)}\b', r[0] or '')] if sec else []
+        if pick:
+            print(f'\n## From {path} [{pick[0][0]}]')
+            for loc, body in pick[:3]:
+                print(body[:900] + ('...' if len(body) > 900 else ''))
+                shown += 1
+        elif rows:
+            print(f'\n({len(rows)} indexed piece(s) of {path}; search them with: duetsheet.py find FOLDER "<words>")')
+    tabs = [f for f in ev.get('files') or [] if isinstance(f, dict) and f.get('role') == 'table']
+    for f in tabs[:4]:
+        r = con.execute("SELECT body FROM chunks WHERE path=? AND loc='columns'", (norm(f.get('path')),)).fetchone()
+        if r:
+            print(f'\n## Table {f.get("path")}\n{r[0][:600]}')
+    return 0
+
+
+# ---------------------------------------------------------------- the Claude Code skill
+
 def install_skill(target):
     src = HERE / 'skills' / 'duetsheet' / 'SKILL.md'
     if not src.is_file():
@@ -2019,10 +2454,12 @@ def make_shortcut(root, target):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description='Duetsheet launcher', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
-    ap.add_argument('args', nargs='*', help='[check | step | annotations | tree | kifu check|tree | extract | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
+    ap.add_argument('args', nargs='*', help='[check | step | annotations | tree | kifu check|tree|show | extract | index | find | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
     ap.add_argument('--note', default='', help='step, agent-status: a short note')
     ap.add_argument('--port', type=int, default=0, help='port (default: first free port from 8765)')
     ap.add_argument('--no-browser', action='store_true', help='do not open a browser window')
+    ap.add_argument('--limit', type=int, default=20, help='find: how many excerpts to print')
+    ap.add_argument('--no-refresh', action='store_true', help='find, kifu show: use the index as it is, without looking for changed files')
     ap.add_argument('--deep', action='store_true', help='check: re-read every file instead of trusting size and date')
     ap.add_argument('--skills-dir', default='~/.claude/skills', help='where install-skill puts the skill')
     ap.add_argument('--to', default='', help='where shortcut puts the shortcut (default: the desktop)')
@@ -2036,7 +2473,7 @@ def main(argv=None):
     st.add_argument('--by', default='claude', choices=('claude', 'user'), help='who ran it (claude stands for any agent)')
     ap.add_argument('--version', action='version', version=VERSION)
     a = ap.parse_args(argv)
-    cmds = ('check', 'step', 'annotations', 'tree', 'kifu', 'extract', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
+    cmds = ('check', 'step', 'annotations', 'tree', 'kifu', 'extract', 'index', 'find', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
     cmd = a.args[0] if a.args and a.args[0] in cmds else 'serve'
     rest = a.args[1:] if a.args and a.args[0] == cmd else a.args
     if cmd == 'install-skill':
@@ -2049,10 +2486,17 @@ def main(argv=None):
         rest, state = rest[:-1], rest[-1]
     sub = None
     if cmd == 'kifu':
-        if not rest or rest[0] not in ('check', 'tree'):
-            say('ERROR', 'usage: duetsheet.py kifu check|tree FOLDER')
+        if not rest or rest[0] not in ('check', 'tree', 'show') or (rest[0] == 'show' and len(rest) < 3):
+            say('ERROR', 'usage: duetsheet.py kifu check|tree FOLDER, or kifu show FOLDER MOVE')
             return 1
         sub, rest = rest[0], rest[1:]
+        if sub == 'show':
+            rest, move = rest[:1], rest[1]
+    if cmd == 'find':
+        if len(rest) < 2:
+            say('ERROR', 'usage: duetsheet.py find FOLDER "WORDS" [--limit N]')
+            return 1
+        rest, query = rest[:1], ' '.join(rest[1:])
     if cmd == 'extract':
         if len(rest) < 2:
             say('ERROR', 'usage: duetsheet.py extract FOLDER REPORT.html [REPORT.html ...]')
@@ -2071,7 +2515,12 @@ def main(argv=None):
     if cmd == 'tree':
         return print_tree(root)
     if cmd == 'kifu':
-        return run_kifu(root, sub, a.deep)
+        return kifu_show(root, move, not a.no_refresh) if sub == 'show' else run_kifu(root, sub, a.deep)
+    if cmd == 'index':
+        update_index(root)
+        return 0
+    if cmd == 'find':
+        return run_find(root, query, a.limit, not a.no_refresh)
     if cmd == 'extract':
         return max(extract_report(root, r, a.note) for r in reports)
     if cmd == 'wait':
