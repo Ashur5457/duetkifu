@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Ashur5457/duetsheet/blob/main/schema/kifu.schema.json",
+  "title": "Duetkifu research record (kifu.json)",
+  "description": "The research record next to report.json: every move of a research (each attempt, correction, audit, conclusion and planned option), the move it follows, why it was made, what came of it and, for a dead end, why it ended. The report tells a few lines of it; the record keeps all of them. Paths are relative to the folder of kifu.json. `python duetsheet.py kifu check FOLDER` checks the rules that a schema cannot express (parents, links, evidence steps, required reasons).",
+  "type": "object",
+  "required": ["schema", "moves"],
+  "properties": {
+    "schema": { "const": "duetkifu/0.1" },
+    "kifu": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "properties": {
+            "question": { "type": "string", "description": "What the research asks, in one sentence." },
+            "context": { "type": "string" },
+            "metric": {
+              "type": "object",
+              "description": "How moves are compared, so that results stay comparable within one record.",
+              "properties": {
+                "name": { "type": "string" }, "unit": { "type": "string" },
+                "better": { "enum": ["higher", "lower"] }, "note": { "type": "string" }
+              }
+            },
+            "source": { "type": "string" },
+            "groups": { "type": "object", "additionalProperties": { "type": "string" }, "description": "The name shown for each group label of the moves, for example {\"D\": \"Is the prediction accurate\"}." },
+            "createdAt": { "type": "string" }
+          }
+        }
+      }
+    },
+    "moves": { "type": "object", "additionalProperties": { "$ref": "#/$defs/move" } },
+    "changes": {
+      "type": "object",
+      "description": "The change log of the record, one document per changed field, as in report.json. The page writes one for every edit; add, delete and the field names of a move are the fields.",
+      "additionalProperties": {
+        "type": "object", "required": ["by", "move", "field"],
+        "properties": {
+          "id": { "type": "string" }, "by": { "enum": ["user", "claude"] }, "at": { "type": "string" },
+          "move": { "type": "string" }, "field": { "type": "string", "description": "A field of the move such as status or result.text, or add / delete." },
+          "before": {}, "after": {}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "move": {
+      "type": "object",
+      "required": ["id", "no", "title", "kind", "status"],
+      "properties": {
+        "id": { "type": "string", "description": "Same as the key in moves." },
+        "no": { "type": "integer", "minimum": 1, "description": "The order in which the moves were made (the timeline for replaying the research)." },
+        "parent": { "type": ["string", "null"], "description": "The move whose result and ideas this one follows; null for the research question. One parent only: other relations go in links." },
+        "title": { "type": "string", "description": "One sentence: what this move does." },
+        "kind": { "enum": ["question", "attempt", "correction", "audit", "conclusion"] },
+        "group": { "type": "string", "description": "A free label for a branch of the research, for example A or G." },
+        "why": { "type": "string", "description": "Why this move: the hypothesis, what it rests on, the options considered." },
+        "status": { "enum": ["planned", "active", "paused", "done"], "description": "planned: thought of but not done (a variation not played), which is kept on purpose." },
+        "outcome": { "enum": ["success", "failure", "inconclusive"], "description": "Required when status is done." },
+        "cause": { "enum": ["idea", "execution", "measurement", "method", "cost", "superseded", "other"], "description": "Why a move failed, was inconclusive or was paused. idea (the hypothesis was wrong) and measurement (the data cannot be trusted, so the path was not really tested) are different dead ends." },
+        "causeConfirmed": { "type": "boolean", "description": "false while the cause is only an agent's suggestion." },
+        "reason": { "type": "string", "description": "The cause in plain words. Required for failure, inconclusive and paused." },
+        "result": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "value": { "type": "number", "description": "The metric of kifu.meta.metric." },
+            "n": { "type": "integer", "description": "Samples or repeats." }
+          }
+        },
+        "note": { "type": "string" },
+        "population": { "type": ["string", "object"], "description": "Which samples, window and filters the numbers of this move refer to." },
+        "conditions": { "type": "object", "description": "Conditions and parameters (recipe, temperature, instrument, sample batch...)." },
+        "cost": { "type": "object", "properties": { "days": { "type": "number" }, "samples": { "type": "number" }, "hours": { "type": "number" }, "note": { "type": "string" } } },
+        "trigger": {
+          "type": "object",
+          "required": ["kind"],
+          "description": "Who or what started this move.",
+          "properties": {
+            "kind": { "enum": ["user", "advisor", "supervisor", "data", "site", "self", "plan", "unknown"] },
+            "who": { "type": "string" }
+          }
+        },
+        "when": { "type": "string", "description": "The date as the sources give it, for example 8/24 or late August." },
+        "at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}", "description": "ISO date, only when it is known." },
+        "startedAt": { "type": "string" }, "closedAt": { "type": "string" },
+        "by": { "enum": ["user", "claude"] },
+        "source": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "file": { "type": "string", "description": "A report or slide file, relative to the folder of kifu.json." },
+            "url": { "type": "string" },
+            "section": { "type": "string" }
+          }
+        },
+        "addedFrom": { "type": "string", "description": "Where a move added after the fact comes from." },
+        "mark": {
+          "type": "object", "required": ["kind"], "description": "A review mark added afterwards, as in reviewing a game.",
+          "properties": { "kind": { "enum": ["good", "bad", "doubtful", "interesting"] }, "note": { "type": "string" } }
+        },
+        "milestone": {
+          "type": "object", "required": ["kind"],
+          "properties": {
+            "kind": { "type": "string", "description": "turning-point, root-cause, champion, breakthrough or pivot; other values are shown as they are, with a warning from check." },
+            "reason": { "type": "string" }
+          }
+        },
+        "links": {
+          "type": "array",
+          "description": "Relations besides the parent. A correction is stored only on the correcting move (type corrects).",
+          "items": {
+            "type": "object", "required": ["type", "to"],
+            "properties": {
+              "type": { "enum": ["corrects", "clue", "supports", "compares", "inspired", "supersedes"] },
+              "to": { "type": "string", "description": "Another move id." },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "dataOutside": { "type": "boolean", "description": "true when the raw data of this move is outside the opened folder, so it cannot join the data chain." },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "steps": { "type": "array", "items": { "type": "string" }, "description": "Ids of steps in report.json that recomputed this move's numbers (data chain level: recomputed)." },
+            "files": {
+              "type": "array",
+              "description": "The files this move's numbers come from, with their fingerprints, when they were not recomputed (data chain level: sourced): the report, table, figure or script. check flags a file that changed or is missing.",
+              "items": {
+                "type": "object", "required": ["path"],
+                "properties": {
+                  "path": { "type": "string", "description": "Relative to the folder of kifu.json." },
+                  "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                  "size": { "type": "integer" }, "modified": { "type": "string" },
+                  "role": { "enum": ["report", "table", "figure", "slides", "script", "raw", "other"] },
+                  "note": { "type": "string", "description": "Where in the file, for example a section or a slide." }
+                }
+              }
+            },
+            "noData": { "type": "string", "description": "Why this move has no data (data chain level: none), for example a literature note or an experiment not run yet." },
+            "checks": {
+              "type": "array",
+              "description": "A number the record states, against the same number recomputed from the raw files. A mismatch is listed for the user to decide; nothing is rewritten automatically.",
+              "items": {
+                "type": "object", "required": ["claim", "match"],
+                "properties": {
+                  "claim": { "type": "string" },
+                  "recorded": {}, "recomputed": {},
+                  "match": { "enum": ["yes", "close", "no", "not-reproducible"], "description": "yes: within tolerance; close: same direction and size, other samples or window; no: different; not-reproducible: the definition or the data is lost." },
+                  "population": { "type": ["string", "object"] },
+                  "source": { "type": "object", "properties": { "path": { "type": "string" }, "keys": { "type": "array", "items": { "type": "string" } } } },
+                  "step": { "type": "string" },
+                  "note": { "type": "string" },
+                  "decidedBy": { "type": "string", "description": "Set when a person, not a recomputation, decided the match (for example user)." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

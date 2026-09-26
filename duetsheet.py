@@ -8,6 +8,10 @@
                                             record a computation step: which script turned which files into which
     python duetsheet.py annotations FOLDER  print the open annotations with what they point at (compact JSON for agents)
     python duetsheet.py tree FOLDER         print the chapters as a tree of research branches, with their status and data
+    python duetsheet.py kifu check FOLDER   check kifu.json, the research record next to report.json (also part of check)
+    python duetsheet.py kifu tree FOLDER    print the moves of the research record as a tree
+    python duetsheet.py extract FOLDER REPORT.html|SLIDES.pptx
+                                            write the figures and tables of a report or slide deck to files, as a step
     python duetsheet.py wait FOLDER         for an agent: wait until the user clicks "Ask the agent to revise", then exit
     python duetsheet.py agent-status FOLDER working|done|failed [--note TEXT]
                                             for an agent: tell the page what it is doing
@@ -29,14 +33,15 @@ so an agent running this command sees them.
 
 Python 3.8 or later, standard library only.
 """
-import argparse, base64, datetime, glob, hashlib, hmac, http.server, json, mimetypes, os, pathlib, posixpath, re, secrets, shutil, socket, subprocess, sys, tempfile, threading, time, urllib.parse, webbrowser
+import argparse, base64, csv, datetime, glob, hashlib, hmac, html.parser, http.server, json, mimetypes, os, pathlib, posixpath, re, secrets, shutil, socket, subprocess, sys, tempfile, threading, time, urllib.parse, webbrowser, zipfile
+import xml.etree.ElementTree as ET
 
 VERSION = '0.7.0'
 SCHEMA = 'duetsheet/0.7'
 HERE = pathlib.Path(__file__).resolve().parent
 PAGE = HERE / 'duetsheet.html'
 SUBDIR = 'duetsheet'
-OWN = ('report.json', 'errors.log', 'assets', 'exports', 'habits', 'lang')   # what Duetsheet may write in the project folder
+OWN = ('report.json', 'kifu.json', 'errors.log', 'assets', 'exports', 'habits', 'lang')   # what Duetsheet may write in the project folder
 SKIP_DIRS = {'.git', 'node_modules', '__pycache__', SUBDIR}
 
 for stream in (sys.stdout, sys.stderr):
@@ -369,8 +374,389 @@ def print_tree(root):
     return 1 if problems else 0
 
 
-def check_chain(project, root, rep, deep):
-    """Return (errors, warnings, notes) about steps and dataset sources."""
+# ---------------------------------------------------------------- the research record (duetkifu/0.1)
+# kifu.json, next to report.json, records every move of a research: which move it follows (parent), why it was made,
+# what came of it and, for a dead end, why. The report tells a few of these lines; the record keeps all of them,
+# failures included. Paths in kifu.json are relative to its folder, like the paths in report.json.
+
+KIFU_FILE = 'kifu.json'
+KIFU_SCHEMA = 'duetkifu/0.1'
+MOVE_KINDS = ('question', 'attempt', 'correction', 'audit', 'conclusion')
+MOVE_STATUSES = ('planned', 'active', 'paused', 'done')
+OUTCOMES = ('success', 'failure', 'inconclusive')
+CAUSES = ('idea', 'execution', 'measurement', 'method', 'cost', 'superseded', 'other')
+TRIGGERS = ('user', 'advisor', 'supervisor', 'data', 'site', 'self', 'plan', 'unknown')
+LINK_TYPES = ('corrects', 'clue', 'supports', 'compares', 'inspired', 'supersedes')
+MATCHES = ('yes', 'close', 'no', 'not-reproducible')
+MARKS = ('good', 'bad', 'doubtful', 'interesting')
+MILESTONES = ('turning-point', 'root-cause', 'champion', 'breakthrough', 'pivot')   # others are allowed, with a warning
+OUTCOME_SIGN = {'success': '✓', 'failure': '✗', 'inconclusive': '?'}
+FILE_ROLES = ('report', 'table', 'figure', 'slides', 'script', 'raw', 'other')
+# how far a move's numbers can be followed back (evidence): recomputed from raw files by recorded steps, sourced from
+# files named with their fingerprints (a report, a table, a figure) but not recomputed, or none (noData says why)
+CHAIN_LEVELS = ('recomputed', 'sourced', 'none')
+
+
+def move_chain(m):
+    ev = m.get('evidence') if isinstance(m, dict) and isinstance(m.get('evidence'), dict) else {}
+    if ev.get('steps'):
+        return 'recomputed'
+    if ev.get('files'):
+        return 'sourced'
+    if str(ev.get('noData') or '').strip():
+        return 'none'
+    return None
+
+
+def read_json_file(path):
+    """(object, error): strict JSON in UTF-8 (a byte order mark is tolerated); NaN and Infinity are refused."""
+    def no_constants(name):
+        raise ValueError(f'{name} is not valid JSON; write null instead')
+    try:
+        return json.loads(path.read_text(encoding='utf-8-sig'), parse_constant=no_constants), None
+    except json.JSONDecodeError as e:
+        return None, f'{path.name} line {e.lineno}, column {e.colno}: {e.msg}'
+    except (OSError, UnicodeDecodeError, ValueError) as e:
+        return None, f'{path.name}: {e}'
+
+
+def move_no(m):
+    no = m.get('no')
+    return no if isinstance(no, int) and not isinstance(no, bool) else 10 ** 9
+
+
+def kifu_moves(kifu):
+    """The moves in order of their number, as a tree, and a list of problems. Each node: {id, move, parent, kids, depth}.
+    A node's kids are ordered by number; the first one continues its parent's line (same depth), the others branch off."""
+    raw = kifu.get('moves') if isinstance(kifu, dict) else None
+    if not isinstance(raw, dict):
+        return [], ['"moves" must be an object keyed by move id']
+    nodes, problems = {k: {'id': k, 'move': m, 'parent': None, 'kids': [], 'depth': 0} for k, m in raw.items() if isinstance(m, dict)}, []
+    for n in nodes.values():
+        p = n['move'].get('parent')
+        if p in (None, ''):
+            continue
+        if p == n['id'] or p not in nodes:
+            problems.append(f'moves.{n["id"]}.parent "{p}" is not another move')
+        else:
+            n['parent'] = p
+    for n in nodes.values():
+        seen, x = {n['id']}, n['parent']
+        while x:
+            if x in seen:
+                problems.append(f'moves.{n["id"]}.parent: the parents form a loop')
+                n['parent'] = None
+                break
+            seen.add(x)
+            x = nodes[x]['parent']
+    ordered = sorted(nodes.values(), key=lambda n: (move_no(n['move']), n['id']))
+    for n in ordered:
+        if n['parent']:
+            nodes[n['parent']]['kids'].append(n)
+    stack = [(n, 0) for n in reversed(ordered) if not n['parent']]
+    while stack:
+        n, d = stack.pop()
+        n['depth'] = d
+        stack += [(k, d + (1 if i else 0)) for i, k in reversed(list(enumerate(n['kids'])))]
+    return ordered, problems
+
+
+def check_kifu(project, root, rep=None, stale=None):
+    """Return (errors, warnings, notes) for project/kifu.json. rep is the report, whose steps the evidence names;
+    stale is {step id: reasons} for the steps that need rerunning (see check_chain)."""
+    errors, warnings, notes = [], [], []
+    kifu, err = read_json_file(project / KIFU_FILE)
+    if err:
+        return [err], [], []
+    if not isinstance(kifu, dict):
+        return [f'{KIFU_FILE} must be a JSON object'], [], []
+    if kifu.get('schema') != KIFU_SCHEMA:
+        errors.append(f'{KIFU_FILE}: "schema" must be "{KIFU_SCHEMA}"')
+    meta = (kifu.get('kifu') or {}).get('meta') if isinstance(kifu.get('kifu'), dict) else None
+    if not isinstance(meta, dict) or not str(meta.get('question') or '').strip():
+        warnings.append('kifu.meta.question is missing: say in one sentence what the research asks')
+    groups = meta.get('groups') if isinstance(meta, dict) else None
+    if groups is not None and (not isinstance(groups, dict) or not all(isinstance(v, str) for v in groups.values())):
+        errors.append('kifu.meta.groups must be {"<group>": "name shown for it"}')
+    nodes, problems = kifu_moves(kifu)
+    errors += problems
+    moves = kifu.get('moves') if isinstance(kifu.get('moves'), dict) else {}
+    steps = rep.get('steps') if isinstance(rep, dict) and isinstance(rep.get('steps'), dict) else {}
+    stale = stale or {}
+    nos, missing_src, unconfirmed, mismatches, stale_use = {}, [], [], [], {}
+    fp, file_states = Fingerprints(project), {'changed': [], 'missing': []}
+    counts = dict.fromkeys(MATCHES, 0)
+
+    def one_of(where, v, allowed):
+        if v not in allowed:
+            errors.append(f'{where} must be {", ".join(allowed)}' + (f' (not "{v}")' if v is not None else ''))
+            return False
+        return True
+
+    def path_ok(where, p):
+        """True when p names an existing file; outside the opened folder is an error."""
+        if not isinstance(p, str) or not p:
+            errors.append(f'{where} must be a path')
+            return False
+        if not inside(root, project, p):
+            errors.append(f'{where} "{p}" is outside the folder "{root.name}" (paths are relative to the folder of {KIFU_FILE})')
+            return False
+        return (project / norm(p)).is_file()
+
+    def text(v, n=60):
+        s = v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)
+        return s if len(s) <= n else s[:n - 1] + '…'
+
+    for key, m in moves.items():
+        w = f'moves.{key}'
+        if not isinstance(m, dict):
+            errors.append(f'{w} must be an object')
+            continue
+        if m.get('id') != key:
+            errors.append(f'{w}.id must be "{key}"')
+        no = move_no(m)
+        if no == 10 ** 9 or no < 1:
+            errors.append(f'{w}.no must be a whole number from 1 (the order in which the moves were made)')
+        elif no in nos:
+            warnings.append(f'{w}.no {no} is also the number of move "{nos[no]}"')
+        else:
+            nos[no] = key
+        if not isinstance(m.get('title'), str) or not m['title'].strip():
+            errors.append(f'{w}.title is missing')
+        one_of(f'{w}.kind', m.get('kind'), MOVE_KINDS)
+        if m.get('parent') in (None, '') and m.get('kind') != 'question':
+            warnings.append(f'{w} has no parent; only the research question starts without one')
+        st, oc = m.get('status'), m.get('outcome')
+        one_of(f'{w}.status', st, MOVE_STATUSES)
+        if oc is not None:
+            one_of(f'{w}.outcome', oc, OUTCOMES)
+            if st != 'done':
+                warnings.append(f'{w}.outcome is set but the move is {st}, not done')
+        elif st == 'done':
+            errors.append(f'{w}: a done move needs an outcome ({", ".join(OUTCOMES)})')
+        ends_badly = oc in ('failure', 'inconclusive') or st == 'paused'
+        if ends_badly and not str(m.get('reason') or '').strip():
+            errors.append(f'{w}: say why in "reason" (needed when a move fails, is inconclusive or is paused)')
+        cause = m.get('cause')
+        if cause is not None:
+            if one_of(f'{w}.cause', cause, CAUSES) and not ends_badly:
+                warnings.append(f'{w}.cause is only used when a move fails, is inconclusive or is paused')
+            if m.get('causeConfirmed') is False:
+                unconfirmed.append(f'{key} ({cause})')
+        elif oc in ('failure', 'inconclusive'):
+            warnings.append(f'{w}: no "cause". A wrong idea and data that cannot be trusted are different dead ends')
+        if 'causeConfirmed' in m and not isinstance(m['causeConfirmed'], bool):
+            errors.append(f'{w}.causeConfirmed must be true or false')
+        trig = m.get('trigger')
+        if trig is None:
+            warnings.append(f'{w}.trigger is missing: who or what started this move')
+        elif not isinstance(trig, dict):
+            errors.append(f'{w}.trigger must be {{"kind", "who"}}')
+        else:
+            one_of(f'{w}.trigger.kind', trig.get('kind'), TRIGGERS)
+        at = m.get('at')
+        if at is not None and not (isinstance(at, str) and re.match(r'^\d{4}-\d{2}-\d{2}(T|$)', at)):
+            errors.append(f'{w}.at must be an ISO date (YYYY-MM-DD); put a loose date such as "late August" in "when"')
+        res = m.get('result')
+        if res is not None:
+            if not isinstance(res, dict):
+                errors.append(f'{w}.result must be {{"text", "value", "n"}}')
+            else:
+                if res.get('value') is not None and (not isinstance(res['value'], (int, float)) or isinstance(res['value'], bool)):
+                    errors.append(f'{w}.result.value must be a number (the metric); put words in result.text')
+                if res.get('n') is not None and (not isinstance(res['n'], int) or isinstance(res['n'], bool)):
+                    errors.append(f'{w}.result.n must be a whole number (samples or repeats)')
+        for f, allowed, why in (('mark', MARKS, 'note'), ('milestone', None, 'reason')):
+            v = m.get(f)
+            if v is None:
+                continue
+            if not isinstance(v, dict) or not isinstance(v.get('kind'), str) or not v['kind']:
+                errors.append(f'{w}.{f} must be {{"kind", "{why}"}}')
+            elif allowed:
+                one_of(f'{w}.{f}.kind', v['kind'], allowed)
+            elif v['kind'] not in MILESTONES:
+                warnings.append(f'{w}.milestone.kind "{v["kind"]}" is not one of {", ".join(MILESTONES)}; it is shown as it is')
+        links = m.get('links', [])
+        if not isinstance(links, list):
+            errors.append(f'{w}.links must be a list of {{"type", "to"}}')
+            links = []
+        for i, l in enumerate(links):
+            if not isinstance(l, dict):
+                errors.append(f'{w}.links[{i}] must be {{"type", "to"}}')
+            elif one_of(f'{w}.links[{i}].type', l.get('type'), LINK_TYPES) and (l.get('to') not in moves or l.get('to') == key):
+                errors.append(f'{w}.links[{i}].to "{l.get("to")}" is not another move')
+        src = m.get('source')
+        if src is not None:
+            if not isinstance(src, dict):
+                errors.append(f'{w}.source must be {{"title", "file", "url", "section"}}')
+            elif src.get('file') is not None and not path_ok(f'{w}.source.file', src['file']) and inside(root, project, src['file']):
+                missing_src.append(src['file'])
+        if 'dataOutside' in m and not isinstance(m['dataOutside'], bool):
+            errors.append(f'{w}.dataOutside must be true or false')
+        ev = m.get('evidence')
+        if ev is None:
+            continue
+        if not isinstance(ev, dict):
+            errors.append(f'{w}.evidence must be {{"steps", "checks"}}')
+            continue
+        esteps = ev.get('steps', [])
+        if not isinstance(esteps, list) or not all(isinstance(s, str) for s in esteps):
+            errors.append(f'{w}.evidence.steps must be a list of step ids')
+            esteps = []
+        for s in esteps:
+            if s not in steps:
+                errors.append(f'{w}.evidence.steps: "{s}" is not a step in report.json')
+            elif s in stale:
+                stale_use.setdefault(s, []).append(key)
+        efiles = ev.get('files', [])
+        if not isinstance(efiles, list):
+            errors.append(f'{w}.evidence.files must be a list of {{"path", "sha256", "role", "note"}}')
+            efiles = []
+        for i, r in enumerate(efiles):
+            fw = f'{w}.evidence.files[{i}]'
+            if not isinstance(r, dict):
+                errors.append(f'{fw} must be {{"path", "sha256", "role", "note"}}')
+                continue
+            if r.get('role') is not None:
+                one_of(f'{fw}.role', r['role'], FILE_ROLES)
+            if not path_ok(f'{fw}.path', r.get('path')):
+                if inside(root, project, r.get('path') or ''):
+                    file_states['missing'].append(f'{key}: {r["path"]}')
+                continue
+            if not re.fullmatch(r'[0-9a-f]{64}', str(r.get('sha256', ''))):
+                warnings.append(f'{fw}: "{r["path"]}" has no sha256, so changes to it cannot be seen')
+            elif fp.status(r).get('state') == 'changed':
+                file_states['changed'].append(f'{key}: {r["path"]}')
+        if 'noData' in ev and not isinstance(ev['noData'], str):
+            errors.append(f'{w}.evidence.noData must say, in words, why this move has no data')
+        checks = ev.get('checks', [])
+        if not isinstance(checks, list):
+            errors.append(f'{w}.evidence.checks must be a list')
+            checks = []
+        for i, c in enumerate(checks):
+            cw = f'{w}.evidence.checks[{i}]'
+            if not isinstance(c, dict):
+                errors.append(f'{cw} must be an object')
+                continue
+            if not isinstance(c.get('claim'), str) or not c['claim'].strip():
+                errors.append(f'{cw}.claim is missing: what the record says')
+            if not one_of(f'{cw}.match', c.get('match'), MATCHES):
+                continue
+            counts[c['match']] += 1
+            if c.get('step') is not None and c['step'] not in esteps:
+                warnings.append(f'{cw}.step "{c["step"]}" is not in {w}.evidence.steps')
+            cs = c.get('source')
+            if cs is not None:
+                if not isinstance(cs, dict):
+                    errors.append(f'{cw}.source must be {{"path", "keys"}}')
+                elif not path_ok(f'{cw}.source.path', cs.get('path')) and inside(root, project, cs.get('path') or ''):
+                    warnings.append(f'{cw}.source.path "{cs["path"]}" does not exist')
+            if c['match'] in ('no', 'not-reproducible'):
+                mismatches.append(f'{key}: {text(c.get("claim"))}: recorded {text(c.get("recorded"))}, recomputed {text(c.get("recomputed"))} ({c["match"]})')
+
+    for s, keys in stale_use.items():
+        warnings.append(f'step "{s}" needs rerunning, so the evidence of move(s) {", ".join(keys)} may be out of date')
+    changes = kifu.get('changes', {})
+    if not isinstance(changes, dict):
+        errors.append(f'{KIFU_FILE}: "changes" must be an object keyed by change id')
+        changes = {}
+    for cid, c in changes.items():   # the change log of the record: one document per changed field
+        if not isinstance(c, dict) or c.get('by') not in ('user', 'claude') or not isinstance(c.get('move'), str) or not isinstance(c.get('field'), str):
+            errors.append(f'changes.{cid} must be {{"by": "user" | "claude", "at", "move", "field", "before", "after"}}')
+    if changes:
+        notes.append(f'{len(changes)} recorded change(s) to the record ({sum(1 for c in changes.values() if isinstance(c, dict) and c.get("by") == "user")} by the user)')
+    blocks = rep.get('blocks') if isinstance(rep, dict) and isinstance(rep.get('blocks'), dict) else {}
+    for bid, b in blocks.items():   # a chapter of the report says which move it tells
+        if isinstance(b, dict) and b.get('move') not in (None, '') and b['move'] not in moves:
+            warnings.append(f'blocks.{bid}.move "{b["move"]}" is not a move in {KIFU_FILE}')
+    if nodes:
+        tally = lambda f, allowed: ', '.join(f'{n} {v}' for v in allowed for n in [sum(1 for x in nodes if x['move'].get(f) == v)] if n)
+        notes.append(f'{KIFU_FILE}: {len(nodes)} moves ({tally("status", MOVE_STATUSES)}; {tally("outcome", OUTCOMES) or "no outcomes yet"})')
+    if any(counts.values()):
+        notes.append('Checks against recomputed numbers: ' + ', '.join(f'{n} {k}' for k, n in counts.items()))
+    if mismatches:
+        notes.append(f'{len(mismatches)} check(s) do not match; the user decides what to do with them:')
+        notes += ['  ' + x for x in mismatches]
+    if unconfirmed:
+        notes.append(f'Causes the user has not confirmed yet: {", ".join(unconfirmed)}')
+    for st, what in (('changed', 'changed since they were recorded'), ('missing', 'are missing')):
+        if file_states[st]:
+            warnings.append(f'{len(file_states[st])} evidence file(s) {what}: {", ".join(file_states[st][:5])}{" ..." if len(file_states[st]) > 5 else ""}')
+    fp.save()
+    if nodes:
+        levels = {n['id']: move_chain(n['move']) for n in nodes}
+        notes.append('Data chain of the moves: ' + ', '.join(f'{sum(1 for v in levels.values() if v == lv)} {lv}' for lv in CHAIN_LEVELS)
+                     + f', {sum(1 for v in levels.values() if v is None)} not recorded')
+        todo = [k for k, v in levels.items() if v is None]
+        if todo:
+            notes.append(f'Moves without a data chain yet (evidence.steps, evidence.files, or evidence.noData saying why): '
+                         f'{", ".join(todo[:12])}{" ..." if len(todo) > 12 else ""}')
+    if missing_src:
+        uniq = list(dict.fromkeys(missing_src))
+        notes.append(f'{len(uniq)} source file(s) named by moves are not in the folder: {", ".join(uniq[:3])}{" ..." if len(uniq) > 3 else ""}')
+    return errors, warnings, notes
+
+
+def print_kifu_tree(project):
+    """The moves as an indented tree (depth first, children in the order they were made): number, status and outcome,
+    title, cause, checks, corrections."""
+    kifu, err = read_json_file(project / KIFU_FILE)
+    if err:
+        say('ERROR', err)
+        return 1
+    nodes, problems = kifu_moves(kifu)
+    meta = ((kifu.get('kifu') or {}).get('meta') or {}) if isinstance(kifu, dict) else {}
+    print(f'{meta.get("question") or KIFU_FILE}  ({len(nodes)} moves)')
+
+    def line(n, depth):
+        m = n['move']
+        head = f'{m.get("status") or "?"}' + (f' {OUTCOME_SIGN.get(m.get("outcome"), "")}' if m.get('outcome') else '')
+        extra = []
+        if m.get('cause'):
+            extra.append(f'cause: {m["cause"]}' + ('' if m.get('causeConfirmed', True) else ', not confirmed'))
+        checks = ((m.get('evidence') or {}).get('checks') or []) if isinstance(m.get('evidence'), dict) else []
+        if checks:
+            extra.append('checks: ' + ' '.join(f'{k} {c}' for k in MATCHES for c in [sum(1 for x in checks if isinstance(x, dict) and x.get('match') == k)] if c))
+        fixes = [l.get('to') for l in m.get('links') or [] if isinstance(l, dict) and l.get('type') == 'corrects']
+        if fixes:
+            extra.append('corrects ' + ', '.join(map(str, fixes)))
+        if move_chain(m):
+            extra.append(f'data: {move_chain(m)}')
+        no = move_no(m)
+        print(f'{no if no < 10 ** 9 else "?":>3}  {"  " * depth}{n["id"]} [{head}] {m.get("title") or ""}' + (f'  ({"; ".join(extra)})' if extra else ''))
+
+    stack = [(n, 0) for n in reversed(nodes) if not n['parent']]   # depth first; children in the order they were made
+    while stack:
+        n, d = stack.pop()
+        line(n, d)
+        stack += [(k, d + 1) for k in reversed(n['kids'])]
+    for p in problems:
+        say('ERROR', p)
+    return 1 if problems else 0
+
+
+def run_kifu(root, sub, deep=False):
+    project, _ = project_of(root)
+    if not (project / KIFU_FILE).is_file():
+        say('ERROR', f'no {KIFU_FILE} in {project}')
+        return 1
+    if sub == 'tree':
+        return print_kifu_tree(project)
+    rep, stale = None, None
+    if (project / 'report.json').is_file():
+        rep, _ = read_json_file(project / 'report.json')
+        if isinstance(rep, dict):
+            info = {}
+            check_chain(project, root, rep, deep, info)
+            stale = info.get('stale')
+    errors, warnings, notes = check_kifu(project, root, rep, stale)
+    print_problems(project / KIFU_FILE, errors, warnings, notes)
+    return 1 if errors else 0
+
+
+def check_chain(project, root, rep, deep, out=None):
+    """Return (errors, warnings, notes) about steps and dataset sources.
+    out, when given, receives 'stale': {step id: [reasons]} for the steps that need rerunning."""
     errors, warnings, notes = [], [], []
     steps = rep.get('steps') or {}
     datasets = rep.get('datasets') if isinstance(rep.get('datasets'), dict) else {}
@@ -511,6 +897,8 @@ def check_chain(project, root, rep, deep):
     if fp.hashed:
         notes.append(f'Read {fp.hashed} file(s) to compute fingerprints (kept in {"/".join(CACHE_FILE)} for next time)')
     fp.save()
+    if out is not None:
+        out['stale'] = {k: reasons[k] for k in good if stale[k]}
     return errors, warnings, notes
 
 
@@ -520,9 +908,10 @@ STYLE_FIELDS = {'font.family', 'font.size', 'font.label', 'marker', 'line', 'tic
                 'figure.preset', 'chartDefaults.kind', 'chartDefaults.logY'}
 
 
-def check_report(project, root=None, deep=False):
+def check_report(project, root=None, deep=False, out=None):
     """Return (errors, warnings, notes) for project/report.json, as lists of strings.
-    root is the folder the user opens (the parent of duetsheet/, or project itself)."""
+    root is the folder the user opens (the parent of duetsheet/, or project itself).
+    out, when given, receives 'report' (the parsed report) and 'stale' (see check_chain)."""
     errors, warnings, notes = [], [], []
     root = root or project
     path = project / 'report.json'
@@ -700,13 +1089,13 @@ def check_report(project, root=None, deep=False):
             for i, r in enumerate(w['rules']):
                 if not isinstance(r, dict) or not isinstance(r.get('text'), str) or not r['text'].strip():
                     warnings.append(f'style.{doc}.rules[{i}] needs a "text" and will be ignored')
-    e, w, n = check_chain(project, root, rep, deep)
+    if out is not None:
+        out['report'] = rep
+    e, w, n = check_chain(project, root, rep, deep, out)
     return errors + e, warnings + w, notes + n
 
 
-def run_check(root, deep=False):
-    project, _ = project_of(root)
-    errors, warnings, notes = check_report(project, root, deep)
+def print_problems(path, errors, warnings, notes):
     for n in notes:
         say(n)
     for w in warnings:
@@ -714,8 +1103,21 @@ def run_check(root, deep=False):
     for e in errors:
         say('ERROR', e)
     if not errors:
-        say('OK', project / 'report.json', f'({len(warnings)} warning(s))' if warnings else '')
-    return 1 if errors else 0
+        say('OK', path, f'({len(warnings)} warning(s))' if warnings else '')
+
+
+def run_check(root, deep=False):
+    """Check report.json and, when there is one, kifu.json next to it."""
+    project, _ = project_of(root)
+    info = {}
+    errors, warnings, notes = check_report(project, root, deep, info)
+    print_problems(project / 'report.json', errors, warnings, notes)
+    bad = bool(errors)
+    if (project / KIFU_FILE).is_file():
+        e, w, n = check_kifu(project, root, info.get('report'), info.get('stale'))
+        print_problems(project / KIFU_FILE, e, w, n)
+        bad = bad or bool(e)
+    return 1 if bad else 0
 
 
 # ---------------------------------------------------------------- the page asks the agent to act
@@ -1251,7 +1653,227 @@ def record_step(root, a):
     return 0
 
 
-# ---------------------------------------------------------------- the Claude Code skill
+# ---------------------------------------------------------------- figures and tables of an HTML report
+# A report made earlier (by a person or an agent) often holds the figures and tables a move of the research record is
+# about, embedded in one large HTML file. `extract` writes them out as files next to the report's other derived data,
+# with the section, heading and caption each one sits under, so a move can point at them (kifu.json evidence.files)
+# and the page can show them. Figures drawn by scripts in the page (canvas, SVG built at load time) are not included.
+
+EXTRACT_DIR = 'derived_data/report_figures'
+IMAGE_EXT = {'png': 'png', 'jpeg': 'jpg', 'jpg': 'jpg', 'gif': 'gif', 'webp': 'webp', 'svg+xml': 'svg'}
+
+
+class ReportReader(html.parser.HTMLParser):
+    """Collects embedded images (data: URLs) and tables in document order, each with the id of the section it is in,
+    the latest heading and a caption (figcaption, table caption, alt text, or the text right after an image)."""
+    HEADINGS = ('h1', 'h2', 'h3', 'h4')
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.items, self.section, self.heading = [], '', ''
+        self.skip = 0              # inside script or style
+        self.text = None           # the heading being read
+        self.figure = []           # items of the open <figure>
+        self.figcap = None         # the figcaption being read
+        self.after = None          # an image waiting for the text after it
+        self.table = None          # the table being read: {rows, row, cell, caption}
+        self.tables = []           # open tables (a table inside a table is read as text of its cell)
+
+    def item(self, kind, **kw):
+        it = {'kind': kind, 'section': self.section, 'heading': self.heading, 'caption': '', **kw}
+        self.items.append(it)
+        return it
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag in ('script', 'style'):
+            self.skip += 1
+            return
+        if a.get('id') and (tag in ('section', 'article') + self.HEADINGS):
+            self.section = a['id']
+        if tag in self.HEADINGS:
+            self.text = []
+            self.after = None
+        elif tag == 'figure':
+            self.figure = []
+        elif tag == 'figcaption':
+            self.figcap = []
+        elif tag == 'img':
+            m = re.match(r'data:image/([\w.+-]+);base64,(.*)', a.get('src') or '', re.S)
+            if m and m.group(1).lower() in IMAGE_EXT:
+                it = self.item('figure', ext=IMAGE_EXT[m.group(1).lower()], data=m.group(2), caption=' '.join((a.get('alt') or '').split()))
+                self.figure.append(it)
+                self.after = it if not it['caption'] else None
+                self.after_text = []
+        elif tag == 'table':
+            if self.table:
+                self.tables.append(self.table)
+            self.table = {'rows': [], 'row': None, 'cell': None, 'caption': None, 'section': self.section, 'heading': self.heading}
+            self.after = None
+        elif self.table and tag == 'tr':
+            self.table['row'] = []
+        elif self.table and tag in ('td', 'th'):
+            self.table['cell'] = []
+            try:
+                self.table['span'] = max(1, min(50, int(a.get('colspan') or 1)))
+            except ValueError:
+                self.table['span'] = 1
+        elif self.table and tag == 'caption':
+            self.table['caption'] = []
+        elif tag == 'br' and self.table and self.table['cell'] is not None:
+            self.table['cell'].append(' ')
+
+    def handle_endtag(self, tag):
+        if tag in ('script', 'style'):
+            self.skip = max(0, self.skip - 1)
+            return
+        if tag in self.HEADINGS and self.text is not None:
+            self.heading = ' '.join(''.join(self.text).split())[:200]
+            self.text = None
+        elif tag == 'figcaption' and self.figcap is not None:
+            cap = ' '.join(''.join(self.figcap).split())[:400]
+            for it in self.figure:
+                it['caption'] = cap
+            self.figcap = None
+            self.after = None
+        elif tag == 'figure':
+            self.figure = []
+        elif self.table and tag in ('td', 'th') and self.table['cell'] is not None:
+            if self.table['row'] is None:
+                self.table['row'] = []
+            text = ' '.join(''.join(self.table['cell']).split())
+            self.table['row'] += [text] + [''] * (self.table.get('span', 1) - 1)
+            self.table['cell'] = None
+        elif self.table and tag == 'tr' and self.table['row'] is not None:
+            if any(c for c in self.table['row']):
+                self.table['rows'].append(self.table['row'])
+            self.table['row'] = None
+        elif self.table and tag == 'caption' and self.table['caption'] is not None:
+            self.table['caption'] = ' '.join(''.join(self.table['caption']).split())[:400]
+        elif tag == 'table' and self.table:
+            t = self.table
+            if len(t['rows']) >= 2:   # a table with a header and at least one row
+                it = {'kind': 'table', 'section': t['section'], 'heading': t['heading'], 'caption': t['caption'] if isinstance(t['caption'], str) else '',
+                      'rows': t['rows']}
+                self.items.append(it)
+            self.table = self.tables.pop() if self.tables else None
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        if self.text is not None:
+            self.text.append(data)
+        if self.figcap is not None:
+            self.figcap.append(data)
+        if self.table:
+            if isinstance(self.table.get('caption'), list):
+                self.table['caption'].append(data)
+            elif self.table['cell'] is not None:
+                self.table['cell'].append(data)
+        elif self.after is not None and data.strip():
+            self.after_text.append(data)
+            text = ' '.join(''.join(self.after_text).split())
+            self.after['caption'] = text[:300]
+            if len(text) >= 300:
+                self.after = None
+
+
+def read_pptx(path):
+    """Items of a PowerPoint file, slide by slide: its pictures and tables, with the slide's first text as heading
+    and its text as caption; the section is slide-<n>."""
+    items = []
+    A = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+    with zipfile.ZipFile(path) as z:
+        names = set(z.namelist())
+        slides = sorted((int(m.group(1)), n) for n in names for m in [re.fullmatch(r'ppt/slides/slide(\d+)\.xml', n)] if m)
+        for no, name in slides:
+            root_el = ET.fromstring(z.read(name))
+            texts = [''.join(t.text or '' for t in p.iter(A + 't')) for p in root_el.iter(A + 'p')]   # one text per paragraph
+            words = ' '.join(' '.join(texts).split())
+            heading = next((' '.join(t.split()) for t in texts if t.strip()), '')[:200]
+            rels = {}
+            rel_name = f'ppt/slides/_rels/slide{no}.xml.rels'
+            if rel_name in names:
+                for r in ET.fromstring(z.read(rel_name)):
+                    rels[r.get('Id')] = posixpath.normpath(posixpath.join('ppt/slides', r.get('Target') or ''))
+            for blip in root_el.iter(A + 'blip'):
+                target = rels.get(blip.get('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed'))
+                ext = (target or '').rsplit('.', 1)[-1].lower()
+                if target in names and ext in ('png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'):
+                    items.append({'kind': 'figure', 'section': f'slide-{no}', 'heading': heading, 'caption': words[:300],
+                                  'ext': 'jpg' if ext == 'jpeg' else ext, 'bytes': z.read(target)})
+            for tbl in root_el.iter(A + 'tbl'):
+                rows = [[' '.join(''.join(t.text or '' for t in tc.iter(A + 't')).split()) for tc in tr.iter(A + 'tc')] for tr in tbl.iter(A + 'tr')]
+                if len(rows) >= 2:
+                    items.append({'kind': 'table', 'section': f'slide-{no}', 'heading': heading, 'caption': words[:300], 'rows': rows})
+    return items
+
+
+def extract_report(root, report, note=''):
+    """Write the embedded images and the tables of an HTML report under duetsheet/derived_data/report_figures/<name>/,
+    with index.json (section, heading, caption of each), and record it as a step."""
+    project, _ = project_of(root)
+    if not (project / 'report.json').is_file():
+        say('ERROR', f'{project / "report.json"} does not exist; start Duetsheet once before extracting')
+        return 1
+    src = pathlib.Path(report).expanduser()
+    src = (src if src.is_absolute() else pathlib.Path.cwd() / src).resolve()
+    rel = norm(os.path.relpath(src, project))
+    if not src.is_file() or not inside(root, project, rel):
+        say('ERROR', f'{report} is not a file inside the folder "{root.name}"')
+        return 1
+    try:
+        if src.suffix.lower() == '.pptx':
+            items = read_pptx(src)
+        else:
+            reader = ReportReader()
+            reader.feed(src.read_text(encoding='utf-8-sig', errors='replace'))
+            items = reader.items
+    except (OSError, ValueError, zipfile.BadZipFile, ET.ParseError) as err:
+        say('ERROR', f'cannot read {rel}:', err)
+        return 1
+    name = re.sub(r'[\\/:*?"<>|\s]+', '_', src.stem).strip('_') or 'report'
+    out = project / EXTRACT_DIR / name
+    if out.is_dir():   # a fresh extraction replaces the files of the previous one
+        for old in out.iterdir():
+            if old.is_file():
+                old.unlink()
+    out.mkdir(parents=True, exist_ok=True)
+    index, nf, nt = [], 0, 0
+    for it in items:
+        if it['kind'] == 'figure':
+            try:
+                data = it['bytes'] if 'bytes' in it else base64.b64decode(re.sub(r'\s+', '', it['data']), validate=False)
+            except (ValueError, TypeError):
+                continue
+            if len(data) < 1024:   # an icon, not a figure
+                continue
+            nf += 1
+            fname = f'figure-{nf:02d}.{it["ext"]}'
+            (out / fname).write_bytes(data)
+        else:
+            nt += 1
+            fname = f'table-{nt:02d}.csv'
+            width = max(len(r) for r in it['rows'])
+            with open(out / fname, 'w', encoding='utf-8', newline='') as f:
+                csv.writer(f, lineterminator='\n').writerows(r + [''] * (width - len(r)) for r in it['rows'])
+        index.append({'file': fname, 'kind': it['kind'], 'section': it['section'], 'heading': it['heading'], 'caption': it['caption']})
+    base = f'{EXTRACT_DIR}/{name}'
+    sid = f's-extract-{re.sub(r"[^\w]+|_", "-", name.lower()).strip("-") or "report"}'   # keeps CJK letters, so names stay apart
+    if not index:   # nothing to point at: leave no empty folder, and drop the step of an earlier extraction
+        out.rmdir()
+        say(f'{rel}: no embedded figures or tables (figures and tables drawn by the page\'s own scripts are not included)')
+        rep, err = read_json_file(project / 'report.json')
+        if isinstance(rep, dict) and sid in (rep.get('steps') or {}):
+            del rep['steps'][sid]
+            atomic_write(project / 'report.json', (json.dumps(rep, ensure_ascii=False, indent=1, allow_nan=False) + '\n').encode('utf-8'))
+            say(f'Removed step "{sid}"')
+        return 0
+    (out / 'index.json').write_text(json.dumps({'report': rel, 'items': index}, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
+    step = argparse.Namespace(script='', inputs=[rel], outputs=[f'{base}/*'], command=f'python duetsheet.py extract "{root.name}" "{rel}"',
+                              param=[], id=sid, by='claude', note=note or f'Figures and tables pulled out of {src.name} (duetsheet.py extract)')
+    say(f'{rel}: {nf} figure(s) and {nt} table(s) -> {base}/')
+    return record_step(root, step)
 
 def install_skill(target):
     src = HERE / 'skills' / 'duetsheet' / 'SKILL.md'
@@ -1397,7 +2019,7 @@ def make_shortcut(root, target):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description='Duetsheet launcher', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
-    ap.add_argument('args', nargs='*', help='[check | step | annotations | tree | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
+    ap.add_argument('args', nargs='*', help='[check | step | annotations | tree | kifu check|tree | extract | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
     ap.add_argument('--note', default='', help='step, agent-status: a short note')
     ap.add_argument('--port', type=int, default=0, help='port (default: first free port from 8765)')
     ap.add_argument('--no-browser', action='store_true', help='do not open a browser window')
@@ -1414,7 +2036,7 @@ def main(argv=None):
     st.add_argument('--by', default='claude', choices=('claude', 'user'), help='who ran it (claude stands for any agent)')
     ap.add_argument('--version', action='version', version=VERSION)
     a = ap.parse_args(argv)
-    cmds = ('check', 'step', 'annotations', 'tree', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
+    cmds = ('check', 'step', 'annotations', 'tree', 'kifu', 'extract', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
     cmd = a.args[0] if a.args and a.args[0] in cmds else 'serve'
     rest = a.args[1:] if a.args and a.args[0] == cmd else a.args
     if cmd == 'install-skill':
@@ -1425,6 +2047,17 @@ def main(argv=None):
             say('ERROR', 'usage: duetsheet.py agent-status FOLDER working|done|failed [--note TEXT]')
             return 1
         rest, state = rest[:-1], rest[-1]
+    sub = None
+    if cmd == 'kifu':
+        if not rest or rest[0] not in ('check', 'tree'):
+            say('ERROR', 'usage: duetsheet.py kifu check|tree FOLDER')
+            return 1
+        sub, rest = rest[0], rest[1:]
+    if cmd == 'extract':
+        if len(rest) < 2:
+            say('ERROR', 'usage: duetsheet.py extract FOLDER REPORT.html [REPORT.html ...]')
+            return 1
+        rest, reports = rest[:1], rest[1:]
     root = pathlib.Path(rest[0] if rest else os.getcwd()).expanduser().resolve()
     if not root.is_dir():
         say('ERROR', f'{root} is not a folder')
@@ -1437,6 +2070,10 @@ def main(argv=None):
         return open_annotations(root)
     if cmd == 'tree':
         return print_tree(root)
+    if cmd == 'kifu':
+        return run_kifu(root, sub, a.deep)
+    if cmd == 'extract':
+        return max(extract_report(root, r, a.note) for r in reports)
     if cmd == 'wait':
         return wait_for_request(root)
     if cmd == 'agent-status':

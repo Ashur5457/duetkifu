@@ -202,6 +202,153 @@ main{min-width:0}
 .tnode .tc{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13px;margin-top:2px}
 .tnode .tc select{font-size:13px;padding:2px 4px;max-width:260px}
 .tnode .tc .sp{flex:1}
+/* the research record (kifu.json): a discovery tree */
+.tswitch{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 12px}
+.tswitch button{border:0;background:var(--paper);color:var(--ink);padding:4px 14px;font:inherit;font-size:13px;cursor:pointer}
+.tswitch button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+#tree.kifu{max-width:1320px}
+.kq{font:700 19px/1.45 var(--serif);margin:0 0 6px;max-width:75ch}
+.kstats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.kpill{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:2px 11px 2px 8px;font-size:12.5px;color:var(--muted)}
+.kpill b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.kpl+.kpl::before{content:"/ ";color:var(--line)}
+.kbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 12px;font-size:13px}
+.kseg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+.kseg button{border:0;border-right:1px solid var(--line);background:none;color:var(--muted);padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}
+.kseg button:last-child{border-right:0}
+.kseg button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-weight:700}
+.kchkb{display:inline-flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer}
+.ksearch{display:inline-flex;align-items:center;gap:8px}
+.ksearch input{font:inherit;font-size:13px;padding:4px 9px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);width:180px}
+.kqn{font-size:12.5px;color:var(--muted)}
+.kzoom{display:inline-flex;gap:4px;margin-left:auto}
+.kzoom button{border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--muted);min-width:30px;height:28px;font:inherit;font-size:15px;cursor:pointer}
+.kzoom button.wide{padding:0 10px;font-size:13px}
+.klegend{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--muted);align-items:center}
+.klegend>span{display:inline-flex;align-items:center;gap:6px}
+.kyou{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c5)}
+.kmain{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.kstage{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:auto;height:min(76vh,860px)}
+.kstage.klist{padding:2px;display:flex;flex-direction:column;gap:8px;background:transparent;border:0}
+.kstage svg{display:block}
+.kpanel{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;
+  position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;font-size:14px}
+@media (max-width:980px){.kmain{grid-template-columns:minmax(0,1fr)}.kstage{height:62vh}.kpanel{position:static;max-height:none}.kzoom{margin-left:0}}
+/* the tree */
+.f-ink{fill:var(--ink)}.f-ok{fill:var(--ok)}.f-path{fill:var(--accent)}.f-fix{fill:var(--c2)}
+.s-dead{fill:var(--paper);stroke:var(--c0);stroke-width:1.6;stroke-linecap:round}
+.s-audit{fill:var(--paper);stroke:var(--accent);stroke-width:2}
+.s-open{fill:var(--paper);stroke:var(--c3);stroke-width:2.4}
+.s-clue{fill:var(--paper);stroke:var(--accent);stroke-width:2.2;stroke-dasharray:2.6 2}
+.s-todo{fill:var(--paper);stroke:var(--accent);stroke-width:1.8;stroke-dasharray:3 2}
+.s-ring{fill:none;stroke:var(--accent);stroke-width:1.4}
+.kico{flex:none;vertical-align:middle}
+.kedge{fill:none;stroke:var(--line);stroke-width:1.4}
+.kedge.dead{stroke-dasharray:4 3}.kedge.todo{stroke:var(--accent);stroke-dasharray:3 3;opacity:.7}
+.kedge.onpath{stroke:var(--accent);stroke-width:2.6}
+.knode{cursor:pointer;outline:none}
+.klbl{font:500 12.5px var(--sans);fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4.5px;stroke-linejoin:round}
+.knode.sh-dead .klbl{fill:var(--muted)}
+.knode.onpath .klbl,.knode.sh-dir .klbl,.knode.sh-out .klbl,.knode.sh-root .klbl{font-weight:700}
+.knode:hover .klbl{fill:var(--accent)}
+.khl{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 2.5;opacity:0}
+.knode.sel .khl,.knode:focus-visible .khl{opacity:1}
+.kyoudot{fill:var(--c5);stroke:var(--paper);stroke-width:1.5}
+.kcorr{fill:var(--c2);stroke:var(--paper);stroke-width:1}
+.kdot{stroke-width:1.6}
+.kdot.lv-recomputed{stroke:var(--paper)}.kdot.lv-recomputed.st-ok{fill:var(--ok)}.kdot.lv-recomputed.st-stale{fill:var(--c5)}.kdot.lv-recomputed.st-unchecked{fill:var(--c0)}
+.kdot.lv-sourced{fill:var(--paper)}.kdot.lv-sourced.st-ok{stroke:var(--ok)}.kdot.lv-sourced.st-stale{stroke:var(--c5)}.kdot.lv-sourced.st-unchecked{stroke:var(--c0)}
+.xl{fill:none;stroke-width:1.5}
+.xl.clue{stroke:var(--accent);stroke-dasharray:2 4;stroke-linecap:round;stroke-width:2}
+.xl.corrects{stroke:var(--c2);stroke-dasharray:6 4}
+.xl.supports{stroke:var(--muted);stroke-dasharray:6 4}
+.ah-clue{fill:var(--accent)}.ah-corrects{fill:var(--c2)}.ah-supports{fill:var(--muted)}
+.xhit{fill:none;stroke:transparent;stroke-width:12;cursor:help}
+.ktree.noxl .kxg{display:none}
+.kaxis{stroke:var(--line);stroke-width:1}.kaxl{font:500 11.5px ui-monospace,Menlo,Consolas,monospace;fill:var(--muted)}
+.knode,.kedge,.kxg{transition:opacity .18s}
+.ktree .dim{opacity:.16}.ktree.filtered .kxg{opacity:.25}
+.ktree[data-mode="path"] .kedge:not(.onpath){opacity:.16}
+@media (prefers-reduced-motion:reduce){.knode,.kedge,.kxg{transition:none}}
+/* the panel */
+.kpmeta{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.kchip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:2px 10px 2px 7px;border-radius:999px;
+  background:color-mix(in srgb,var(--kc,var(--ok)) 14%,transparent);color:var(--kc,var(--ok))}
+.kchip.sh-dead{--kc:var(--c0)}.kchip.sh-fix{--kc:var(--c2)}.kchip.sh-open{--kc:var(--c3)}
+.kchip.sh-dir,.kchip.sh-key,.kchip.sh-root,.kchip.sh-out,.kchip.sh-clue,.kchip.sh-todo,.kchip.sh-audit{--kc:var(--accent)}
+.ktag,.kdate{font-size:12.5px;color:var(--muted)}
+.ktrig{font-size:12.5px;color:var(--muted);margin:0}.ktrig.you{color:var(--c5);font-weight:700}
+.kpanel h2{font:700 20px/1.35 var(--serif);margin:0}
+.kpanel h2 .kid{font-weight:400;font-size:12px}
+.kpres{margin:0;font-size:14.5px}
+.kmean{margin:0;font-size:14px;color:var(--muted);border-left:3px solid var(--line);padding-left:11px}
+.kmean b{color:var(--ink);margin-right:6px}
+.kcause{margin:0;font-size:13.5px}
+.kunc{font-size:12.5px;color:var(--c2)}
+.krel{display:flex;flex-direction:column;gap:5px;font-size:13.5px;border-top:1px solid var(--line);padding-top:10px}
+.krow{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.krow .k{color:var(--muted);min-width:4.5em}
+.kgo{font-size:13.5px;text-align:left}
+.kln{font-size:12.5px;color:var(--muted)}
+.ksrc{font-size:13px;color:var(--muted)}.ksrc a{color:var(--accent)}
+.ksrc .mono,.kdata .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere}
+.kdata{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.kdata h3{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px;margin:0}
+.kchain{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.kdata h5{margin:8px 0 2px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.kfile{display:flex;flex-direction:column;gap:1px;padding:3px 0;border-bottom:1px dashed var(--line)}
+.krole{font-size:11.5px;font-weight:600;color:var(--accent)}
+.kwarn{color:var(--c2);font-size:13px;margin:0}
+.kc{font:600 11.5px/1.5 var(--sans);padding:0 6px;border-radius:8px;border:1px solid currentColor;white-space:nowrap}
+.kchk{display:inline-flex;flex-wrap:wrap;gap:4px}
+.m-yes{color:var(--ok)}.m-close{color:var(--c2)}.m-no{color:var(--c5)}.m-not-reproducible{color:var(--c0)}
+.ktabw{overflow-x:auto}
+.ktab{border-collapse:collapse;font-size:12.5px;width:100%}
+.ktab th,.ktab td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+.ktab th{font-weight:500;color:var(--muted)}
+.ktab td .kc{display:inline-block}
+/* the list layout and the main path */
+.kmove{padding:8px 12px;gap:3px}
+.kmove.sel{outline:2px solid var(--accent);outline-offset:-1px}
+.kmove.sh-todo{border-style:dashed}
+.kno{font:600 12px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
+.kid{font:12px ui-monospace,Menlo,Consolas,monospace;color:var(--muted)}
+.kres{margin:0;font-size:13.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kpath{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin-top:16px}
+.kpath h3{font:700 17px var(--serif);margin:0 0 8px}
+.kpath ol{margin:0;padding-left:1.6em;display:flex;flex-direction:column;gap:6px}
+.kpath .kpd{font-size:13.5px;color:var(--muted)}
+@media (max-width:640px){.tbr{margin-left:4px;padding-left:8px}}
+/* figures and tables of a move */
+.kfigs{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:10px}
+.kfigs h3{font-size:15px;margin:0}
+.kfig{margin:0;display:flex;flex-direction:column;gap:4px}
+.kfigb{border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px;cursor:zoom-in;display:block;width:100%}
+.kfigb img{display:block;max-width:100%;height:auto;margin:0 auto}
+.kfig figcaption,.kfigcap{font-size:12.5px;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.kpreview{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+.kpreview .ktab th{position:sticky;top:0;background:var(--paper)}
+.kbig img{display:block;max-width:100%;height:auto;margin:0 auto;background:#fff}
+/* editing a move */
+.kbar.kedit{padding:8px 10px;border:1px dashed var(--line);border-radius:10px;background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.kform{display:flex;flex-direction:column;gap:8px}
+.kf{display:flex;flex-direction:column;gap:3px;font-size:13px;min-width:0;flex:1 1 140px}
+.kf>span:first-child{color:var(--muted);font-size:12.5px}
+.kf input[type=text],.kf input[type=url],.kf input[type=date],.kf input:not([type]),.kf select,.kf textarea,.kadd input,.kadd select,.kform>label>textarea{
+  font:inherit;font-size:13.5px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
+.kf textarea{resize:vertical;line-height:1.5}
+.kf2{display:flex;flex-wrap:wrap;gap:8px}
+.kcb{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);margin-top:2px}
+.kfs{border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.kfs legend{font-size:12.5px;font-weight:600;color:var(--muted);padding:0 4px}
+.krowe{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:13px;border-bottom:1px dashed var(--line);padding:2px 0}
+.krowe .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;flex:1 1 auto}
+.kadd{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.kadd input,.kadd select{width:auto;flex:1 1 120px}
+.kacts{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.kprob{margin:0;padding:6px 10px 6px 26px;border-radius:6px;background:color-mix(in srgb,var(--c2) 12%,transparent);color:var(--ink);font-size:13px}
+.klog summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+.klog ul{margin:6px 0 0;padding-left:1.2em;font-size:12.5px;display:flex;flex-direction:column;gap:3px}
 .btitle{font-size:18px;margin:0 0 6px;line-height:1.35}
 .md p{margin:0 0 .55em}.md p:last-child{margin-bottom:0}
 .md ul{margin:0 0 .55em;padding-left:1.3em}
@@ -404,7 +551,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
   <div class="seg" id="modes" role="group" aria-label="Mode">
     <button type="button" data-mode="view" aria-pressed="true">View</button>
     <button type="button" data-mode="edit" aria-pressed="false">Edit</button>
-    <button type="button" data-mode="tree" aria-pressed="false">Tree</button>
+    <button type="button" data-mode="tree" aria-pressed="false">Kifu</button>
   </div>
   <span class="hint" id="hint"></span>
   <button type="button" class="btn issues" id="issuesBtn" hidden aria-label="Problems"></button>
@@ -426,7 +573,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
     </div>
     <nav class="thumbs" id="thumbs" aria-label="Pages"></nav>
   </section>
-  <section id="tree" aria-label="Tree" hidden><div id="treehost"></div></section>
+  <section id="tree" aria-label="Kifu" hidden><div id="treehost"></div></section>
   <section id="edit" aria-label="Edit" hidden>
     <div class="flowbar"><button type="button" class="btn small" id="compactBtn" aria-pressed="false">Reorder (titles only)</button></div>
     <div id="flow"></div>
@@ -1130,7 +1277,6 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要換數據、欄位、數據組或其他任何修改，請寫在下方的留言框（可參考「範例句」）。",
  "Draw around points on the chart with the mouse, or click one point.": "在圖上按住滑鼠畫一圈圈出資料點，或直接點一個點。",
  "Draw around a region of the figure with the mouse.": "在圖上按住滑鼠畫一圈，圈出一塊區域。",
- "Tree": "樹狀",
  "The chapters as a tree of research branches, with their status and the data they use.": "把章節看成研究分支的樹狀圖，標出每一支的狀態和用到的數據。",
  "status|Active": "進行中",
  "status|Paused": "暫停",
@@ -1165,7 +1311,179 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "這個分支改用 […] 取代 […]，其他都和分支來源的那一章相同。",
  "Compute this branch into new files, and do not change the files of the chapter it branches from.": "這個分支的計算結果存成新檔案，不要改動分支來源那一章的檔案。",
  "Compare the result of this branch with the chapter it branches from, in one chart.": "把這個分支和分支來源那一章的結果畫在同一張圖比較。",
- "Write down why this branch stopped, and what would make it worth reopening.": "寫下這個分支為什麼停下來，以及什麼情況下值得重開。"
+ "Write down why this branch stopped, and what would make it worth reopening.": "寫下這個分支為什麼停下來，以及什麼情況下值得重開。",
+ "Chapters": "章節",
+ "Every move of the research from kifu.json, dead ends included.": "研究的每一手（來自 kifu.json），包含走不通的路。",
+ "Checks that do not match": "核對不符",
+ "The idea was wrong": "假說錯了",
+ "Carried out wrongly": "操作或樣品出問題",
+ "The data cannot be trusted": "數據不可信",
+ "The analysis method": "分析方法有問題",
+ "Too costly": "成本太高（時間、樣品、機時）",
+ "A better path appeared": "有更好的路",
+ "Research question": "研究問題",
+ "Correction": "自我更正",
+ "Independent audit": "獨立查核",
+ "Conclusion": "結論",
+ "Advisor": "指導教授",
+ "Supervisor": "主管",
+ "New data": "新數據",
+ "The lab": "實驗現場",
+ "Followed from the results": "順著結果往下做",
+ "Plan": "計畫",
+ "Unknown": "不明",
+ "Corrects": "更正",
+ "Clue for": "線索指向",
+ "Supports": "支持",
+ "Compared with": "比較對象",
+ "Inspired by": "啟發來源",
+ "Replaces": "取代",
+ "Corrected by": "被更正",
+ "Clue from": "線索來源",
+ "Supported by": "被支持",
+ "Inspired": "啟發了",
+ "Replaced by": "被取代",
+ "Good move": "好手",
+ "Bad move": "惡手",
+ "Doubtful": "存疑",
+ "Interesting": "有意思",
+ "Turning point": "轉折點",
+ "Root cause": "根因",
+ "Best so far": "目前最好",
+ "Breakthrough": "突破",
+ "Pivot": "轉向",
+ "Matches": "一致",
+ "Close enough": "接近",
+ "Does not match": "不符",
+ "Cannot be reproduced": "無法重現",
+ "Added from": "補記來源",
+ "After {move}": "接在 {move} 之後",
+ "Cause": "原因",
+ "Checks against recomputed numbers ({n})": "與重算數字的核對（{n}）",
+ "Conditions": "條件",
+ "Cost": "成本",
+ "Next moves": "下一手",
+ "Population": "口徑（母體與篩選）",
+ "Read the chapter \"{t}\"": "閱讀章節「{t}」",
+ "Recomputed": "重算值",
+ "Recomputed by": "重算步驟",
+ "Recorded": "紀錄值",
+ "Result": "結果",
+ "Show": "顯示",
+ "Source": "出處",
+ "Started by": "觸發者",
+ "Step \"{id}\" is not in report.json.": "步驟「{id}」不在 report.json 裡。",
+ "The raw data of this move is outside the folder, so it is not part of the data chain.": "這一手的原始數據在資料夾外面，所以沒有接上資料鏈。",
+ "What the record says": "紀錄上的說法",
+ "Why": "為什麼走這一手",
+ "Why it ended": "結束原因",
+ "decided by you": "由你判斷",
+ "decided by {who}": "由 {who} 判斷",
+ "not confirmed yet": "尚未確認",
+ "value {v}": "數值 {v}",
+ "{file} has no moves yet.": "{file} 還沒有任何一手。",
+ "{n} checks against recomputed numbers": "與重算數字核對 {n} 條",
+ "{n} moves": "{n} 手",
+ "Holds": "成立",
+ "Dead end": "死路",
+ "Not resolved yet": "尚未解決",
+ "Early clue": "早期線索",
+ "To be tested": "待驗證",
+ "Main path": "主路徑",
+ "Dead ends": "死路",
+ "Corrections and open questions": "更正與未解",
+ "Started by you": "您觸發的",
+ "No data chain yet": "缺資料鏈",
+ "Timeline": "時間軸",
+ "List": "清單",
+ "Recomputed from the raw files": "已從原始檔重算",
+ "Sources named, not recomputed": "有出處，未重算",
+ "No data": "無數據",
+ "Report": "報告",
+ "Figure": "圖",
+ "Slides": "簡報",
+ "Raw data": "原始數據",
+ "Why it stopped": "為什麼停下",
+ "How to judge it": "判準",
+ "What it means": "意義",
+ "Checks": "核對",
+ "Clue": "線索",
+ "Corrected later": "後來被更正",
+ "Cross links": "交叉連結",
+ "Fit": "全覽",
+ "Follows": "延伸自",
+ "Highlight": "顯示模式",
+ "Layout": "版面",
+ "Name the files this move rests on (evidence.files), the steps that recompute it (evidence.steps), or say why there is no data (evidence.noData).": "請寫下這一手依據的檔案（evidence.files）、重算它的步驟（evidence.steps），或說明為什麼沒有數據（evidence.noData）。",
+ "Not recorded yet": "尚未記錄",
+ "Recomputed, up to date": "已重算，一致",
+ "Search the moves": "搜尋：TMB、DRT、ρ…",
+ "Sources ({n})": "出處檔（{n}）",
+ "Sources named": "有出處",
+ "The main path, from the question to the conclusion": "從問題走到結論的主路徑",
+ "Zoom in": "放大",
+ "Zoom out": "縮小",
+ "not recorded": "未記錄",
+ "Kifu": "棋譜",
+ "Tree diagram": "樹狀圖",
+ "Figures and tables": "圖表",
+ "Loading…": "載入中…",
+ "Open the project folder to see them.": "開啟專案資料夾才看得到。",
+ "Show all {n} rows": "顯示全部 {n} 列",
+ "{n} figures and tables, shown above": "{n} 個圖表（顯示在上方）",
+ "Preview": "預覽",
+ "Attempt": "嘗試",
+ "kifu|Planned": "計畫中",
+ "kifu|Active": "進行中",
+ "kifu|Paused": "暫停",
+ "kifu|Done": "完成",
+ "Success": "成立",
+ "Failure": "失敗",
+ "Inconclusive": "沒有結論",
+ "Mark": "覆盤標記",
+ "Milestone": "里程碑",
+ "Kind": "種類",
+ "Section": "章節",
+ "Date": "日期",
+ "File": "檔案",
+ "Link": "連結",
+ "Links": "交叉連結",
+ "Group": "分枝",
+ "Who": "誰",
+ "A done move needs a result: success, failure or inconclusive.": "完成的手需要結果：成立、失敗或沒有結論。",
+ "Add a move after the selected one": "在選取的手之後新增一手",
+ "Add file": "加入檔案",
+ "Add step": "加入步驟",
+ "Changes are saved to {file} at once and recorded.": "修改會立刻存到 {file}，並記進修改紀錄。",
+ "Changes to this move ({n})": "這一手的修改紀錄（{n}）",
+ "Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.": "請選原因：「假說錯了」和「數據不可信」是不同的死路。",
+ "Close this move": "結束這一手",
+ "Confirmed": "已確認",
+ "Could not save {file}.": "無法儲存 {file}。",
+ "Delete the planned move \"{t}\"? This is recorded in the change log.": "刪除計畫中的手「{t}」？會記進修改紀錄。",
+ "Every attempt, dead ends included, goes into {file} next to report.json.": "每一次嘗試（包括走不通的路）都記在 report.json 旁邊的 {file}。",
+ "For example: only discussed in a meeting; the next round has not run yet": "例如：只在會議中討論；下一輪實驗還沒做",
+ "Give the move a title.": "請給這一手一個標題。",
+ "New move": "新的一手",
+ "Next move": "接著走一手",
+ "No data, because": "沒有數據，因為",
+ "One sentence: why it ended": "一句話：為什麼結束",
+ "Optional": "可不填",
+ "Path, for example ../report.html": "路徑，例如 ../report.html",
+ "Place in the record": "在棋譜中的位置",
+ "Review": "覆盤",
+ "Say why it ended (a failure, an inconclusive or a paused move needs a reason).": "請寫下為什麼結束（失敗、沒有結論或暫停的手都需要原因）。",
+ "Start a research record": "開始研究棋譜",
+ "Step": "步驟",
+ "Steps that recompute this move, files its numbers come from, or why there is no data.": "重算這一手的步驟、數字出處的檔案，或為什麼沒有數據。",
+ "The hypothesis, what it rests on, the other options": "假說、根據、當時考慮過的其他選項",
+ "What does this research ask?": "這個研究想回答什麼？",
+ "Where in the file": "在檔案的哪裡",
+ "Which samples, window and filters the numbers refer to": "數字用的是哪些樣品、哪個窗口、什麼篩選",
+ "Why this move": "為什麼走這一手",
+ "Background": "背景",
+ "The whole record": "整份棋譜",
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 的啟動程式已經停止，現在無法讀取或儲存任何東西。請重新啟動它（例如用桌面捷徑），再重新整理這個頁面。"
 },
 "zh-Hans": {
  "_name": "简体中文",
@@ -1811,7 +2129,6 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "要换数据、栏位、数据组或其他任何修改，请写在下方的留言框（可参考“范例句”）。",
  "Draw around points on the chart with the mouse, or click one point.": "在图上按住鼠标画一圈圈出数据点，或直接点击一个点。",
  "Draw around a region of the figure with the mouse.": "在图上按住鼠标画一圈，圈出一块区域。",
- "Tree": "树状",
  "The chapters as a tree of research branches, with their status and the data they use.": "把章节看成研究分支的树状图，标出每一支的状态和用到的数据。",
  "status|Active": "进行中",
  "status|Paused": "暂停",
@@ -1846,7 +2163,179 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "这个分支改用 […] 取代 […]，其他都和分支来源的那一章相同。",
  "Compute this branch into new files, and do not change the files of the chapter it branches from.": "这个分支的计算结果存成新文件，不要改动分支来源那一章的文件。",
  "Compare the result of this branch with the chapter it branches from, in one chart.": "把这个分支和分支来源那一章的结果画在同一张图比较。",
- "Write down why this branch stopped, and what would make it worth reopening.": "写下这个分支为什么停下来，以及什么情况下值得重开。"
+ "Write down why this branch stopped, and what would make it worth reopening.": "写下这个分支为什么停下来，以及什么情况下值得重开。",
+ "Chapters": "章节",
+ "Every move of the research from kifu.json, dead ends included.": "研究的每一手（来自 kifu.json），包括走不通的路。",
+ "Checks that do not match": "核对不符",
+ "The idea was wrong": "假说错了",
+ "Carried out wrongly": "操作或样品出问题",
+ "The data cannot be trusted": "数据不可信",
+ "The analysis method": "分析方法有问题",
+ "Too costly": "成本太高（时间、样品、机时）",
+ "A better path appeared": "有更好的路",
+ "Research question": "研究问题",
+ "Correction": "自我更正",
+ "Independent audit": "独立核查",
+ "Conclusion": "结论",
+ "Advisor": "指导教授",
+ "Supervisor": "主管",
+ "New data": "新数据",
+ "The lab": "实验现场",
+ "Followed from the results": "顺着结果往下做",
+ "Plan": "计划",
+ "Unknown": "不明",
+ "Corrects": "更正",
+ "Clue for": "线索指向",
+ "Supports": "支持",
+ "Compared with": "比较对象",
+ "Inspired by": "启发来源",
+ "Replaces": "取代",
+ "Corrected by": "被更正",
+ "Clue from": "线索来源",
+ "Supported by": "被支持",
+ "Inspired": "启发了",
+ "Replaced by": "被取代",
+ "Good move": "好手",
+ "Bad move": "恶手",
+ "Doubtful": "存疑",
+ "Interesting": "有意思",
+ "Turning point": "转折点",
+ "Root cause": "根因",
+ "Best so far": "目前最好",
+ "Breakthrough": "突破",
+ "Pivot": "转向",
+ "Matches": "一致",
+ "Close enough": "接近",
+ "Does not match": "不符",
+ "Cannot be reproduced": "无法重现",
+ "Added from": "补记来源",
+ "After {move}": "接在 {move} 之后",
+ "Cause": "原因",
+ "Checks against recomputed numbers ({n})": "与重算数字的核对（{n}）",
+ "Conditions": "条件",
+ "Cost": "成本",
+ "Next moves": "下一手",
+ "Population": "口径（总体与筛选）",
+ "Read the chapter \"{t}\"": "阅读章节“{t}”",
+ "Recomputed": "重算值",
+ "Recomputed by": "重算步骤",
+ "Recorded": "记录值",
+ "Result": "结果",
+ "Show": "显示",
+ "Source": "出处",
+ "Started by": "触发者",
+ "Step \"{id}\" is not in report.json.": "步骤“{id}”不在 report.json 中。",
+ "The raw data of this move is outside the folder, so it is not part of the data chain.": "这一手的原始数据在文件夹外面，所以没有接上数据链。",
+ "What the record says": "记录上的说法",
+ "Why": "为什么走这一手",
+ "Why it ended": "结束原因",
+ "decided by you": "由你判断",
+ "decided by {who}": "由 {who} 判断",
+ "not confirmed yet": "尚未确认",
+ "value {v}": "数值 {v}",
+ "{file} has no moves yet.": "{file} 还没有任何一手。",
+ "{n} checks against recomputed numbers": "与重算数字核对 {n} 条",
+ "{n} moves": "{n} 手",
+ "Holds": "成立",
+ "Dead end": "死路",
+ "Not resolved yet": "尚未解决",
+ "Early clue": "早期线索",
+ "To be tested": "待验证",
+ "Main path": "主路径",
+ "Dead ends": "死路",
+ "Corrections and open questions": "更正与未解",
+ "Started by you": "您触发的",
+ "No data chain yet": "缺数据链",
+ "Timeline": "时间轴",
+ "List": "清单",
+ "Recomputed from the raw files": "已从原始文件重算",
+ "Sources named, not recomputed": "有出处，未重算",
+ "No data": "无数据",
+ "Report": "报告",
+ "Figure": "图",
+ "Slides": "演示文稿",
+ "Raw data": "原始数据",
+ "Why it stopped": "为什么停下",
+ "How to judge it": "判断标准",
+ "What it means": "意义",
+ "Checks": "核对",
+ "Clue": "线索",
+ "Corrected later": "后来被更正",
+ "Cross links": "交叉链接",
+ "Fit": "全览",
+ "Follows": "延伸自",
+ "Highlight": "显示模式",
+ "Layout": "版面",
+ "Name the files this move rests on (evidence.files), the steps that recompute it (evidence.steps), or say why there is no data (evidence.noData).": "请写下这一手依据的文件（evidence.files）、重算它的步骤（evidence.steps），或说明为什么没有数据（evidence.noData）。",
+ "Not recorded yet": "尚未记录",
+ "Recomputed, up to date": "已重算，一致",
+ "Search the moves": "搜索：TMB、DRT、ρ…",
+ "Sources ({n})": "出处文件（{n}）",
+ "Sources named": "有出处",
+ "The main path, from the question to the conclusion": "从问题走到结论的主路径",
+ "Zoom in": "放大",
+ "Zoom out": "缩小",
+ "not recorded": "未记录",
+ "Kifu": "棋谱",
+ "Tree diagram": "树状图",
+ "Figures and tables": "图表",
+ "Loading…": "加载中…",
+ "Open the project folder to see them.": "打开项目文件夹才能看到。",
+ "Show all {n} rows": "显示全部 {n} 行",
+ "{n} figures and tables, shown above": "{n} 个图表（显示在上方）",
+ "Preview": "预览",
+ "Attempt": "尝试",
+ "kifu|Planned": "计划中",
+ "kifu|Active": "进行中",
+ "kifu|Paused": "暂停",
+ "kifu|Done": "完成",
+ "Success": "成立",
+ "Failure": "失败",
+ "Inconclusive": "没有结论",
+ "Mark": "复盘标记",
+ "Milestone": "里程碑",
+ "Kind": "种类",
+ "Section": "章节",
+ "Date": "日期",
+ "File": "文件",
+ "Link": "链接",
+ "Links": "交叉链接",
+ "Group": "分支",
+ "Who": "谁",
+ "A done move needs a result: success, failure or inconclusive.": "完成的手需要结果：成立、失败或没有结论。",
+ "Add a move after the selected one": "在选取的手之后新增一手",
+ "Add file": "加入文件",
+ "Add step": "加入步骤",
+ "Changes are saved to {file} at once and recorded.": "修改会立即保存到 {file}，并记入修改记录。",
+ "Changes to this move ({n})": "这一手的修改记录（{n}）",
+ "Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.": "请选原因：“假说错了”和“数据不可信”是不同的死路。",
+ "Close this move": "结束这一手",
+ "Confirmed": "已确认",
+ "Could not save {file}.": "无法保存 {file}。",
+ "Delete the planned move \"{t}\"? This is recorded in the change log.": "删除计划中的手“{t}”？会记入修改记录。",
+ "Every attempt, dead ends included, goes into {file} next to report.json.": "每一次尝试（包括走不通的路）都记在 report.json 旁边的 {file}。",
+ "For example: only discussed in a meeting; the next round has not run yet": "例如：只在会议中讨论；下一轮实验还没做",
+ "Give the move a title.": "请给这一手一个标题。",
+ "New move": "新的一手",
+ "Next move": "接着走一手",
+ "No data, because": "没有数据，因为",
+ "One sentence: why it ended": "一句话：为什么结束",
+ "Optional": "可不填",
+ "Path, for example ../report.html": "路径，例如 ../report.html",
+ "Place in the record": "在棋谱中的位置",
+ "Review": "复盘",
+ "Say why it ended (a failure, an inconclusive or a paused move needs a reason).": "请写下为什么结束（失败、没有结论或暂停的手都需要原因）。",
+ "Start a research record": "开始研究棋谱",
+ "Step": "步骤",
+ "Steps that recompute this move, files its numbers come from, or why there is no data.": "重算这一手的步骤、数字出处的文件，或为什么没有数据。",
+ "The hypothesis, what it rests on, the other options": "假说、依据、当时考虑过的其他选项",
+ "What does this research ask?": "这个研究想回答什么？",
+ "Where in the file": "在文件的哪里",
+ "Which samples, window and filters the numbers refer to": "数字用的是哪些样品、哪个窗口、什么筛选",
+ "Why this move": "为什么走这一手",
+ "Background": "背景",
+ "The whole record": "整份棋谱",
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 的启动程序已经停止，现在无法读取或保存任何内容。请重新启动它（例如用桌面快捷方式），再刷新这个页面。"
 },
 "ja": {
  "_name": "日本語",
@@ -2492,7 +2981,6 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "データ、列、系列などを変えたいときは、下のコメント欄に書いてください（「依頼の例」を参照）。",
  "Draw around points on the chart with the mouse, or click one point.": "グラフ上でマウスを押したまま点を囲むか、1 つの点をクリックします。",
  "Draw around a region of the figure with the mouse.": "図の上でマウスを押したまま範囲を囲みます。",
- "Tree": "ツリー",
  "The chapters as a tree of research branches, with their status and the data they use.": "章をリサーチの分岐ツリーとして表示し、各分岐の状態と使ったデータを示します。",
  "status|Active": "進行中",
  "status|Paused": "一時停止",
@@ -2527,7 +3015,179 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "この分岐では […] の代わりに […] を使い、それ以外は分岐元の章と同じにしてください。",
  "Compute this branch into new files, and do not change the files of the chapter it branches from.": "この分岐の計算結果は新しいファイルに保存し、分岐元の章のファイルは変えないでください。",
  "Compare the result of this branch with the chapter it branches from, in one chart.": "この分岐と分岐元の章の結果を 1 つの図で比較してください。",
- "Write down why this branch stopped, and what would make it worth reopening.": "この分岐を止めた理由と、どんな条件なら再開する価値があるかを書いてください。"
+ "Write down why this branch stopped, and what would make it worth reopening.": "この分岐を止めた理由と、どんな条件なら再開する価値があるかを書いてください。",
+ "Chapters": "章",
+ "Every move of the research from kifu.json, dead ends included.": "kifu.json に記録された研究のすべての手（行き止まりも含む）。",
+ "Checks that do not match": "照合が合わない手",
+ "The idea was wrong": "仮説が誤り",
+ "Carried out wrongly": "操作・試料の問題",
+ "The data cannot be trusted": "データが信頼できない",
+ "The analysis method": "解析手法の問題",
+ "Too costly": "コストが高すぎる（時間・試料・装置）",
+ "A better path appeared": "より良い道が見つかった",
+ "Research question": "研究課題",
+ "Correction": "自己訂正",
+ "Independent audit": "独立監査",
+ "Conclusion": "結論",
+ "Advisor": "指導教員",
+ "Supervisor": "上司",
+ "New data": "新しいデータ",
+ "The lab": "実験現場",
+ "Followed from the results": "結果から続けた",
+ "Plan": "計画",
+ "Unknown": "不明",
+ "Corrects": "訂正",
+ "Clue for": "手がかり（対象）",
+ "Supports": "裏付け",
+ "Compared with": "比較対象",
+ "Inspired by": "着想元",
+ "Replaces": "置き換え",
+ "Corrected by": "訂正された手",
+ "Clue from": "手がかり（出所）",
+ "Supported by": "裏付けた手",
+ "Inspired": "着想を与えた手",
+ "Replaced by": "置き換えた手",
+ "Good move": "好手",
+ "Bad move": "悪手",
+ "Doubtful": "疑問手",
+ "Interesting": "興味深い",
+ "Turning point": "転換点",
+ "Root cause": "根本原因",
+ "Best so far": "現時点で最良",
+ "Breakthrough": "ブレークスルー",
+ "Pivot": "方針転換",
+ "Matches": "一致",
+ "Close enough": "ほぼ一致",
+ "Does not match": "不一致",
+ "Cannot be reproduced": "再現不可",
+ "Added from": "追加の出典",
+ "After {move}": "{move} の次",
+ "Cause": "原因",
+ "Checks against recomputed numbers ({n})": "再計算との照合（{n}）",
+ "Conditions": "条件",
+ "Cost": "コスト",
+ "Next moves": "次の手",
+ "Population": "母集団と条件",
+ "Read the chapter \"{t}\"": "章「{t}」を読む",
+ "Recomputed": "再計算値",
+ "Recomputed by": "再計算したステップ",
+ "Recorded": "記録値",
+ "Result": "結果",
+ "Show": "表示",
+ "Source": "出典",
+ "Started by": "きっかけ",
+ "Step \"{id}\" is not in report.json.": "ステップ「{id}」は report.json にありません。",
+ "The raw data of this move is outside the folder, so it is not part of the data chain.": "この手の元データはフォルダの外にあるため、データの流れにつながっていません。",
+ "What the record says": "記録の主張",
+ "Why": "なぜこの手か",
+ "Why it ended": "終わった理由",
+ "decided by you": "あなたが判断",
+ "decided by {who}": "{who} が判断",
+ "not confirmed yet": "未確認",
+ "value {v}": "値 {v}",
+ "{file} has no moves yet.": "{file} にはまだ手がありません。",
+ "{n} checks against recomputed numbers": "再計算との照合 {n} 件",
+ "{n} moves": "{n} 手",
+ "Holds": "成立",
+ "Dead end": "行き止まり",
+ "Not resolved yet": "未解決",
+ "Early clue": "早期の手がかり",
+ "To be tested": "検証待ち",
+ "Main path": "主路線",
+ "Dead ends": "行き止まり",
+ "Corrections and open questions": "訂正と未解決",
+ "Started by you": "あなたがきっかけ",
+ "No data chain yet": "データの流れなし",
+ "Timeline": "時間軸",
+ "List": "リスト",
+ "Recomputed from the raw files": "元データから再計算済み",
+ "Sources named, not recomputed": "出典あり・未再計算",
+ "No data": "データなし",
+ "Report": "レポート",
+ "Figure": "図",
+ "Slides": "スライド",
+ "Raw data": "元データ",
+ "Why it stopped": "なぜ止めたか",
+ "How to judge it": "判定基準",
+ "What it means": "意味",
+ "Checks": "照合",
+ "Clue": "手がかり",
+ "Corrected later": "後で訂正",
+ "Cross links": "相互リンク",
+ "Fit": "全体表示",
+ "Follows": "前の手",
+ "Highlight": "強調表示",
+ "Layout": "レイアウト",
+ "Name the files this move rests on (evidence.files), the steps that recompute it (evidence.steps), or say why there is no data (evidence.noData).": "この手の根拠となるファイル（evidence.files）、再計算するステップ（evidence.steps）、またはデータがない理由（evidence.noData）を記録してください。",
+ "Not recorded yet": "未記録",
+ "Recomputed, up to date": "再計算済み・一致",
+ "Search the moves": "検索：TMB、DRT、ρ…",
+ "Sources ({n})": "出典ファイル（{n}）",
+ "Sources named": "出典あり",
+ "The main path, from the question to the conclusion": "問いから結論までの主路線",
+ "Zoom in": "拡大",
+ "Zoom out": "縮小",
+ "not recorded": "未記録",
+ "Kifu": "棋譜",
+ "Tree diagram": "ツリー図",
+ "Figures and tables": "図表",
+ "Loading…": "読み込み中…",
+ "Open the project folder to see them.": "プロジェクトフォルダを開くと表示されます。",
+ "Show all {n} rows": "全 {n} 行を表示",
+ "{n} figures and tables, shown above": "図表 {n} 件（上に表示）",
+ "Preview": "プレビュー",
+ "Attempt": "試み",
+ "kifu|Planned": "予定",
+ "kifu|Active": "進行中",
+ "kifu|Paused": "中断",
+ "kifu|Done": "完了",
+ "Success": "成立",
+ "Failure": "失敗",
+ "Inconclusive": "結論なし",
+ "Mark": "検討マーク",
+ "Milestone": "マイルストーン",
+ "Kind": "種類",
+ "Section": "節",
+ "Date": "日付",
+ "File": "ファイル",
+ "Link": "リンク",
+ "Links": "相互リンク",
+ "Group": "分岐",
+ "Who": "誰",
+ "A done move needs a result: success, failure or inconclusive.": "完了した手には結果（成立・失敗・結論なし）が必要です。",
+ "Add a move after the selected one": "選んだ手の次に手を追加",
+ "Add file": "ファイルを追加",
+ "Add step": "ステップを追加",
+ "Changes are saved to {file} at once and recorded.": "変更はすぐ {file} に保存され、記録されます。",
+ "Changes to this move ({n})": "この手の変更履歴（{n}）",
+ "Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.": "原因を選んでください。「仮説が誤り」と「データが信頼できない」は別の行き止まりです。",
+ "Close this move": "この手を終える",
+ "Confirmed": "確認済み",
+ "Could not save {file}.": "{file} を保存できませんでした。",
+ "Delete the planned move \"{t}\"? This is recorded in the change log.": "予定の手「{t}」を削除しますか？変更履歴に記録されます。",
+ "Every attempt, dead ends included, goes into {file} next to report.json.": "すべての試み（行き止まりも含む）を report.json の隣の {file} に記録します。",
+ "For example: only discussed in a meeting; the next round has not run yet": "例：会議で話しただけ／次のラウンドはまだ",
+ "Give the move a title.": "手にタイトルを付けてください。",
+ "New move": "新しい手",
+ "Next move": "次の手を打つ",
+ "No data, because": "データなし、理由",
+ "One sentence: why it ended": "一文で：なぜ終えたか",
+ "Optional": "任意",
+ "Path, for example ../report.html": "パス（例：../report.html）",
+ "Place in the record": "棋譜の中の位置",
+ "Review": "検討",
+ "Say why it ended (a failure, an inconclusive or a paused move needs a reason).": "終えた理由を書いてください（失敗・結論なし・中断の手には理由が必要です）。",
+ "Start a research record": "研究の棋譜を始める",
+ "Step": "ステップ",
+ "Steps that recompute this move, files its numbers come from, or why there is no data.": "この手を再計算するステップ、数値の出典ファイル、またはデータがない理由。",
+ "The hypothesis, what it rests on, the other options": "仮説、その根拠、ほかの選択肢",
+ "What does this research ask?": "この研究は何を問うのか？",
+ "Where in the file": "ファイルのどこか",
+ "Which samples, window and filters the numbers refer to": "数値が指すサンプル・範囲・条件",
+ "Why this move": "なぜこの手か",
+ "Background": "背景",
+ "The whole record": "棋譜全体",
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet の起動プログラムが停止したため、読み込みも保存もできません。もう一度起動して（デスクトップのショートカットなど）、このページを再読み込みしてください。"
 },
 "ko": {
  "_name": "한국어",
@@ -3173,7 +3833,6 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "데이터, 열, 계열 등 다른 것을 바꾸려면 아래 댓글 상자에 적어 주세요 (\"요청 예시\" 참고).",
  "Draw around points on the chart with the mouse, or click one point.": "차트에서 마우스를 누른 채 점들을 둘러 그리거나, 점 하나를 클릭하세요.",
  "Draw around a region of the figure with the mouse.": "그림에서 마우스를 누른 채 영역을 둘러 그리세요.",
- "Tree": "트리",
  "The chapters as a tree of research branches, with their status and the data they use.": "장을 연구 분기 트리로 보여 주고, 각 분기의 상태와 사용한 데이터를 표시합니다.",
  "status|Active": "진행 중",
  "status|Paused": "일시 중지",
@@ -3208,7 +3867,179 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "이 분기에서는 […] 대신 […]를 쓰고, 나머지는 분기 출처 장과 같게 해 주세요.",
  "Compute this branch into new files, and do not change the files of the chapter it branches from.": "이 분기의 계산 결과는 새 파일로 저장하고, 분기 출처 장의 파일은 바꾸지 마세요.",
  "Compare the result of this branch with the chapter it branches from, in one chart.": "이 분기와 분기 출처 장의 결과를 한 차트에서 비교해 주세요.",
- "Write down why this branch stopped, and what would make it worth reopening.": "이 분기를 멈춘 이유와, 어떤 경우에 다시 열 가치가 있는지 적어 주세요."
+ "Write down why this branch stopped, and what would make it worth reopening.": "이 분기를 멈춘 이유와, 어떤 경우에 다시 열 가치가 있는지 적어 주세요.",
+ "Chapters": "장",
+ "Every move of the research from kifu.json, dead ends included.": "kifu.json에 기록된 연구의 모든 수(막다른 길 포함).",
+ "Checks that do not match": "대조가 맞지 않는 수",
+ "The idea was wrong": "가설이 틀림",
+ "Carried out wrongly": "조작 또는 시료 문제",
+ "The data cannot be trusted": "데이터를 신뢰할 수 없음",
+ "The analysis method": "분석 방법 문제",
+ "Too costly": "비용이 너무 큼(시간·시료·장비)",
+ "A better path appeared": "더 나은 길이 생김",
+ "Research question": "연구 질문",
+ "Correction": "자기 정정",
+ "Independent audit": "독립 검증",
+ "Conclusion": "결론",
+ "Advisor": "지도 교수",
+ "Supervisor": "상사",
+ "New data": "새 데이터",
+ "The lab": "실험 현장",
+ "Followed from the results": "결과에서 이어짐",
+ "Plan": "계획",
+ "Unknown": "알 수 없음",
+ "Corrects": "정정",
+ "Clue for": "단서 대상",
+ "Supports": "뒷받침",
+ "Compared with": "비교 대상",
+ "Inspired by": "영감의 출처",
+ "Replaces": "대체",
+ "Corrected by": "정정한 수",
+ "Clue from": "단서 출처",
+ "Supported by": "뒷받침한 수",
+ "Inspired": "영감을 준 수",
+ "Replaced by": "대체한 수",
+ "Good move": "좋은 수",
+ "Bad move": "나쁜 수",
+ "Doubtful": "의문",
+ "Interesting": "흥미로움",
+ "Turning point": "전환점",
+ "Root cause": "근본 원인",
+ "Best so far": "현재 최고",
+ "Breakthrough": "돌파구",
+ "Pivot": "방향 전환",
+ "Matches": "일치",
+ "Close enough": "근접",
+ "Does not match": "불일치",
+ "Cannot be reproduced": "재현 불가",
+ "Added from": "추가 출처",
+ "After {move}": "{move} 다음",
+ "Cause": "원인",
+ "Checks against recomputed numbers ({n})": "재계산 값과의 대조({n})",
+ "Conditions": "조건",
+ "Cost": "비용",
+ "Next moves": "다음 수",
+ "Population": "모집단과 조건",
+ "Read the chapter \"{t}\"": "장 \"{t}\" 읽기",
+ "Recomputed": "재계산 값",
+ "Recomputed by": "재계산 단계",
+ "Recorded": "기록 값",
+ "Result": "결과",
+ "Show": "표시",
+ "Source": "출처",
+ "Started by": "계기",
+ "Step \"{id}\" is not in report.json.": "단계 \"{id}\"이(가) report.json에 없습니다.",
+ "The raw data of this move is outside the folder, so it is not part of the data chain.": "이 수의 원시 데이터는 폴더 밖에 있어 데이터 체인에 연결되지 않았습니다.",
+ "What the record says": "기록된 주장",
+ "Why": "왜 이 수인가",
+ "Why it ended": "끝난 이유",
+ "decided by you": "직접 판단",
+ "decided by {who}": "{who}이(가) 판단",
+ "not confirmed yet": "미확인",
+ "value {v}": "값 {v}",
+ "{file} has no moves yet.": "{file}에 아직 수가 없습니다.",
+ "{n} checks against recomputed numbers": "재계산 값과 대조 {n}건",
+ "{n} moves": "{n}수",
+ "Holds": "성립",
+ "Dead end": "막다른 길",
+ "Not resolved yet": "미해결",
+ "Early clue": "초기 단서",
+ "To be tested": "검증 대기",
+ "Main path": "주 경로",
+ "Dead ends": "막다른 길",
+ "Corrections and open questions": "정정과 미해결",
+ "Started by you": "내가 시작한 수",
+ "No data chain yet": "데이터 체인 없음",
+ "Timeline": "타임라인",
+ "List": "목록",
+ "Recomputed from the raw files": "원시 파일에서 재계산됨",
+ "Sources named, not recomputed": "출처 있음, 재계산 안 함",
+ "No data": "데이터 없음",
+ "Report": "보고서",
+ "Figure": "그림",
+ "Slides": "슬라이드",
+ "Raw data": "원시 데이터",
+ "Why it stopped": "멈춘 이유",
+ "How to judge it": "판단 기준",
+ "What it means": "의미",
+ "Checks": "대조",
+ "Clue": "단서",
+ "Corrected later": "나중에 정정됨",
+ "Cross links": "교차 링크",
+ "Fit": "전체 보기",
+ "Follows": "이어받은 수",
+ "Highlight": "강조",
+ "Layout": "레이아웃",
+ "Name the files this move rests on (evidence.files), the steps that recompute it (evidence.steps), or say why there is no data (evidence.noData).": "이 수의 근거 파일(evidence.files), 재계산 단계(evidence.steps), 또는 데이터가 없는 이유(evidence.noData)를 기록하세요.",
+ "Not recorded yet": "아직 기록 안 됨",
+ "Recomputed, up to date": "재계산됨, 최신",
+ "Search the moves": "검색: TMB, DRT, ρ…",
+ "Sources ({n})": "출처 파일({n})",
+ "Sources named": "출처 있음",
+ "The main path, from the question to the conclusion": "질문에서 결론까지의 주 경로",
+ "Zoom in": "확대",
+ "Zoom out": "축소",
+ "not recorded": "기록 안 됨",
+ "Kifu": "기보",
+ "Tree diagram": "트리 그림",
+ "Figures and tables": "그림과 표",
+ "Loading…": "불러오는 중…",
+ "Open the project folder to see them.": "프로젝트 폴더를 열면 볼 수 있습니다.",
+ "Show all {n} rows": "전체 {n}행 보기",
+ "{n} figures and tables, shown above": "그림과 표 {n}개(위에 표시)",
+ "Preview": "미리보기",
+ "Attempt": "시도",
+ "kifu|Planned": "계획",
+ "kifu|Active": "진행 중",
+ "kifu|Paused": "일시 중지",
+ "kifu|Done": "완료",
+ "Success": "성립",
+ "Failure": "실패",
+ "Inconclusive": "결론 없음",
+ "Mark": "복기 표시",
+ "Milestone": "이정표",
+ "Kind": "종류",
+ "Section": "절",
+ "Date": "날짜",
+ "File": "파일",
+ "Link": "링크",
+ "Links": "교차 링크",
+ "Group": "가지",
+ "Who": "누구",
+ "A done move needs a result: success, failure or inconclusive.": "완료한 수에는 결과(성립·실패·결론 없음)가 필요합니다.",
+ "Add a move after the selected one": "선택한 수 다음에 수를 추가",
+ "Add file": "파일 추가",
+ "Add step": "단계 추가",
+ "Changes are saved to {file} at once and recorded.": "변경 사항은 즉시 {file}에 저장되고 기록됩니다.",
+ "Changes to this move ({n})": "이 수의 변경 기록({n})",
+ "Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.": "원인을 고르세요. \"가설이 틀림\"과 \"데이터를 신뢰할 수 없음\"은 다른 막다른 길입니다.",
+ "Close this move": "이 수 마치기",
+ "Confirmed": "확인됨",
+ "Could not save {file}.": "{file}을(를) 저장하지 못했습니다.",
+ "Delete the planned move \"{t}\"? This is recorded in the change log.": "계획된 수 \"{t}\"을(를) 삭제할까요? 변경 기록에 남습니다.",
+ "Every attempt, dead ends included, goes into {file} next to report.json.": "모든 시도(막다른 길 포함)를 report.json 옆의 {file}에 기록합니다.",
+ "For example: only discussed in a meeting; the next round has not run yet": "예: 회의에서만 논의함, 다음 라운드는 아직",
+ "Give the move a title.": "수에 제목을 붙이세요.",
+ "New move": "새 수",
+ "Next move": "다음 수 두기",
+ "No data, because": "데이터 없음, 이유",
+ "One sentence: why it ended": "한 문장으로: 왜 끝났나",
+ "Optional": "선택 사항",
+ "Path, for example ../report.html": "경로(예: ../report.html)",
+ "Place in the record": "기보에서의 위치",
+ "Review": "복기",
+ "Say why it ended (a failure, an inconclusive or a paused move needs a reason).": "끝난 이유를 적으세요(실패·결론 없음·일시 중지한 수에는 이유가 필요합니다).",
+ "Start a research record": "연구 기보 시작",
+ "Step": "단계",
+ "Steps that recompute this move, files its numbers come from, or why there is no data.": "이 수를 재계산하는 단계, 수치의 출처 파일, 또는 데이터가 없는 이유.",
+ "The hypothesis, what it rests on, the other options": "가설, 근거, 당시 고려한 다른 선택지",
+ "What does this research ask?": "이 연구는 무엇을 묻는가?",
+ "Where in the file": "파일의 어디인지",
+ "Which samples, window and filters the numbers refer to": "수치가 가리키는 시료·범위·조건",
+ "Why this move": "왜 이 수인가",
+ "Background": "배경",
+ "The whole record": "기보 전체",
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 실행 프로그램이 멈춰서 더 이상 읽거나 저장할 수 없습니다. 다시 실행한 뒤(예: 바탕화면 바로 가기) 이 페이지를 새로 고치세요."
 },
 "es": {
  "_name": "Español",
@@ -3854,7 +4685,6 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "To change the data, the columns or the series, or anything else, write it in the comment box below (see Example requests).": "Para cambiar los datos, las columnas, las series o cualquier otra cosa, escríbelo en el cuadro de comentarios de abajo (ver Ejemplos de peticiones).",
  "Draw around points on the chart with the mouse, or click one point.": "Rodea puntos del gráfico arrastrando el ratón, o haz clic en un solo punto.",
  "Draw around a region of the figure with the mouse.": "Rodea una región de la figura arrastrando el ratón.",
- "Tree": "Árbol",
  "The chapters as a tree of research branches, with their status and the data they use.": "Los capítulos como un árbol de ramas de investigación, con su estado y los datos que usan.",
  "status|Active": "En curso",
  "status|Paused": "En pausa",
@@ -3889,7 +4719,179 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.": "En esta rama, usa […] en lugar de […]; deja todo lo demás como en el capítulo del que sale.",
  "Compute this branch into new files, and do not change the files of the chapter it branches from.": "Guarda los cálculos de esta rama en archivos nuevos y no cambies los archivos del capítulo del que sale.",
  "Compare the result of this branch with the chapter it branches from, in one chart.": "Compara el resultado de esta rama con el del capítulo del que sale, en un gráfico.",
- "Write down why this branch stopped, and what would make it worth reopening.": "Escribe por qué se detuvo esta rama y qué haría que valiera la pena reabrirla."
+ "Write down why this branch stopped, and what would make it worth reopening.": "Escribe por qué se detuvo esta rama y qué haría que valiera la pena reabrirla.",
+ "Chapters": "Capítulos",
+ "Every move of the research from kifu.json, dead ends included.": "Cada paso de la investigación según kifu.json, incluidos los callejones sin salida.",
+ "Checks that do not match": "Comprobaciones que no coinciden",
+ "The idea was wrong": "La idea era errónea",
+ "Carried out wrongly": "Error de ejecución",
+ "The data cannot be trusted": "Los datos no son fiables",
+ "The analysis method": "El método de análisis",
+ "Too costly": "Demasiado costoso (tiempo, muestras, equipos)",
+ "A better path appeared": "Apareció un camino mejor",
+ "Research question": "Pregunta de investigación",
+ "Correction": "Corrección",
+ "Independent audit": "Auditoría independiente",
+ "Conclusion": "Conclusión",
+ "Advisor": "Asesor",
+ "Supervisor": "Supervisor",
+ "New data": "Datos nuevos",
+ "The lab": "El laboratorio",
+ "Followed from the results": "A partir de los resultados",
+ "Plan": "Plan",
+ "Unknown": "Desconocido",
+ "Corrects": "Corrige",
+ "Clue for": "Pista para",
+ "Supports": "Respalda",
+ "Compared with": "Comparado con",
+ "Inspired by": "Inspirado por",
+ "Replaces": "Reemplaza",
+ "Corrected by": "Corregido por",
+ "Clue from": "Pista de",
+ "Supported by": "Respaldado por",
+ "Inspired": "Inspiró",
+ "Replaced by": "Reemplazado por",
+ "Good move": "Buena jugada",
+ "Bad move": "Mala jugada",
+ "Doubtful": "Dudoso",
+ "Interesting": "Interesante",
+ "Turning point": "Punto de inflexión",
+ "Root cause": "Causa raíz",
+ "Best so far": "El mejor hasta ahora",
+ "Breakthrough": "Avance",
+ "Pivot": "Giro",
+ "Matches": "Coincide",
+ "Close enough": "Cercano",
+ "Does not match": "No coincide",
+ "Cannot be reproduced": "No reproducible",
+ "Added from": "Añadido desde",
+ "After {move}": "Después de {move}",
+ "Cause": "Causa",
+ "Checks against recomputed numbers ({n})": "Comprobaciones con los números recalculados ({n})",
+ "Conditions": "Condiciones",
+ "Cost": "Coste",
+ "Next moves": "Pasos siguientes",
+ "Population": "Población y filtros",
+ "Read the chapter \"{t}\"": "Leer el capítulo «{t}»",
+ "Recomputed": "Recalculado",
+ "Recomputed by": "Recalculado por",
+ "Recorded": "Registrado",
+ "Result": "Resultado",
+ "Show": "Mostrar",
+ "Source": "Fuente",
+ "Started by": "Iniciado por",
+ "Step \"{id}\" is not in report.json.": "El paso «{id}» no está en report.json.",
+ "The raw data of this move is outside the folder, so it is not part of the data chain.": "Los datos brutos de este paso están fuera de la carpeta, así que no forman parte de la cadena de datos.",
+ "What the record says": "Lo que dice el registro",
+ "Why": "Por qué",
+ "Why it ended": "Por qué terminó",
+ "decided by you": "decidido por ti",
+ "decided by {who}": "decidido por {who}",
+ "not confirmed yet": "sin confirmar",
+ "value {v}": "valor {v}",
+ "{file} has no moves yet.": "{file} aún no tiene pasos.",
+ "{n} checks against recomputed numbers": "{n} comprobaciones con números recalculados",
+ "{n} moves": "{n} pasos",
+ "Holds": "Se sostiene",
+ "Dead end": "Callejón sin salida",
+ "Not resolved yet": "Sin resolver",
+ "Early clue": "Pista temprana",
+ "To be tested": "Por comprobar",
+ "Main path": "Camino principal",
+ "Dead ends": "Callejones sin salida",
+ "Corrections and open questions": "Correcciones y preguntas abiertas",
+ "Started by you": "Iniciados por ti",
+ "No data chain yet": "Sin cadena de datos",
+ "Timeline": "Cronología",
+ "List": "Lista",
+ "Recomputed from the raw files": "Recalculado desde los archivos brutos",
+ "Sources named, not recomputed": "Con fuentes, sin recalcular",
+ "No data": "Sin datos",
+ "Report": "Informe",
+ "Figure": "Figura",
+ "Slides": "Diapositivas",
+ "Raw data": "Datos brutos",
+ "Why it stopped": "Por qué se detuvo",
+ "How to judge it": "Cómo juzgarlo",
+ "What it means": "Qué significa",
+ "Checks": "Comprobaciones",
+ "Clue": "Pista",
+ "Corrected later": "Corregido después",
+ "Cross links": "Enlaces cruzados",
+ "Fit": "Ajustar",
+ "Follows": "Sigue a",
+ "Highlight": "Resaltar",
+ "Layout": "Diseño",
+ "Name the files this move rests on (evidence.files), the steps that recompute it (evidence.steps), or say why there is no data (evidence.noData).": "Indica los archivos en que se basa este paso (evidence.files), los pasos que lo recalculan (evidence.steps) o por qué no hay datos (evidence.noData).",
+ "Not recorded yet": "Aún sin registrar",
+ "Recomputed, up to date": "Recalculado, al día",
+ "Search the moves": "Buscar: TMB, DRT, ρ…",
+ "Sources ({n})": "Fuentes ({n})",
+ "Sources named": "Con fuentes",
+ "The main path, from the question to the conclusion": "El camino principal, de la pregunta a la conclusión",
+ "Zoom in": "Acercar",
+ "Zoom out": "Alejar",
+ "not recorded": "sin registrar",
+ "Kifu": "Kifu",
+ "Tree diagram": "Diagrama de árbol",
+ "Figures and tables": "Figuras y tablas",
+ "Loading…": "Cargando…",
+ "Open the project folder to see them.": "Abre la carpeta del proyecto para verlas.",
+ "Show all {n} rows": "Mostrar las {n} filas",
+ "{n} figures and tables, shown above": "{n} figuras y tablas, mostradas arriba",
+ "Preview": "Vista previa",
+ "Attempt": "Intento",
+ "kifu|Planned": "Planeado",
+ "kifu|Active": "En curso",
+ "kifu|Paused": "En pausa",
+ "kifu|Done": "Terminado",
+ "Success": "Éxito",
+ "Failure": "Fracaso",
+ "Inconclusive": "Sin conclusión",
+ "Mark": "Marca",
+ "Milestone": "Hito",
+ "Kind": "Tipo",
+ "Section": "Sección",
+ "Date": "Fecha",
+ "File": "Archivo",
+ "Link": "Enlace",
+ "Links": "Enlaces",
+ "Group": "Rama",
+ "Who": "Quién",
+ "A done move needs a result: success, failure or inconclusive.": "Un paso terminado necesita un resultado: éxito, fracaso o sin conclusión.",
+ "Add a move after the selected one": "Añadir un paso tras el seleccionado",
+ "Add file": "Añadir archivo",
+ "Add step": "Añadir paso de cálculo",
+ "Changes are saved to {file} at once and recorded.": "Los cambios se guardan en {file} al momento y quedan registrados.",
+ "Changes to this move ({n})": "Cambios de este paso ({n})",
+ "Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.": "Elige una causa: una idea errónea y unos datos poco fiables son callejones distintos.",
+ "Close this move": "Cerrar este paso",
+ "Confirmed": "Confirmado",
+ "Could not save {file}.": "No se pudo guardar {file}.",
+ "Delete the planned move \"{t}\"? This is recorded in the change log.": "¿Eliminar el paso planeado «{t}»? Queda en el registro de cambios.",
+ "Every attempt, dead ends included, goes into {file} next to report.json.": "Cada intento, incluidos los callejones sin salida, se guarda en {file}, junto a report.json.",
+ "For example: only discussed in a meeting; the next round has not run yet": "Por ejemplo: solo se habló en una reunión; la siguiente ronda aún no se ha hecho",
+ "Give the move a title.": "Pon un título al paso.",
+ "New move": "Paso nuevo",
+ "Next move": "Siguiente paso",
+ "No data, because": "Sin datos, porque",
+ "One sentence: why it ended": "Una frase: por qué terminó",
+ "Optional": "Opcional",
+ "Path, for example ../report.html": "Ruta, por ejemplo ../report.html",
+ "Place in the record": "Lugar en el registro",
+ "Review": "Revisión",
+ "Say why it ended (a failure, an inconclusive or a paused move needs a reason).": "Di por qué terminó (un paso fallido, sin conclusión o en pausa necesita un motivo).",
+ "Start a research record": "Empezar el registro de la investigación",
+ "Step": "Paso de cálculo",
+ "Steps that recompute this move, files its numbers come from, or why there is no data.": "Pasos que recalculan este paso, archivos de donde salen sus números, o por qué no hay datos.",
+ "The hypothesis, what it rests on, the other options": "La hipótesis, en qué se apoya, las otras opciones",
+ "What does this research ask?": "¿Qué pregunta esta investigación?",
+ "Where in the file": "En qué parte del archivo",
+ "Which samples, window and filters the numbers refer to": "A qué muestras, ventana y filtros se refieren los números",
+ "Why this move": "Por qué este paso",
+ "Background": "Contexto",
+ "The whole record": "Todo el registro",
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "El lanzador de Duetsheet se ha detenido, así que ya no se lee ni se guarda nada. Vuelve a iniciarlo (por ejemplo con el acceso directo del escritorio) y recarga esta página."
 }
 }
 </script>
@@ -4376,8 +5378,16 @@ async function branchFrom(c){ // a new chapter after this one and its branches, 
   const n=$(`.cw[data-id="${id}"]`);if(n){n.scrollIntoView({behavior:'smooth',block:'center'});const ti=n.querySelector('.ed-title');if(ti){ti.focus({preventScroll:true});ti.select()}}
 }
 function renderTree(){
-  const host=$('#treehost');host.replaceChildren();S.geo={};
-  const C=chapters();
+  const host=$('#treehost');host.replaceChildren();S.geo={};$('#tree').classList.remove('kifu');
+  const C=chapters(),K=S.kifu?kifuModel():null,both=!!K&&K.list.length>0&&C.list.length>0;
+  const view=K&&K.list.length&&!(both&&S.treeView==='chapters')?'kifu':'chapters';
+  if(both)host.append(h('div',{class:'tswitch',role:'group','aria-label':tr('Show')},[['kifu','Kifu'],['chapters','Chapters']].map(([v,t])=>
+    h('button',{type:'button','aria-pressed':String(view===v),text:tr(t),onclick:()=>{S.treeView=v;render()}}))));
+  $('#hint').textContent=S.readonly?$('#hint').textContent:tr(view==='kifu'?'Every move of the research from kifu.json, dead ends included.':HINT.tree);
+  if(view==='kifu'){renderKifu(host,K);return}
+  if(K&&!K.list.length)host.append(h('p',{class:'treeintro',text:tr('{file} has no moves yet.',{file:KIFU_FILE})}));
+  if((!K||!K.list.length)&&canEditKifu())host.append(h('p',{},[h('button',{type:'button',class:'btn small primary',text:tr('Start a research record'),onclick:startKifu}),
+    h('span',{class:'kln',text:' '+tr('Every attempt, dead ends included, goes into {file} next to report.json.',{file:KIFU_FILE})})]));
   if(!C.list.length){host.append(h('p',{class:'treeintro',text:tr('Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.')}));return}
   host.append(h('p',{class:'treeintro',text:S.readonly?tr('Each box is a chapter. Click a title to read it.')
     :tr('Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.')}));
@@ -4410,6 +5420,537 @@ function treeNode(c){
     kids.push(h('div',{class:'tc'},[h('label',{},[tr('Status')+' ',ss]),h('label',{},[tr('Branches from')+' ',ps]),h('span',{class:'sp'}),
       h('button',{type:'button',class:'btn small',text:tr('Branch from here'),title:tr('Add a new chapter that branches from this one'),onclick:()=>branchFrom(c)})]))}
   return h('div',{class:'tnode st-'+st,'data-id':b.id},kids);
+}
+
+/* ---------- The research record (kifu.json, duetkifu/0.1) ----------
+   kifu.json, next to report.json, records every move of a research: the move it follows (parent), why, what came of it
+   and, for a dead end, why it ended. The page only reads it; when it has moves, Tree mode draws them instead of the chapters.
+   A move's children are ordered by number. */
+const KIFU_FILE='kifu.json';
+const CAUSE_TEXT={idea:'The idea was wrong',execution:'Carried out wrongly',measurement:'The data cannot be trusted',method:'The analysis method',
+  cost:'Too costly',superseded:'A better path appeared',other:'Other'};
+const TRIGGER_TEXT={user:'You',advisor:'Advisor',supervisor:'Supervisor',data:'New data',site:'The lab',self:'Followed from the results',plan:'Plan',unknown:'Unknown'};
+const LINK_TEXT={corrects:'Corrects',clue:'Clue for',supports:'Supports',compares:'Compared with',inspired:'Inspired by',supersedes:'Replaces'};
+const BACK_TEXT={corrects:'Corrected by',clue:'Clue from',supports:'Supported by',compares:'Compared with',inspired:'Inspired',supersedes:'Replaced by'};
+const MARK_TEXT={good:'Good move',bad:'Bad move',doubtful:'Doubtful',interesting:'Interesting'};
+const MILESTONE_TEXT={'turning-point':'Turning point','root-cause':'Root cause',champion:'Best so far',breakthrough:'Breakthrough',pivot:'Pivot'};
+const MATCHES=['yes','close','no','not-reproducible'];
+const MATCH_SIGN={yes:'=',close:'≈',no:'≠','not-reproducible':'?'};
+const MATCH_TEXT={yes:'Matches',close:'Close enough',no:'Does not match','not-reproducible':'Cannot be reproduced'};
+const hasKey=(map,v)=>typeof v==='string'&&Object.prototype.hasOwnProperty.call(map,v);
+const textOf=(map,v,ctx)=>hasKey(map,v)?(ctx?trc(ctx,map[v]):tr(map[v])):String(v??''); // unknown values are shown as they are
+const checksOf=m=>m&&m.evidence&&Array.isArray(m.evidence.checks)?m.evidence.checks.filter(c=>c&&typeof c==='object'):[];
+const plainText=v=>v==null?'':typeof v==='string'?v:JSON.stringify(v);
+function watchKifu(dir){ // read kifu.json now and whenever it changes on disk
+  let known=null,bad=null,stop=false;
+  async function load(){
+    let fh;try{fh=await dir.getFileHandle(KIFU_FILE)}catch(e){if(S.kifu){S.kifu=null;render()}known=null;return}
+    const m=fh.mtime?await fh.mtime():(await fh.getFile()).lastModified;if(m===known||stop)return;
+    let data;try{data=lenientJSON(await(await fh.getFile()).text()).value}
+    catch(e){ // perhaps half-written: report it only when it is still unreadable on the next check
+      if(bad&&bad.m===m){if(!bad.logged){bad.logged=true;logIssue('error',tr('{file} is not valid JSON.',{file:KIFU_FILE}),jsonDetail(e))}}else bad={m};
+      return}
+    bad=null;known=m;if(stop)return;
+    S.kifu={data:data&&typeof data==='object'?data:{}};if(kifuFiles().length)scheduleVerify();if(S.mode==='tree')render()}
+  const iv=setInterval(()=>load().catch(()=>{}),1500);load().catch(()=>{});kifuPick=null;
+  return{close(){stop=true;clearInterval(iv)},seen(m){known=m}};
+}
+function kifuModel(){ // the moves as a tree; rebuilt on every render
+  if(S.kifuMemo)return S.kifuMemo;
+  const k=S.kifu&&S.kifu.data,raw=k&&k.moves&&typeof k.moves==='object'?k.moves:{};
+  const num=m=>Number.isInteger(m.no)?m.no:1e9;
+  const list=Object.entries(raw).filter(([,m])=>m&&typeof m==='object').map(([id,m])=>({id,m,parent:null,kids:[],depth:0,links:[],back:[]}));
+  const byId=new Map(list.map(x=>[x.id,x]));
+  list.forEach(x=>{const p=x.m.parent;if(p!=null&&p!==''&&p!==x.id&&byId.has(p))x.parent=p});
+  list.forEach(x=>{const seen=new Set([x.id]);for(let p=x.parent;p;p=byId.get(p).parent){if(seen.has(p)){x.parent=null;break}seen.add(p)}});
+  list.sort((a,b)=>num(a.m)-num(b.m)||(a.id<b.id?-1:1));
+  list.forEach(x=>{if(x.parent)byId.get(x.parent).kids.push(x)});
+  list.forEach(x=>(Array.isArray(x.m.links)?x.m.links:[]).forEach(l=>{
+    if(l&&typeof l.to==='string'&&byId.has(l.to)&&l.to!==x.id){x.links.push(l);byId.get(l.to).back.push({type:l.type,from:x.id,note:l.note})}}));
+  const roots=list.filter(x=>!x.parent),walk=(x,d)=>{x.depth=d;x.kids.forEach((c,i)=>walk(c,i?d+1:d))};roots.forEach(x=>walk(x,0));
+  const chapterOf=new Map();orderedBlocks().forEach(b=>{if(isChapter(b)&&typeof b.move==='string'&&!chapterOf.has(b.move))chapterOf.set(b.move,b)});
+  return S.kifuMemo={meta:k&&k.kifu&&k.kifu.meta&&typeof k.kifu.meta==='object'?k.kifu.meta:{},list,byId,roots,chapterOf};
+}
+const kifuFiles=()=>{const mv=S.kifu&&S.kifu.data&&S.kifu.data.moves;return mv&&typeof mv==='object'?Object.values(mv).flatMap(m=>
+  m&&m.evidence&&Array.isArray(m.evidence.files)?m.evidence.files.filter(r=>r&&typeof r.path==='string'&&r.path):[]):[]};
+const moveNo=m=>Number.isInteger(m.no)?'#'+m.no:'#?';
+function checkPills(m){
+  const cs=checksOf(m);if(!cs.length)return null;
+  return h('span',{class:'kchk'},MATCHES.map(k=>{const n=cs.filter(c=>c.match===k).length;
+    return n?h('span',{class:'kc m-'+k,text:MATCH_SIGN[k]+' '+n,title:tr(MATCH_TEXT[k])}):null}))}
+/* The record is drawn as a discovery tree: the question on the left, each move one column to the right of the move it
+   follows, dead ends kept as leaves; or on a time axis; or as a list of cards. A panel beside it shows the selected move:
+   its result, why it was made or stopped, what it corrects, where it comes from, and its data chain. */
+const SHAPE_TEXT={dir:'Research question',ok:'Holds',key:'Turning point',root:'Root cause',dead:'Dead end',fix:'Correction',audit:'Independent audit',
+  open:'Not resolved yet',clue:'Early clue',todo:'To be tested',out:'Conclusion'};
+const KIFU_MODES={all:'All',path:'Main path',dead:'Dead ends',fix:'Corrections and open questions',user:'Started by you',mismatch:'Checks that do not match',nochain:'No data chain yet'};
+const KIFU_LAYOUTS={tree:'Tree diagram',time:'Timeline',list:'List'};
+const CHAIN_TEXT={recomputed:'Recomputed from the raw files',sourced:'Sources named, not recomputed',none:'No data'};
+const ROLE_TEXT={report:'Report',table:'Table',figure:'Figure',slides:'Slides',script:'Script',raw:'Raw data',other:'Other'};
+function moveShape(m){
+  if(m.kind==='question')return'dir';if(m.kind==='conclusion')return'out';if(m.status==='planned')return'todo';
+  const ms=m.milestone&&m.milestone.kind;if(ms==='root-cause')return'root';if(ms)return'key';
+  if(m.kind==='correction')return'fix';if(m.kind==='audit')return'audit';if(m.outcome==='failure')return'dead';
+  if(m.status==='active'||m.status==='paused'||m.outcome==='inconclusive')return'open';
+  if(m.mark&&m.mark.kind==='interesting')return'clue';return'ok'}
+function shapeInto(g,sh){ // the mark of a move, centred on 0,0
+  const c=(a)=>el('circle',a,g),p=(a)=>el('path',a,g),r=(a)=>el('rect',a,g);
+  if(sh==='dir')r({x:-7,y:-7,width:14,height:14,rx:2.5,class:'f-ink'});
+  else if(sh==='ok')c({r:6,class:'f-ok'});
+  else if(sh==='dead'){c({r:6,class:'s-dead'});p({d:'M-3,-3L3,3M3,-3L-3,3',class:'s-dead'})}
+  else if(sh==='fix')p({d:'M0,-7.5L7.5,0L0,7.5L-7.5,0Z',class:'f-fix'});
+  else if(sh==='audit')p({d:'M0,-7.5L6.5,-3.75L6.5,3.75L0,7.5L-6.5,3.75L-6.5,-3.75Z',class:'s-audit'});
+  else if(sh==='open')c({r:6,class:'s-open'});
+  else if(sh==='clue')c({r:6.5,class:'s-clue'});
+  else if(sh==='todo')r({x:-6.5,y:-6.5,width:13,height:13,rx:2,class:'s-todo'});
+  else if(sh==='key'){c({r:10.5,class:'s-ring'});c({r:6.5,class:'f-path'})}
+  else if(sh==='root'){c({r:14,class:'s-ring'});c({r:9,class:'f-path'})}
+  else if(sh==='out')r({x:-9,y:-7,width:18,height:14,rx:4,class:'f-path'});
+  return g}
+function shapeIcon(sh,size){const s=el('svg',{width:size||16,height:size||16,viewBox:sh==='root'?'-15 -15 30 30':'-11 -11 22 22','aria-hidden':'true',class:'kico'});
+  shapeInto(el('g',{},s),sh);return s}
+function moveChain(m){ // how far this move's numbers can be followed back: {level, state}
+  const ev=m.evidence&&typeof m.evidence==='object'?m.evidence:{},C=chain();
+  const steps=Array.isArray(ev.steps)?ev.steps:[],files=Array.isArray(ev.files)?ev.files.filter(r=>r&&typeof r.path==='string'):[];
+  const fstates=files.map(r=>stateOf(fileState(r)));
+  if(steps.length)return{level:'recomputed',state:worst([...steps.map(id=>{const s=S.steps.get(id);return s&&Array.isArray(s.outputs)?C.stepStatus(s).state:'unchecked'}),...fstates])};
+  if(files.length)return{level:'sourced',state:fstates.includes('stale')?'stale':worst(fstates)};
+  if(typeof ev.noData==='string'&&ev.noData.trim())return{level:'none',state:null};
+  return{level:null,state:null}}
+function kifuView(){return S.kv||(S.kv={layout:'tree',mode:'all',xl:true,z:0,q:'',sel:null,scroll:null})}
+function kifuPaths(K){ // the main path: from the question to the moves the report tells, else to the conclusions
+  const told=[...K.chapterOf.keys()].filter(id=>K.byId.has(id));
+  const ends=told.length?told:K.list.filter(x=>x.m.kind==='conclusion').map(x=>x.id);
+  const on=new Set();ends.forEach(id=>{for(let x=K.byId.get(id);x&&!on.has(x.id);x=x.parent&&K.byId.get(x.parent))on.add(x.id)});
+  const line=[];if(ends.length)for(let x=K.byId.get(ends[0]);x;x=x.parent&&K.byId.get(x.parent))line.unshift(x);
+  return{on,line}}
+function kifuFacts(x){const m=x.m,cs=checksOf(m);
+  return{shape:moveShape(m),user:!!(m.trigger&&m.trigger.kind==='user'),mismatch:cs.some(c=>c.match==='no'||c.match==='not-reproducible'),
+    corrected:x.back.some(l=>l.type==='corrects'),chain:moveChain(m)}}
+function kifuMatch(x,f,mode,on){
+  if(mode==='path')return on.has(x.id);if(mode==='dead')return f.shape==='dead';
+  if(mode==='fix')return['fix','open','clue','todo','audit'].includes(f.shape)||f.corrected;
+  if(mode==='user')return f.user;if(mode==='mismatch')return f.mismatch;if(mode==='nochain')return!f.chain.level;return true}
+function kifuHit(x,q){if(!q)return true;const m=x.m;
+  return[x.id,m.title,m.result&&m.result.text,m.note,m.reason,m.why].filter(Boolean).join(' ').toLowerCase().includes(q)}
+function renderKifu(host,K){
+  const V=kifuView(),all=K.list,meta=K.meta,P=kifuPaths(K),F=new Map(all.map(x=>[x.id,kifuFacts(x)]));
+  if(!K.byId.has(V.sel))V.sel=(all.find(x=>!x.parent)||all[0]).id;
+  $('#tree').classList.add('kifu');
+  // what the research asks, and what the record holds
+  if(meta.question)host.append(h('p',{class:'kq',text:meta.question}));
+  if(meta.context)host.append(h('p',{class:'treeintro',text:meta.context}));
+  const count=sh=>all.filter(x=>sh.includes(F.get(x.id).shape)).length;
+  const pill=(icon,label,n)=>n?h('span',{class:'kpill'},[icon,label,h('b',{text:String(n)})]):null;
+  const cs=all.flatMap(x=>checksOf(x.m)),lv=k=>all.filter(x=>F.get(x.id).chain.level===k).length;
+  host.append(h('div',{class:'kstats'},[h('span',{class:'kpill'},[tr('{n} moves',{n:all.length})]),
+    ...[['Holds',['ok','key','root']],['Dead end',['dead']],['Correction',['fix']],['Independent audit',['audit']],['Not resolved yet',['open']],['Early clue',['clue']],['To be tested',['todo']]]
+      .map(([t,sh])=>pill(shapeIcon(sh[0]),tr(t),count(sh))),
+    pill(h('span',{class:'kyou'}),tr('Started by you'),all.filter(x=>F.get(x.id).user).length),
+    h('span',{class:'kpill'},[tr('Data chain')+': ',...['recomputed','sourced','none'].map(k=>h('span',{class:'kpl',text:tr(CHAIN_TEXT[k])+' '+lv(k)})),
+      h('span',{class:'kpl',text:tr('not recorded')+' '+all.filter(x=>!F.get(x.id).chain.level).length})]),
+    cs.length?h('span',{class:'kpill'},[tr('{n} checks against recomputed numbers',{n:cs.length})+': ',
+      ...MATCHES.map(k=>{const n=cs.filter(c=>c.match===k).length;return n?h('span',{class:'kc m-'+k,text:MATCH_SIGN[k]+' '+n,title:tr(MATCH_TEXT[k])}):null})]):null]));
+  // layout, what to highlight, search, zoom
+  const seg=(label,map,cur,set)=>h('div',{class:'kseg',role:'group','aria-label':label},Object.entries(map).map(([v,t])=>
+    h('button',{type:'button','aria-pressed':String(cur===v),text:tr(t),onclick:()=>{set(v);render()}})));
+  const q=h('input',{type:'search',value:V.q,placeholder:tr('Search the moves'),'aria-label':tr('Search the moves'),
+    oninput:e=>{V.q=e.target.value;applyKifuFilter(host,K,F,P)},onkeydown:e=>{if(e.key==='Enter'){const f=all.find(x=>kifuHit(x,V.q.trim().toLowerCase()));if(f)selectMove(f.id,true)}}});
+  const zb=(t,label,fn)=>h('button',{type:'button',text:t,'aria-label':label,onclick:fn});
+  if(canEditKifu()){const sel=V.sel;
+    host.append(h('div',{class:'kbar kedit'},[seg(tr('Kifu'),{view:'Preview',edit:'Edit'},V.edit?'edit':'view',v=>V.edit=v==='edit'),
+      V.edit?h('button',{type:'button',class:'btn small primary',text:'+ '+tr('Next move'),title:tr('Add a move after the selected one'),onclick:()=>addMove(V.sel)}):null,
+      V.edit&&K.byId.get(sel)&&K.byId.get(sel).m.status!=='done'?h('button',{type:'button',class:'btn small',text:tr('Close this move'),onclick:()=>closeMoveDialog(V.sel)}):null,
+      V.edit?h('span',{class:'kln',text:tr('Changes are saved to {file} at once and recorded.',{file:KIFU_FILE})}):null]))}
+  host.append(h('div',{class:'kbar'},[seg(tr('Layout'),KIFU_LAYOUTS,V.layout,v=>{V.layout=v;V.scroll=null}),seg(tr('Highlight'),KIFU_MODES,V.mode,v=>V.mode=v),
+    V.layout==='list'?null:h('label',{class:'kchkb'},[h('input',{type:'checkbox',checked:V.xl?'':null,onchange:e=>{V.xl=e.target.checked;render()}}),tr('Cross links')]),
+    h('label',{class:'ksearch'},[q,h('span',{class:'kqn'})]),
+    V.layout==='list'?null:h('div',{class:'kzoom'},[zb('−',tr('Zoom out'),()=>zoomKifu(V.z-.15)),zb('+',tr('Zoom in'),()=>zoomKifu(V.z+.15)),
+      h('button',{type:'button',class:'wide',text:tr('Fit'),onclick:()=>zoomKifu('fit')})]),
+    kifuLegend()]));
+  const stage=h('div',{class:'kstage'+(V.layout==='list'?' klist':'')}),panel=h('aside',{class:'kpanel','aria-live':'polite'});
+  host.append(h('div',{class:'kmain'},[stage,panel]));
+  if(V.layout==='list')stage.append(...all.map(x=>moveCard(x,K,F.get(x.id))));
+  else{stage.append(kifuSVG(K,F,P,V));
+    stage.addEventListener('scroll',()=>{V.scroll=[stage.scrollLeft,stage.scrollTop]});
+    requestAnimationFrame(()=>{zoomKifu(V.z||(stage.clientWidth<700?.8:.9));if(V.scroll){stage.scrollLeft=V.scroll[0];stage.scrollTop=V.scroll[1]}})}
+  applyKifuFilter(host,K,F,P);
+  panel.append(...movePanel(K.byId.get(V.sel),K,F));
+  if(P.line.length>1)host.append(h('section',{class:'kpath'},[h('h3',{text:tr('The main path, from the question to the conclusion')}),
+    h('ol',{},P.line.map(x=>h('li',{},[h('div',{},[h('button',{type:'button',class:'linkbtn kgo',text:x.m.title||x.id,onclick:()=>selectMove(x.id,true)}),
+      h('span',{class:'kdate',text:' '+(x.m.when||x.m.at||'')})]),x.m.note?h('div',{class:'kpd',text:x.m.note}):null])))]));
+}
+function kifuLegend(){
+  const line=(cls,t)=>h('span',{},[(()=>{const s=el('svg',{width:30,height:10,'aria-hidden':'true'});el('path',{d:'M1,5H29',class:'xl '+cls},s);return s})(),t]);
+  const dotIcon=(cls,t)=>h('span',{},[(()=>{const s=el('svg',{width:12,height:12,viewBox:'-6 -6 12 12','aria-hidden':'true'});el('circle',{r:3.6,class:'kdot '+cls},s);return s})(),t]);
+  return h('div',{class:'klegend'},[h('span',{},[shapeIcon('key'),tr('Main path')]),h('span',{},[h('span',{class:'kyou'}),tr('Started by you')]),
+    line('clue',tr('Clue')),line('corrects',tr('Corrects')),line('supports',tr('Supports')),
+    h('span',{},[(()=>{const s=el('svg',{width:12,height:12,viewBox:'-6 -6 12 12','aria-hidden':'true'});el('path',{d:'M0,-3.5L3.5,0L0,3.5L-3.5,0Z',class:'kcorr'},s);return s})(),tr('Corrected later')]),
+    dotIcon('lv-recomputed st-ok',tr('Recomputed, up to date')),dotIcon('lv-recomputed st-stale',tr('Needs recomputing')),dotIcon('lv-sourced st-ok',tr('Sources named'))])}
+function kifuTimes(K){ // a day for every move: its date, else a day between the dated moves made before and after it
+  const L=K.list,d=L.map(x=>{const t=x.m.at?Date.parse(String(x.m.at).slice(0,10)):NaN;return isNaN(t)?null:Math.round(t/864e5)});
+  const idx=d.map((v,i)=>v==null?null:i).filter(i=>i!=null);if(!idx.length)return new Map(L.map((x,i)=>[x.id,i]));
+  const out=d.slice();
+  L.forEach((x,i)=>{if(out[i]!=null)return;const a=[...idx].reverse().find(j=>j<i),b=idx.find(j=>j>i);
+    out[i]=a==null?d[b]-2:b==null?d[a]+5:d[a]+(d[b]-d[a])*(i-a)/(b-a)});
+  const min=Math.min(...out);return new Map(L.map((x,i)=>[x.id,out[i]-min]))}
+function kifuSVG(K,F,P,V){
+  const COL=150,ROW=30,ROWT=24,DPX=64,ML=34,MT=58,pos=new Map();let W,H,ticks=[];
+  if(V.layout==='time'){
+    const T=kifuTimes(K);K.list.forEach((x,i)=>pos.set(x.id,{x:ML+T.get(x.id)*DPX,y:MT+i*ROWT}));
+    const maxT=Math.max(...T.values());W=ML+maxT*DPX+260;H=MT+(K.list.length-1)*ROWT+40;
+    const seen=new Set();K.list.forEach(x=>{if(!x.m.at)return;const t=T.get(x.id),k=String(x.m.at).slice(5,10).replace(/^0/,'').replace('-0','/').replace('-','/');
+      if(!seen.has(t)){seen.add(t);ticks.push([ML+t*DPX,k])}});
+    ticks.sort((a,b)=>a[0]-b[0]);ticks=ticks.filter((t,i)=>!i||t[0]-ticks[i-1][0]>=40);
+  }else{
+    let leaf=0,maxD=0;const lay=(x,d)=>{maxD=Math.max(maxD,d);
+      if(!x.kids.length)pos.set(x.id,{x:ML+d*COL,y:MT+leaf++*ROW});
+      else{x.kids.forEach(k=>lay(k,d+1));pos.set(x.id,{x:ML+d*COL,y:(pos.get(x.kids[0].id).y+pos.get(x.kids[x.kids.length-1].id).y)/2})}};
+    K.list.filter(x=>!x.parent).forEach(r=>lay(r,0));W=ML+maxD*COL+260;H=MT+Math.max(0,leaf-1)*ROW+40;
+  }
+  const svg=el('svg',{class:'ktree'+(V.xl?'':' noxl'),viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'group','aria-label':tr('{n} moves',{n:K.list.length}),'data-mode':V.mode});
+  svg.dataset.w=W;svg.dataset.h=H;
+  const defs=el('defs',{},svg);
+  ['clue','corrects','supports'].forEach(k=>{const mk=el('marker',{id:'kah-'+k,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},defs);
+    el('path',{d:'M0,0L10,5L0,10Z',class:'ah-'+k},mk)});
+  ticks.forEach(([x,l])=>{el('line',{x1:x,y1:30,x2:x,y2:H-20,class:'kaxis'},svg);el('text',{x,y:22,'text-anchor':'middle',class:'kaxl'},svg).textContent=l});
+  K.list.forEach(x=>{if(!x.parent)return;const a=pos.get(x.parent),b=pos.get(x.id),f=F.get(x.id);
+    const d=Math.abs(b.x-a.x)<2?`M${a.x},${a.y}L${b.x},${b.y}`:`M${a.x},${a.y}C${(a.x+b.x)/2},${a.y} ${(a.x+b.x)/2},${b.y} ${b.x},${b.y}`;
+    el('path',{d,class:'kedge'+(P.on.has(x.id)&&P.on.has(x.parent)?' onpath':'')+(f.shape==='dead'?' dead':'')+(f.shape==='todo'?' todo':''),'data-for':x.id},svg)});
+  const xg=el('g',{class:'kxg'},svg);
+  K.list.forEach(x=>x.links.forEach(l=>{const a=pos.get(x.id),b=pos.get(l.to);if(!a||!b)return;
+    const k=l.type==='clue'?'clue':l.type==='corrects'?'corrects':'supports';
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,off=Math.min(90,len*.28);
+    const cx=mx-dy/len*off,cy=my+dx/len*off,sh=12/len,d=`M${a.x},${a.y}Q${cx},${cy} ${b.x-dx*sh},${b.y-dy*sh}`;
+    const g=el('g',{class:'kxw'},xg);el('path',{d,class:'xl '+k,'marker-end':`url(#kah-${k})`},g);el('path',{d,class:'xhit'},g);
+    el('title',{},g).textContent=textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?': '+l.note:'')}));
+  K.list.forEach(x=>{const p=pos.get(x.id),f=F.get(x.id),m=x.m,leafLbl=!x.kids.length||V.layout==='time';
+    const g=el('g',{class:`knode sh-${f.shape}`+(P.on.has(x.id)?' onpath':'')+(f.user?' tr-user':'')+(f.mismatch?' mis':'')+(f.chain.level?'':' noch')+(x.id===V.sel?' sel':''),
+      transform:`translate(${p.x},${p.y})`,tabindex:0,role:'button','data-id':x.id,'aria-label':tr(SHAPE_TEXT[f.shape])+': '+(m.title||x.id)},svg);
+    el('title',{},g).textContent=(m.title||x.id)+(m.when?' ('+m.when+')':'');
+    el('circle',{class:'khl',r:f.shape==='root'?19:14},g);shapeInto(g,f.shape);
+    if(f.user)el('circle',{class:'kyoudot',cx:-9,cy:-9,r:3},g);
+    if(f.corrected)el('path',{d:'M9,-12.5L12.5,-9L9,-5.5L5.5,-9Z',class:'kcorr'},g);
+    if(f.chain.level&&f.chain.level!=='none')el('circle',{cx:-9,cy:9,r:3.2,class:`kdot lv-${f.chain.level} st-${f.chain.state||'unchecked'}`},g);
+    const t=String(m.title||x.id),max=leafLbl?26:15,lx=leafLbl?(f.shape==='root'?18:12):-4,ly=leafLbl?4.5:(f.shape==='root'?-19:-13);
+    el('text',{class:'klbl',x:lx,y:ly},g).textContent=t.length>max?t.slice(0,max-1)+'…':t;
+    g.addEventListener('click',()=>selectMove(x.id,false));
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectMove(x.id,false)}})});
+  return svg}
+function zoomKifu(z,quiet){const V=kifuView(),svg=$('#treehost svg.ktree'),stage=$('#treehost .kstage');if(!svg)return;
+  const W=+svg.dataset.w,H=+svg.dataset.h;
+  if(z==='fit')z=Math.min((stage.clientWidth-8)/W,(stage.clientHeight-8)/H);
+  V.z=Math.max(.3,Math.min(1.6,z));svg.setAttribute('width',Math.round(W*V.z));svg.setAttribute('height',Math.round(H*V.z))}
+function applyKifuFilter(host,K,F,P){ // highlight the moves of the mode and the search; the others fade
+  const V=kifuView(),q=V.q.trim().toLowerCase(),n=K.list.filter(x=>kifuMatch(x,F.get(x.id),V.mode,P.on)&&kifuHit(x,q));
+  const on=new Set(n.map(x=>x.id)),svg=$('.ktree',host);
+  if(svg){$$('.knode',svg).forEach(g=>g.classList.toggle('dim',!on.has(g.dataset.id)));
+    $$('.kedge',svg).forEach(e=>e.classList.toggle('dim',V.mode!=='all'||!!q?!(on.has(e.dataset.for)):false));
+    svg.classList.toggle('filtered',V.mode!=='all'||!!q)}
+  $$('.kmove',host).forEach(c=>c.hidden=!on.has(c.dataset.move));
+  const qn=$('.kqn',host);if(qn)qn.textContent=V.mode!=='all'||q?tr('{n} moves',{n:n.length}):''}
+function selectMove(id,scroll){
+  const V=kifuView(),K=kifuModel(),x=K.byId.get(id);if(!x)return;V.sel=id;
+  $$('#treehost .knode.sel,#treehost .kmove.sel').forEach(g=>g.classList.remove('sel'));
+  const g=$(`#treehost [data-id="${CSS.escape(id)}"],#treehost [data-move="${CSS.escape(id)}"]`);if(g)g.classList.add('sel');
+  const panel=$('#treehost .kpanel');if(panel){const F=new Map(K.list.map(y=>[y.id,kifuFacts(y)]));panel.replaceChildren(...movePanel(x,K,F));panel.scrollTop=0}
+  if(scroll&&g){const stage=$('#treehost .kstage'),b=g.getBoundingClientRect(),sb=stage.getBoundingClientRect();
+    if(V.layout==='list')g.scrollIntoView({block:'center',behavior:'smooth'});
+    else stage.scrollBy({left:b.left-sb.left-sb.width/2,top:b.top-sb.top-sb.height/2,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}
+}
+/* ---------- Editing the record (Kifu mode, Edit) ----------
+   Each change is written at once: kifu.json is read fresh, only the edited move changes, and the file is written back, so
+   an agent's edits to other moves are kept. Every change is also recorded in kifu.json "changes" (who, when, before, after).
+   A move that was made cannot be deleted, only closed with a reason; a planned move nothing depends on can be. */
+const KIND_TEXT={question:'Research question',attempt:'Attempt',correction:'Correction',audit:'Independent audit',conclusion:'Conclusion'};
+const MOVE_STATUS_TEXT={planned:'Planned',active:'Active',paused:'Paused',done:'Done'};
+const OUTCOME_TEXT={success:'Success',failure:'Failure',inconclusive:'Inconclusive'};
+const canEditKifu=()=>!!(S.folder&&!S.readonly&&!S.cloud);
+let kifuQueue=Promise.resolve();
+function kifuWrite(apply){ // read kifu.json fresh, apply one change, write it back; returns what apply returned
+  let result;
+  kifuQueue=kifuQueue.then(async()=>{
+    const dir=S.folder&&S.folder.dir;if(!dir)return;
+    let data=null;
+    try{const fh=await dir.getFileHandle(KIFU_FILE);data=lenientJSON(await(await fh.getFile()).text()).value}
+    catch(e){if(!(e&&e.name==='NotFoundError'))throw e} // unreadable: stop, so a half-written file is never overwritten
+    if(!data||typeof data!=='object')data={schema:'duetkifu/0.1'};
+    if(!data.moves||typeof data.moves!=='object')data.moves={};
+    result=apply(data);if(result===false)return;
+    const fh=await writeFile(dir,KIFU_FILE,JSON.stringify(data,null,1)+'\n');
+    const m=fh.mtime?await fh.mtime():(await fh.getFile()).lastModified;
+    if(S.kifuWatch)S.kifuWatch.seen(m);
+    S.kifu={data};if(S.mode==='tree')render()})
+  .catch(e=>{logIssue('error',tr('Could not save {file}.',{file:KIFU_FILE}),e&&e.msg?e.msg:errText(e))});
+  return kifuQueue.then(()=>result)}
+function kifuChange(d,move,field,before,after){const id=uid('k-');
+  if(!d.changes||typeof d.changes!=='object')d.changes={};
+  d.changes[id]={id,by:'user',at:now(),move,field,before:before===undefined?null:clone(before),after:after===undefined?null:clone(after)}}
+function setMoveField(o,path,v){ // an empty value removes the field, and objects left empty (result, trigger, ...) go with it
+  const ks=path.split('.'),last=ks.pop(),up=[];let a=o;
+  for(const k of ks){if(!a[k]||typeof a[k]!=='object')a[k]={};up.push([a,k]);a=a[k]}
+  if(v===undefined||v===null||v==='')delete a[last];else a[last]=v;
+  for(let i=up.length-1;i>=0;i--){const[p,k]=up[i];if(p[k]&&typeof p[k]==='object'&&!Array.isArray(p[k])&&!Object.keys(p[k]).length)delete p[k];else break}}
+function editMove(id,field,value){ // one field of one move; an empty value removes the field
+  if(typeof value==='string')value=value.trim();
+  return kifuWrite(d=>{const m=d.moves[id];if(!m)return false;const before=getPath(m,field);
+    if(JSON.stringify(before??null)===JSON.stringify(value===''?null:value??null))return false;
+    setMoveField(m,field,value);kifuChange(d,id,field,before,value===''?null:value)})}
+function editMeta(field,value,moveId){ // the question and context of the whole record, shown above the tree
+  value=typeof value==='string'?value.trim():value;
+  return kifuWrite(d=>{if(!d.kifu||typeof d.kifu!=='object')d.kifu={};if(!d.kifu.meta||typeof d.kifu.meta!=='object')d.kifu.meta={};
+    const before=d.kifu.meta[field];if((before??'')===(value??''))return false;
+    if(value)d.kifu.meta[field]=value;else delete d.kifu.meta[field];kifuChange(d,moveId,'kifu.meta.'+field,before,value||null)})}
+function moveProblems(m){ // what kifu check would call an error, said in plain words
+  const p=[],bad=m.outcome==='failure'||m.outcome==='inconclusive'||m.status==='paused';
+  if(!String(m.title||'').trim())p.push(tr('Give the move a title.'));
+  if(m.status==='done'&&!m.outcome)p.push(tr('A done move needs a result: success, failure or inconclusive.'));
+  if(bad&&!String(m.reason||'').trim())p.push(tr('Say why it ended (a failure, an inconclusive or a paused move needs a reason).'));
+  if((m.outcome==='failure'||m.outcome==='inconclusive')&&!m.cause)p.push(tr('Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.'));
+  return p}
+function nextMoveId(d,group){const pre=typeof group==='string'&&/^[A-Za-z]{1,4}$/.test(group)?group:'M';let n=1;while(d.moves[pre+n])n++;return pre+n}
+async function addMove(parentId){ // "Next move": a new active move after the selected one
+  const today=new Date();
+  const id=await kifuWrite(d=>{const p=parentId&&d.moves[parentId];
+    const no=Math.max(0,...Object.values(d.moves).map(m=>m&&Number.isInteger(m.no)?m.no:0))+1,id=nextMoveId(d,p&&p.group);
+    const m={id,no,parent:p?parentId:null,title:tr('New move'),kind:p?'attempt':'question',status:'active',trigger:{kind:'user'},
+      when:`${today.getMonth()+1}/${today.getDate()}`,at:today.toISOString().slice(0,10),by:'user',startedAt:now(),evidence:{steps:[],checks:[]}};
+    if(p&&p.group)m.group=p.group;
+    d.moves[id]=m;kifuChange(d,id,'add',null,m.title);return id});
+  if(!id)return;const V=kifuView();V.sel=id;V.edit=true;render();
+  const t=$('#treehost .kpanel input[data-field="title"]');if(t){t.focus();t.select()}}
+function closeMoveDialog(id){ // "Close this move": the result, and for a dead end its cause and a sentence why
+  const K=kifuModel(),x=K.byId.get(id);if(!x)return;const m=x.m;
+  const oc=h('select',{},Object.entries(OUTCOME_TEXT).map(([v,t])=>h('option',{value:v,text:tr(t)})));oc.value=m.outcome||'success';
+  const ca=h('select',{},[h('option',{value:'',text:'—'}),...Object.entries(CAUSE_TEXT).map(([v,t])=>h('option',{value:v,text:tr(t)}))]);ca.value=m.cause||'';
+  const re=h('textarea',{rows:3,text:m.reason||''}),msg=h('p',{class:'kwarn'});
+  const sync=()=>{const bad=oc.value!=='success';ca.disabled=!bad;re.placeholder=bad?tr('One sentence: why it ended'):tr('Optional')};oc.onchange=sync;sync();
+  openModal(tr('Close this move'),[h('div',{class:'kform'},[h('p',{class:'kln',text:moveNo(m)+' '+id+' '+(m.title||'')}),
+    h('label',{class:'kf'},[h('span',{text:tr('Result')}),oc]),h('label',{class:'kf'},[h('span',{text:tr('Cause')}),ca]),
+    h('label',{class:'kf'},[h('span',{text:tr('Why it ended')}),re]),msg,
+    h('button',{type:'button',class:'btn primary',text:tr('Close this move'),onclick:async()=>{
+      const bad=oc.value!=='success',reason=re.value.trim();
+      if(bad&&!reason){msg.textContent=tr('Say why it ended (a failure, an inconclusive or a paused move needs a reason).');return}
+      if(bad&&!ca.value){msg.textContent=tr('Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.');return}
+      closeModal();
+      await kifuWrite(d=>{const mm=d.moves[id];if(!mm)return false;
+        const set=(f,v)=>{const b=getPath(mm,f);if(JSON.stringify(b??null)===JSON.stringify(v??null))return;setMoveField(mm,f,v);kifuChange(d,id,f,b,v)};
+        set('status','done');set('outcome',oc.value);set('cause',bad?ca.value:null);if(bad)set('causeConfirmed',true);
+        set('reason',reason||null);set('closedAt',now())})}})])]);
+}
+async function deleteMove(id){
+  const K=kifuModel(),x=K.byId.get(id);if(!x)return;
+  if(!confirm(tr('Delete the planned move "{t}"? This is recorded in the change log.',{t:x.m.title||id})))return;
+  await kifuWrite(d=>{const m=d.moves[id];if(!m||m.status!=='planned')return false;
+    if(Object.values(d.moves).some(o=>o&&(o.parent===id||(Array.isArray(o.links)&&o.links.some(l=>l&&l.to===id)))))return false;
+    delete d.moves[id];kifuChange(d,id,'delete',m,null)});
+  const V=kifuView();V.sel=x.parent||null;render()}
+const deletable=(x,K)=>x.m.status==='planned'&&!x.kids.length&&!x.back.length;
+async function startKifu(){ // a record for a folder that has none yet: the research question is the first move
+  await kifuWrite(d=>{if(Object.keys(d.moves).length)return false;
+    d.schema='duetkifu/0.1';d.kifu={meta:{question:'',createdAt:now()}};
+    d.moves.Q={id:'Q',no:1,parent:null,title:tr('What does this research ask?'),kind:'question',status:'active',trigger:{kind:'user'},by:'user',at:now().slice(0,10),evidence:{steps:[],checks:[]}};
+    kifuChange(d,'Q','add',null,d.moves.Q.title)});
+  const V=kifuView();V.sel='Q';V.edit=true;S.treeView='kifu';render()}
+let kifuPick=null;
+function kifuFilePicks(){ // files a move can point at: the top of the folder, derived data and extracted figures, imported data
+  if(kifuPick)return kifuPick;
+  return kifuPick=(async()=>{const F=S.folder,out=new Set();if(!F)return[];
+    for(const fh of await listFiles(F.root))out.add(normPath(F.prefix+fh.name));
+    for(const{rel}of await listDeep(await subdir(F.dir,'derived_data'),/./,'derived_data/'))out.add(rel);
+    ((S.folderFiles&&S.folderFiles.data)||[]).forEach(f=>out.add(f.path));
+    return[...out].filter(p=>!/(^|\/)(report|kifu)\.json$/.test(p)).sort()})()}
+async function fileRef(path){ // a file reference with its fingerprint, as steps record them
+  const r=S.server?(await serverFingerprints([{path}]))[0]:await localFingerprint({path});
+  if(!r||r.state==='missing'||r.state==='outside')throw new Error(tr('{file} is missing',{file:path}));
+  return{path:normPath(path),sha256:r.sha256,size:r.size,modified:r.modified}}
+function moveEditor(x,K,F){ // the selected move as a form
+  const m=x.m,id=x.id,f=F.get(id),out=[],V=kifuView();
+  const opt=(map,ctx)=>Object.entries(map).map(([v,t])=>h('option',{value:v,text:ctx?trc(ctx,t):tr(t)}));
+  const sel=(field,options,blank)=>{const s=h('select',{'data-field':field,onchange:e=>editMove(id,field,e.target.value||null)},[blank?h('option',{value:'',text:'—'}):null,...options]);
+    s.value=getPath(m,field)??'';return s};
+  const inp=(field,type,ph)=>h('input',{type:type||'text','data-field':field,value:plainText(getPath(m,field)),placeholder:ph||null,onchange:e=>editMove(id,field,e.target.value)});
+  const area=(field,rows,ph)=>h('textarea',{rows:rows||3,'data-field':field,text:plainText(getPath(m,field)),placeholder:ph||null,onchange:e=>editMove(id,field,e.target.value)});
+  const fld=(label,...nodes)=>h('label',{class:'kf'},[h('span',{text:label}),...nodes]);
+  const sec=(title,...nodes)=>h('fieldset',{class:'kfs'},[h('legend',{text:title}),...nodes]);
+  out.push(h('div',{class:'kpmeta'},[h('span',{class:'kchip sh-'+f.shape},[shapeIcon(f.shape),tr(SHAPE_TEXT[f.shape])]),h('span',{class:'kid',text:moveNo(m)+' '+id})]));
+  const probs=moveProblems(m);if(probs.length)out.push(h('ul',{class:'kprob'},probs.map(p=>h('li',{text:p}))));
+  const form=h('div',{class:'kform'});out.push(form);
+  if(m.kind==='question'&&!x.parent){const meta=K.meta||{};
+    form.append(sec(tr('The whole record'),
+      fld(tr('Research question'),h('textarea',{rows:2,text:meta.question||'',placeholder:tr('What does this research ask?'),onchange:e=>editMeta('question',e.target.value,id)})),
+      fld(tr('Background'),h('textarea',{rows:2,text:meta.context||'',onchange:e=>editMeta('context',e.target.value,id)}))))}
+  form.append(fld(tr('Title'),inp('title')),
+    h('div',{class:'kf2'},[fld(tr('Kind'),sel('kind',opt(KIND_TEXT))),fld(tr('Status'),sel('status',opt(MOVE_STATUS_TEXT,'kifu')))]),
+    h('div',{class:'kf2'},[fld(tr('Result'),sel('outcome',opt(OUTCOME_TEXT),true)),
+      fld(tr('Cause'),sel('cause',opt(CAUSE_TEXT),true),h('span',{class:'kcb'},[h('input',{type:'checkbox',checked:m.causeConfirmed===false?null:m.cause?'':null,disabled:m.cause?null:'',
+        onchange:e=>editMove(id,'causeConfirmed',e.target.checked)}),tr('Confirmed')]))]),
+    fld(tr('Why it ended'),area('reason',2)),
+    fld(tr('Why this move'),area('why',2,tr('The hypothesis, what it rests on, the other options'))),
+    fld(tr('Result'),area('result.text',3)),
+    fld(tr('What it means'),area('note',2)),
+    fld(tr('Population'),inp('population','text',tr('Which samples, window and filters the numbers refer to'))));
+  // where it sits
+  const below=new Set();const mark=y=>{below.add(y.id);y.kids.forEach(mark)};mark(x);
+  const groups=[...new Set(K.list.map(y=>y.m.group).filter(g=>typeof g==='string'))].sort();
+  const gl=h('datalist',{id:'kgroups'},groups.map(g=>h('option',{value:g})));
+  form.append(sec(tr('Place in the record'),
+    fld(tr('Follows'),sel('parent',K.list.filter(y=>!below.has(y.id)).map(y=>h('option',{value:y.id,text:moveNo(y.m)+' '+y.id+' '+(y.m.title||'')})),true)),
+    h('div',{class:'kf2'},[fld(tr('Group'),(()=>{const i=inp('group');i.setAttribute('list','kgroups');return i})(),gl),
+      fld(tr('When'),inp('when','text','8/24')),fld(tr('Date'),inp('at','date'))]),
+    h('div',{class:'kf2'},[fld(tr('Started by'),sel('trigger.kind',opt(TRIGGER_TEXT),true)),fld(tr('Who'),inp('trigger.who'))])));
+  // review marks
+  const markSel=(field,map,noteKey)=>{const s=h('select',{onchange:e=>{const v=e.target.value,cur=m[field]&&typeof m[field]==='object'?m[field]:{};
+      editMove(id,field,v?{...cur,kind:v}:null)}},[h('option',{value:'',text:'—'}),...opt(map)]);s.value=(m[field]&&m[field].kind)||'';return s};
+  const markNote=(field,noteKey)=>h('input',{type:'text',value:(m[field]&&m[field][noteKey])||'',disabled:m[field]&&m[field].kind?null:'',
+    onchange:e=>editMove(id,field+'.'+noteKey,e.target.value)});
+  form.append(sec(tr('Review'),h('div',{class:'kf2'},[fld(tr('Mark'),markSel('mark',MARK_TEXT)),fld(tr('Note'),markNote('mark','note'))]),
+    h('div',{class:'kf2'},[fld(tr('Milestone'),markSel('milestone',MILESTONE_TEXT)),fld(tr('Note'),markNote('milestone','reason'))])));
+  // links to other moves
+  const links=Array.isArray(m.links)?m.links:[];
+  const lt=h('select',{},opt(LINK_TEXT)),lto=h('select',{},K.list.filter(y=>y.id!==id).map(y=>h('option',{value:y.id,text:y.id+' '+(y.m.title||'')}))),ln=h('input',{type:'text',placeholder:tr('Note')});
+  form.append(sec(tr('Links'),...links.map((l,i)=>h('div',{class:'krowe'},[h('span',{text:textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?' ('+l.note+')':'')}),
+      h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'links',links.filter((_,j)=>j!==i))})])),
+    h('div',{class:'kadd'},[lt,lto,ln,h('button',{type:'button',class:'btn small',text:tr('Add'),onclick:()=>{
+      const l={type:lt.value,to:lto.value};if(ln.value.trim())l.note=ln.value.trim();editMove(id,'links',[...links,l])}})])));
+  // the data chain
+  const ev=m.evidence&&typeof m.evidence==='object'?m.evidence:{},steps=Array.isArray(ev.steps)?ev.steps:[],files=Array.isArray(ev.files)?ev.files:[];
+  const ss=h('select',{},[...S.steps.keys()].filter(k=>!steps.includes(k)).sort().map(k=>h('option',{value:k,text:k})));
+  const fp=h('input',{type:'text',list:'kfiles',placeholder:tr('Path, for example ../report.html')}),fl=h('datalist',{id:'kfiles'});
+  kifuFilePicks().then(L=>fl.replaceChildren(...L.map(p=>h('option',{value:p}))));
+  const fr=h('select',{},opt(ROLE_TEXT)),fn=h('input',{type:'text',placeholder:tr('Where in the file')}),fmsg=h('span',{class:'kwarn'});
+  form.append(sec(tr('Data chain'),
+    h('p',{class:'kln',text:tr('Steps that recompute this move, files its numbers come from, or why there is no data.')}),
+    ...steps.map(sid=>h('div',{class:'krowe'},[h('span',{class:'mono',text:tr('Step')+' '+sid}),
+      h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'evidence.steps',steps.filter(s=>s!==sid))})])),
+    ss.options.length?h('div',{class:'kadd'},[ss,h('button',{type:'button',class:'btn small',text:tr('Add step'),onclick:()=>editMove(id,'evidence.steps',[...steps,ss.value])})]):null,
+    ...files.map((r,i)=>h('div',{class:'krowe'},[h('span',{class:'krole',text:textOf(ROLE_TEXT,r.role||'other')}),h('span',{class:'mono',text:r.path}),
+      h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'evidence.files',files.filter((_,j)=>j!==i))})])),
+    h('div',{class:'kadd'},[fp,fl,fr,fn,h('button',{type:'button',class:'btn small',text:tr('Add file'),onclick:async()=>{
+      const p=fp.value.trim();if(!p)return;fmsg.textContent='';
+      try{const ref={...await fileRef(p),role:fr.value};if(fn.value.trim())ref.note=fn.value.trim();
+        await editMove(id,'evidence.files',[...files.filter(o=>normPath(o.path)!==normPath(p)),ref])}
+      catch(e){fmsg.textContent=e.message||String(e)}}}),fmsg]),
+    fld(tr('No data, because'),area('evidence.noData',2,tr('For example: only discussed in a meeting; the next round has not run yet')))));
+  // the source report
+  form.append(sec(tr('Source'),h('div',{class:'kf2'},[fld(tr('Title'),inp('source.title')),fld(tr('Section'),inp('source.section'))]),
+    fld(tr('File'),(()=>{const i=inp('source.file');i.setAttribute('list','kfiles');return i})()),fld(tr('Link'),inp('source.url','url'))));
+  // actions and the change log of this move
+  const acts=[h('button',{type:'button',class:'btn small',text:tr('Next move'),onclick:()=>addMove(id)})];
+  if(m.status!=='done')acts.push(h('button',{type:'button',class:'btn small',text:tr('Close this move'),onclick:()=>closeMoveDialog(id)}));
+  if(deletable(x,K))acts.push(h('button',{type:'button',class:'btn small',text:tr('Delete'),onclick:()=>deleteMove(id)}));
+  out.push(h('div',{class:'kacts'},acts));
+  const ch=Object.values((S.kifu&&S.kifu.data&&S.kifu.data.changes)||{}).filter(c=>c&&c.move===id).sort((a,b)=>(a.at||'')<(b.at||'')?1:-1);
+  if(ch.length)out.push(h('details',{class:'klog'},[h('summary',{text:tr('Changes to this move ({n})',{n:ch.length})}),
+    h('ul',{},ch.slice(0,30).map(c=>h('li',{},[h('span',{class:'kdate',text:shortTime(c.at)+' '+(c.by==='claude'?tr('by the agent'):tr('by you'))+' '}),
+      h('b',{text:c.field}),h('span',{text:': '+(c.before==null?'—':plainText(c.before)).slice(0,60)+' → '+(c.after==null?'—':plainText(c.after)).slice(0,60)})])))]));
+  return out;
+}
+
+/* Figures and tables a move points at (evidence.files with role figure or table): shown in the panel, read from the folder */
+const IMG_FILE=/\.(png|jpe?g|gif|webp|svg)$/i,TABLE_FILE=/\.(csv|tsv)$/i;
+function moveFigures(m){
+  const files=(m.evidence&&Array.isArray(m.evidence.files)?m.evidence.files:[]).filter(r=>r&&typeof r.path==='string');
+  const figs=files.filter(r=>IMG_FILE.test(r.path)&&r.role!=='report'),tabs=files.filter(r=>TABLE_FILE.test(r.path)&&r.role==='table');
+  if(!figs.length&&!tabs.length)return null;
+  const box=h('div',{class:'kfigs'},[h('h3',{text:tr('Figures and tables')})]);
+  if(!S.folder){box.append(h('p',{class:'kln',text:tr('Open the project folder to see them.')}));return box}
+  figs.forEach(r=>{const img=h('img',{alt:r.note||baseName(r.path)});
+    const fig=h('figure',{class:'kfig'},[h('button',{type:'button',class:'kfigb',title:tr('Enlarge'),onclick:()=>openModal(baseName(r.path),[h('div',{class:'kbig'},[img.cloneNode(),
+      h('p',{class:'kln',text:r.note||''}),h('div',{class:'mono kln',text:r.path})])])},[img]),r.note?h('figcaption',{text:r.note}):null]);
+    box.append(fig);folderURL(r).then(u=>{if(u)img.src=u;else fig.replaceWith(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}))})});
+  tabs.forEach(r=>{const hold=h('div',{class:'ktabw kpreview'},[h('p',{class:'kln',text:tr('Loading…')})]);
+    box.append(h('div',{class:'kfig'},[hold,r.note?h('p',{class:'kfigcap',text:r.note}):null]));
+    folderText(r).then(t=>{if(t==null){hold.replaceChildren(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}));return}
+      const rows=parseDelimited(t),show=rows.slice(0,9),more=rows.length-show.length;
+      const table=list=>h('table',{class:'ktab'},[h('thead',{},[h('tr',{},list[0].map(c=>h('th',{text:c})))]),h('tbody',{},list.slice(1).map(rw=>h('tr',{},rw.map(c=>h('td',{text:c})))))]);
+      hold.replaceChildren(...[table(show),more>0?h('button',{type:'button',class:'linkbtn',text:tr('Show all {n} rows',{n:rows.length-1}),
+        onclick:()=>openModal(baseName(r.path),[h('div',{class:'ktabw'},[table(rows)]),h('p',{class:'kln',text:r.note||''})])}):null].filter(Boolean))})});
+  return box}
+const kfileMemo=new Map();
+async function folderFile(path){ // a file of the opened folder, by its path relative to the folder of report.json
+  const F=S.folder;if(!F||isAbsPath(path))return null;
+  const segs=normPath((F.dir!==F.root?F.dir.name+'/':'')+normPath(path)).split('/');if(segs[0]==='..')return null;
+  try{let d=F.root;for(const s of segs.slice(0,-1))d=await d.getDirectoryHandle(s);return await(await d.getFileHandle(segs[segs.length-1])).getFile()}
+  catch(e){return null}}
+function folderURL(r){const k='u|'+refKey(r);if(!kfileMemo.has(k))kfileMemo.set(k,folderFile(r.path).then(f=>f?URL.createObjectURL(f):null));return kfileMemo.get(k)}
+function folderText(r){const k='t|'+refKey(r);if(!kfileMemo.has(k))kfileMemo.set(k,folderFile(r.path).then(f=>f?f.text():null));return kfileMemo.get(k)}
+function moveLink(id,K){const x=K.byId.get(id);
+  return h('button',{type:'button',class:'linkbtn kgo',text:x?(x.m.title||id):id,title:x?moveNo(x.m)+' '+id:id,onclick:()=>selectMove(id,true)})}
+function moveCard(x,K,f){ // List layout: one card per move
+  const m=x.m,p=x.parent&&K.byId.get(x.parent);
+  const kids=[h('div',{class:'th'},[shapeIcon(f.shape),h('span',{class:'kno',text:moveNo(m)}),h('span',{class:'kid',text:x.id}),
+    h('button',{type:'button',class:'tt',text:m.title||x.id,onclick:()=>selectMove(x.id,false)}),
+    f.chain.level?h('span',{class:'kchain',text:tr(CHAIN_TEXT[f.chain.level])},[f.chain.state?dot(f.chain.state):null]):null])];
+  const trig=m.trigger&&m.trigger.kind?textOf(TRIGGER_TEXT,m.trigger.kind)+(m.trigger.who?' ('+m.trigger.who+')':''):'';
+  kids.push(h('div',{class:'tm',text:[tr(SHAPE_TEXT[f.shape]),p?tr('After {move}',{move:p.m.title||p.id}):'',m.when||m.at||'',trig].filter(Boolean).join(' · ')}));
+  if(m.result&&m.result.text)kids.push(h('p',{class:'kres',text:m.result.text}));
+  const pills=checkPills(m);if(pills)kids.push(h('div',{class:'tl'},[h('span',{class:'k',text:tr('Checks')}),pills]));
+  return h('div',{class:'tnode kmove sh-'+f.shape+(x.id===kifuView().sel?' sel':''),'data-move':x.id},kids);
+}
+function movePanel(x,K,F){ // the selected move, in full (as a form in Edit)
+  if(!x)return[];if(kifuView().edit&&canEditKifu())return moveEditor(x,K,F);
+  const m=x.m,f=F.get(x.id),out=[],groups=K.meta.groups&&typeof K.meta.groups==='object'?K.meta.groups:{};
+  const gname=m.group?(typeof groups[m.group]==='string'?m.group+' · '+groups[m.group]:m.group):'';
+  out.push(h('div',{class:'kpmeta'},[h('span',{class:'kchip sh-'+f.shape},[shapeIcon(f.shape),tr(SHAPE_TEXT[f.shape])]),
+    gname?h('span',{class:'ktag',text:gname}):null,h('span',{class:'kdate',text:[m.when,m.at&&m.at!==m.when?m.at:''].filter(Boolean).join(' · ')})]));
+  if(m.trigger&&m.trigger.kind)out.push(h('p',{class:'ktrig'+(f.user?' you':''),text:tr('Started by')+': '+textOf(TRIGGER_TEXT,m.trigger.kind)+(m.trigger.who?' ('+m.trigger.who+')':'')}));
+  out.push(h('h2',{},[m.title||x.id,h('span',{class:'kid',text:' '+moveNo(m)+' '+x.id})]));
+  if(m.result&&(m.result.text||m.result.value!=null))out.push(h('p',{class:'kpres',text:[m.result.text||'',m.result.value!=null?' ('+tr('value {v}',{v:m.result.value})+(m.result.n!=null?', n = '+m.result.n:'')+')':''].join('')}));
+  const mean=(label,text)=>{if(text)out.push(h('p',{class:'kmean'},[h('b',{text:label}),text]))};
+  mean(tr('Why'),m.why);
+  mean(tr({dead:'Why it stopped',fix:'Correction',todo:'How to judge it'}[f.shape]||'What it means'),m.note);
+  if(m.reason&&m.reason!==m.note)mean(tr('Why it ended'),m.reason);
+  if(m.cause)out.push(h('p',{class:'kcause'},[tr('Cause')+': '+textOf(CAUSE_TEXT,m.cause),m.causeConfirmed===false?h('span',{class:'kunc',text:' '+tr('not confirmed yet')}):null]));
+  if(m.milestone&&m.milestone.reason&&m.milestone.reason!==m.note)mean('★ '+textOf(MILESTONE_TEXT,m.milestone.kind),m.milestone.reason);
+  if(m.mark&&m.mark.note&&m.mark.note!==m.note)mean(textOf(MARK_TEXT,m.mark.kind),m.mark.note);
+  if(m.population)mean(tr('Population'),plainText(m.population));
+  if(m.conditions)mean(tr('Conditions'),plainText(m.conditions));
+  if(m.cost)mean(tr('Cost'),plainText(m.cost));
+  // where it sits in the record
+  const rel=h('div',{class:'krel'}),row=(k,items)=>{if(items.length)rel.append(h('div',{class:'krow'},[h('span',{class:'k',text:k}),...items]))};
+  row(tr('Follows'),x.parent?[moveLink(x.parent,K)]:[]);
+  row(tr('Next moves'),x.kids.map(k=>moveLink(k.id,K)));
+  const grp=(list,map,key)=>{const by=new Map();list.forEach(l=>(by.get(l.type)||by.set(l.type,[]).get(l.type)).push(l));
+    by.forEach((ls,type)=>row(textOf(map,type),ls.map(l=>h('span',{},[moveLink(l[key],K),l.note?h('span',{class:'kln',text:' ('+l.note+')'}):null]))))};
+  grp(x.links,LINK_TEXT,'to');grp(x.back,BACK_TEXT,'from');
+  out.push(rel);
+  const src=m.source&&typeof m.source==='object'?m.source:null;
+  if(src){const url=typeof src.url==='string'&&/^https?:\/\//.test(src.url)?src.url+(src.section?'#'+encodeURIComponent(src.section):''):null;
+    out.push(h('div',{class:'ksrc'},[tr('Source')+': ',url?h('a',{href:url,target:'_blank',rel:'noopener noreferrer',text:src.title||url}):h('span',{text:src.title||''}),
+      src.section?h('span',{text:' ('+src.section+')'}):null,src.file?h('div',{},[h('span',{class:'mono',text:src.file}),' ',S.folder?revealBtn(src.file):null]):null,
+      m.addedFrom?h('div',{class:'kln',text:tr('Added from')+': '+m.addedFrom}):null]))}
+  const ch=K.chapterOf.get(x.id);
+  if(ch)out.push(h('button',{type:'button',class:'btn small',text:tr('Read the chapter "{t}"',{t:ch.title}),onclick:()=>{setMode('view');jumpTo(ch.id)}}));
+  const figs=moveFigures(m);if(figs)out.push(figs);
+  // the data chain of this move
+  const ev=m.evidence&&typeof m.evidence==='object'?m.evidence:{},lvl=f.chain.level;
+  const box=h('div',{class:'kdata chain'},[h('h3',{},[tr('Data chain'),h('span',{class:'kchain'},[f.chain.state?dot(f.chain.state):null,
+    lvl?tr(CHAIN_TEXT[lvl]):tr('Not recorded yet')])])]);
+  if(!lvl)box.append(h('p',{class:'kln',text:tr('Name the files this move rests on (evidence.files), the steps that recompute it (evidence.steps), or say why there is no data (evidence.noData).')}));
+  if(lvl==='none')box.append(h('p',{text:ev.noData}));
+  if(m.dataOutside)box.append(h('p',{class:'kwarn',text:tr('The raw data of this move is outside the folder, so it is not part of the data chain.')}));
+  const ids=Array.isArray(ev.steps)?ev.steps:[];
+  if(ids.length){const C=chain();box.append(h('h5',{text:tr('Recomputed by')}),
+    ...ids.map(sid=>{const s=S.steps.get(sid);return s&&Array.isArray(s.outputs)?stepNode(s,C,new Set(),false)
+      :h('div',{class:'fr'},[dot('unchecked'),h('span',{text:tr('Step "{id}" is not in report.json.',{id:sid})})])}))}
+  const files=Array.isArray(ev.files)?ev.files.filter(r=>r&&typeof r.path==='string'):[];
+  const shown=r=>r.role!=='report'&&(IMG_FILE.test(r.path)||(r.role==='table'&&TABLE_FILE.test(r.path))); // the figures and tables above
+  const listed=files.filter(r=>!shown(r)),above=files.filter(shown);
+  if(files.length)box.append(h('h5',{text:tr('Sources ({n})',{n:files.length})}),...listed.map(r=>h('div',{class:'kfile'},[
+    h('span',{class:'krole',text:textOf(ROLE_TEXT,r.role||'other')}),fileRow(r),r.note?h('div',{class:'kln',text:r.note}):null])),
+    above.length?h('div',{class:'kfile'},[h('div',{class:'fr'},[dot(worst(above.map(r=>stateOf(fileState(r))))),
+      h('span',{text:tr('{n} figures and tables, shown above',{n:above.length})})])]):null);
+  const cs=checksOf(m);
+  if(cs.length)box.append(h('h5',{text:tr('Checks against recomputed numbers ({n})',{n:cs.length})}),h('div',{class:'ktabw'},[h('table',{class:'ktab'},[
+    h('thead',{},[h('tr',{},[tr('What the record says'),tr('Recorded'),tr('Recomputed'),tr('Result')].map(t=>h('th',{text:t})))]),
+    h('tbody',{},cs.map(c=>h('tr',{},[h('td',{},[c.claim||'',c.population?h('div',{class:'kln',text:plainText(c.population)}):null]),
+      h('td',{text:plainText(c.recorded)}),h('td',{text:plainText(c.recomputed)}),
+      h('td',{},[h('span',{class:'kc m-'+c.match,text:(MATCH_SIGN[c.match]||'')+' '+textOf(MATCH_TEXT,c.match)}),
+        c.decidedBy?h('div',{class:'kln',text:c.decidedBy==='user'?tr('decided by you'):tr('decided by {who}',{who:c.decidedBy})}):null,
+        c.note?h('div',{class:'kln',text:c.note}):null])])))])]));
+  out.push(box);
+  return out;
 }
 
 /* ---------- Pagination: pages are computed from content, never stored ---------- */
@@ -5384,11 +6925,11 @@ document.addEventListener('pointerdown',e=>{if(!S.quick||!(e.target instanceof E
 /* ---------- Main render ---------- */
 // Leave the text field being edited (this also saves it), so an explicit action can redraw the page right away
 function leaveField(){if(editingNow())document.activeElement.blur()}
-function editingNow(){const a=document.activeElement;return a&&a.closest&&a.closest('#flow,#tab-style')&&/^(TEXTAREA|INPUT)$/.test(a.tagName)&&a.type!=='checkbox'}
+function editingNow(){const a=document.activeElement;return a&&a.closest&&a.closest('#flow,#tab-style,#treehost .kpanel')&&/^(TEXTAREA|INPUT)$/.test(a.tagName)&&a.type!=='checkbox'}
 function render(){
   if(!S.meta)return;
   if(editingNow()){S.deferred=true;return}
-  S.deferred=false;S.chainMemo=null;S.chapMemo=null;
+  S.deferred=false;S.chainMemo=null;S.chapMemo=null;S.kifuMemo=null;
   const focusF=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fid;
   paginate();
   $('#doc-title').textContent=S.meta.title||'Duetsheet';document.title=(S.meta.title||'Duetsheet')+tr(' | Duetsheet');
@@ -5455,7 +6996,13 @@ function openIssues(){
 }
 $('#issuesBtn').addEventListener('click',openIssues);
 addEventListener('error',e=>logIssue('error',tr('Unexpected error'),(e.message||'')+(e.error&&e.error.stack?'\n'+e.error.stack:'')));
-addEventListener('unhandledrejection',e=>logIssue('error',tr('Unexpected error'),errText(e.reason)+(e.reason&&e.reason.stack?'\n'+e.reason.stack:'')));
+/* When the launcher is closed while the page stays open, every request to it fails. Say so once, in words, and stop asking
+   it (folder list, agent status) instead of reporting each failed request as an unexpected error. */
+let launcherGone=false;
+const LAUNCHER_GONE='The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.';
+function launcherFetch(url,opt){return fetch(url,opt).catch(e=>{launcherLost();throw e})}
+function launcherLost(){if(launcherGone)return;launcherGone=true;logIssue('error',tr(LAUNCHER_GONE));renderLocalBar()}
+addEventListener('unhandledrejection',e=>launcherGone&&e.reason instanceof TypeError?e.preventDefault():logIssue('error',tr('Unexpected error'),errText(e.reason)+(e.reason&&e.reason.stack?'\n'+e.reason.stack:'')));
 
 /* ---------- Reading JSON written by other programs ---------- */
 // Python writes NaN and Infinity, and some Windows tools start a file with a byte order mark; browsers accept neither.
@@ -5490,7 +7037,7 @@ function readReport(text,label){ // report.json text -> documents; what could be
 // When duetsheet.py serves the page, the folder it was started in is reached through it, with no folder picker.
 // httpRoot() offers the part of the File System Access API that the folder code uses, so that code stays the same.
 function httpRoot(token,name){
-  const call=(path,opt)=>fetch('/fs/'+path.split('/').map(encodeURIComponent).join('/'),{...(opt||{}),headers:{'X-Duetsheet-Token':token}});
+  const call=(path,opt)=>launcherFetch('/fs/'+path.split('/').map(encodeURIComponent).join('/'),{...(opt||{}),headers:{'X-Duetsheet-Token':token}});
   const missing=n=>new DOMException(n+' not found','NotFoundError');
   const file=(path,fname,meta)=>({kind:'file',name:fname,meta,
     async getFile(){const r=await call(path);if(r.status===404)throw missing(fname);if(!r.ok)throw new Error(fname+': '+r.status+' '+await r.text());
@@ -5624,8 +7171,8 @@ function starterDocs(name){const t=now(),id='b-start';
   return{'report/meta':{title:name,order:[id],schema:SCHEMA,createdAt:t},
     ['blocks/'+id]:{id,type:'text',title:'',caption:'',breakBefore:'auto',createdAt:t,
       text:tr('Raw data files in this folder are listed in the Folder tab. Ask your agent to write the report (see AGENTS.md), or add blocks yourself in Edit mode.')}}}
-function useDB(next){db=next;
-  Object.assign(S,{meta:null,blocks:new Map(),datasets:new Map(),annos:[],changes:[],rounds:[],steps:new Map(),fstate:null,newInputs:null,writing:null,writingProposal:null,writingStats:null,style:null,examples:[],agentProposal:null,proposal:null,drafts:new Map(),page:0,stale:new Set(),folderFiles:null});
+function useDB(next){db=next;if(S.kifuWatch){S.kifuWatch.close();S.kifuWatch=null}
+  Object.assign(S,{kifu:null,meta:null,blocks:new Map(),datasets:new Map(),annos:[],changes:[],rounds:[],steps:new Map(),fstate:null,newInputs:null,writing:null,writingProposal:null,writingStats:null,style:null,examples:[],agentProposal:null,proposal:null,drafts:new Map(),page:0,stale:new Set(),folderFiles:null});
   subscribe()}
 async function pickFolder(){let dir;try{dir=await window.showDirectoryPicker({mode:'readwrite',id:'duetsheet'})}catch(e){return}await openFolder(dir,true)}
 async function openFolder(root,ask){
@@ -5644,7 +7191,7 @@ async function openFolder(root,ask){
     if(S.folder)S.folder.close();
     Object.assign(f,{name:root.name,root,dataDir,prefix,file:prefix==='../'?'duetsheet/'+REPORT_FILE:REPORT_FILE});
     S.folder=f;S.lastFolder=root;S.caps=folderCaps(dir);S.assetURL=new Map();await loadAssetURLs(dir);
-    useDB(f);await loadFolderLangs(dir);
+    useDB(f);S.kifuWatch=watchKifu(dir);await loadFolderLangs(dir);
     if(!root.virtual)try{await idb.set('folder',root)}catch(e){}
     S.tab='folder';S.panelInView=true;document.body.classList.remove('nopanel');
     renderLocalBar();refreshFolderFiles();toast(tr('Opened folder {name}',{name:root.name}))}
@@ -5657,6 +7204,7 @@ async function restoreFolder(){
 function setSave(state,e){S.saveState=state;S.saveError=e?String(e.message||e.name||e.code||e):'';renderLocalBar()}
 function renderLocalBar(){
   if(S.cloud)return;
+  if(launcherGone){showNote(tr(LAUNCHER_GONE),[h('button',{type:'button',class:'btn small primary',text:tr('Reload'),onclick:()=>location.reload()})],false);return}
   const B=(t,fn,primary)=>h('button',{type:'button',class:'btn small'+(primary?' primary':''),text:t,onclick:fn});const acts=[];let text;
   if(S.folder){
     text=tr('Project folder "{name}": changes are saved to {file} automatically.',{name:S.folder.name,file:S.folder.file})+' '+
@@ -5695,7 +7243,7 @@ $('#reportfile').addEventListener('change',async e=>{const f=e.target.files[0];i
   if(S.blocks.size&&!confirm(tr('Replace the report that is open now with {file}?',{file:f.name})))return;
   useDB(memDB(docs));renderLocalBar();toast(tr('Opened {file}',{file:f.name}))});
 addEventListener('beforeunload',e=>{if(S.folder&&S.folder.pending()){S.folder.flush();e.preventDefault();e.returnValue=''}});
-addEventListener('focus',()=>{if(S.folder)refreshFolderFiles()});
+addEventListener('focus',()=>{if(S.folder&&!launcherGone)refreshFolderFiles()});
 async function loadFolderLangs(dir){
   for(const fh of await listFiles(await subdir(dir,'lang'),/\.json$/i)){try{importLang(JSON.parse(await(await fh.getFile()).text()))}catch(e){}}
   renderLangMenu()}
@@ -5709,7 +7257,7 @@ async function listDeep(d,re,base,depth,out){ // data files in the raw data fold
   return out;
 }
 async function refreshFolderFiles(){
-  if(!S.folder)return;const F=S.folder,dir=F.dir;
+  if(!S.folder||launcherGone)return;const F=S.folder,dir=F.dir;
   const found=(await listDeep(F.dataDir,DATA_EXT)).sort((a,b)=>a.rel<b.rel?-1:1);
   const data=await Promise.all(found.map(async({fh,rel})=>{const f=fh.meta||await fh.getFile();
     return{name:rel,path:F.prefix+rel,fh,size:f.size,modified:new Date(f.lastModified).toISOString()}}));
@@ -6080,13 +7628,14 @@ async function newInputsNow(){ // step id -> files matching its patterns that it
   return found;
 }
 async function serverFingerprints(list){
-  const r=await fetch('/api/fingerprints',{method:'POST',headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:JSON.stringify({files:list})});
+  const r=await launcherFetch('/api/fingerprints',{method:'POST',headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:JSON.stringify({files:list})});
   if(!r.ok)throw new Error(r.status+' '+await r.text());return r.json()}
 async function verifyChain(){
   const seq=S.verifySeq=(S.verifySeq||0)+1;
   if(!S.folder){if(S.fstate){S.fstate=null;S.newInputs=null;S.stale=new Set();render()}return}
   const refs=new Map();
   S.steps.forEach(s=>{if(s&&typeof s==='object')stepFiles(s).forEach(([,r])=>refs.set(refKey(r),r))});
+  kifuFiles().forEach(r=>refs.set(refKey(r),r)); // the files the moves of kifu.json rest on
   S.datasets.forEach(d=>{if(d.source&&d.source.path)refs.set(refKey(d.source),d.source)});
   const list=[...refs.values()];let res=null;
   S.checking=true;if(S.tab==='folder')renderPanel();
@@ -6106,7 +7655,7 @@ async function verifyChain(){
 function revealBtn(path){
   return h('button',{type:'button',class:'linkbtn rv',text:S.server?tr('Show in folder'):tr('Copy path'),title:path,onclick:async e=>{e.stopPropagation();
     if(!S.server){try{await navigator.clipboard.writeText(path);toast(tr('Copied'))}catch(x){}return}
-    try{const r=await fetch('/api/reveal',{method:'POST',headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:JSON.stringify({path})});
+    try{const r=await launcherFetch('/api/reveal',{method:'POST',headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:JSON.stringify({path})});
       if(!r.ok)throw new Error(r.status+' '+await r.text())}catch(x){fail(tr('Could not open the folder.'),x)}}});
 }
 const datasetOf=f=>[...S.datasets.values()].find(d=>d.source&&normPath(d.source.path)===normPath(f.path));
@@ -6311,7 +7860,7 @@ function writingSection(F,B){
 
 /* Personal habits: one copy in ~/.duetsheet/habits/ shared by all projects (through the launcher) */
 async function personalCall(method,body){
-  const r=await fetch('/api/personal',{method,headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  const r=await launcherFetch('/api/personal',{method,headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   if(!r.ok)throw new Error(r.status+' '+await r.text());return method==='GET'?r.json():null;
 }
 async function savePersonal(){
@@ -6371,15 +7920,15 @@ async function askAgent(){
   const open=openCount();
   if(currentChanges().some(c=>c.by==='user'))await finishRound();
   if(!S.server){openAgentPrompt();return}
-  try{const r=await fetch('/api/revise',{method:'POST',headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:JSON.stringify({kind:'revise',open})});
+  try{const r=await launcherFetch('/api/revise',{method:'POST',headers:{'X-Duetsheet-Token':S.server.token,'Content-Type':'application/json'},body:JSON.stringify({kind:'revise',open})});
     if(!r.ok)throw new Error(r.status+' '+await r.text());S.agent=await r.json()}
   catch(e){fail(tr('Could not send the request to the agent.'),e);return}
   renderAgentBar();
   if(S.agent.listening)toast(tr('Sent. The agent will revise the report; this page updates by itself.'));else openAgentPrompt();
 }
 async function pollAgent(){
-  if(!S.server)return;
-  try{const r=await fetch('/api/agent',{headers:{'X-Duetsheet-Token':S.server.token}});if(r.ok)S.agent=await r.json()}catch(e){}
+  if(!S.server||launcherGone)return;
+  try{const r=await launcherFetch('/api/agent',{headers:{'X-Duetsheet-Token':S.server.token}});if(r.ok)S.agent=await r.json()}catch(e){}
   renderAgentBar();
 }
 function agentPrompt(){
