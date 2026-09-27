@@ -251,6 +251,19 @@ main{min-width:0}
 .xl.supports{stroke:var(--muted);stroke-dasharray:6 4}
 .ah-clue{fill:var(--accent)}.ah-corrects{fill:var(--c2)}.ah-supports{fill:var(--muted)}
 .xhit{fill:none;stroke:transparent;stroke-width:12;cursor:help}
+.kediting .xhit{cursor:pointer}.kediting .kxw:hover .xl{stroke-width:3}
+.khandle{display:none;cursor:crosshair}.knode.sel .khandle{display:inline}
+.khandle circle{fill:var(--paper);stroke:var(--accent);stroke-width:1.6}.khandle path{stroke:var(--accent);stroke-width:1.8;stroke-linecap:round}
+.khandle:hover circle{fill:var(--accent)}.khandle:hover path{stroke:var(--paper)}
+.kdrawl{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:5 4;pointer-events:none}
+.knode.kdrop .khl{opacity:1;stroke:var(--accent);stroke-dasharray:none;stroke-width:2.4}
+#kamenu{position:fixed;z-index:65;display:flex;flex-direction:column;min-width:150px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:4px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+#kamenu .kamt{font:600 12px ui-monospace,Menlo,Consolas,monospace;color:var(--muted);padding:4px 8px 6px}
+#kamenu button{all:unset;cursor:pointer;padding:6px 10px;border-radius:5px;font-size:14px;color:var(--ink)}
+#kamenu button:hover,#kamenu button:focus-visible{background:var(--line)}
+#kamenu button.on{font-weight:700}#kamenu button.on::after{content:' ✓'}
+#kamenu .kam-clue{border-left:4px solid var(--accent)}#kamenu .kam-corrects{border-left:4px solid var(--c2)}#kamenu .kam-supports{border-left:4px solid var(--muted)}
+#kamenu .kamdel{color:var(--c5)}#kamenu .kamx{color:var(--muted)}
 .ktree.noxl .kxg{display:none}
 .kaxis{stroke:var(--line);stroke-width:1}.kaxl{font:500 11.5px ui-monospace,Menlo,Consolas,monospace;fill:var(--muted)}
 .knode,.kedge,.kxg{transition:opacity .18s}
@@ -1494,7 +1507,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Reset position": "恢復自動位置",
  "This move no longer exists": "這一手已經不存在了",
  "(move not found)": "（找不到這一手）",
- "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（來自 kifu.json），包含走不通的路。拖曳節點可以安排位置；點標題可以閱讀。"
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（來自 kifu.json），包含走不通的路。拖曳節點可以安排位置；點標題可以閱讀。",
+ "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "畫箭頭：把選中那一手下方的 + 拖到另一手上；點箭頭可以改種類或刪除。",
+ "Drag onto another move to draw an arrow": "拖到另一手上畫箭頭",
+ "That arrow is already there.": "這條箭頭已經有了。"
 },
 "zh-Hans": {
  "_name": "简体中文",
@@ -2365,7 +2381,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Reset position": "恢复自动位置",
  "This move no longer exists": "这一手已经不存在了",
  "(move not found)": "（找不到这一手）",
- "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（来自 kifu.json），包括走不通的路。拖动节点可以安排位置；点标题可以阅读。"
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（来自 kifu.json），包括走不通的路。拖动节点可以安排位置；点标题可以阅读。",
+ "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "画箭头：把选中那一手下方的 + 拖到另一手上；点箭头可以改类型或删除。",
+ "Drag onto another move to draw an arrow": "拖到另一手上画箭头",
+ "That arrow is already there.": "这条箭头已经有了。"
 },
 "ja": {
  "_name": "日本語",
@@ -3236,7 +3255,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Reset position": "自動配置に戻す",
  "This move no longer exists": "この手はもうありません",
  "(move not found)": "（該当する手が見つかりません）",
- "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json に記録された研究のすべての手（行き止まりも含む）。ノードをドラッグして配置し、タイトルをクリックして読めます。"
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json に記録された研究のすべての手（行き止まりも含む）。ノードをドラッグして配置し、タイトルをクリックして読めます。",
+ "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "矢印を引くには、選んだ手の下の + を別の手までドラッグします。矢印をクリックすると種類の変更や削除ができます。",
+ "Drag onto another move to draw an arrow": "別の手までドラッグして矢印を引く",
+ "That arrow is already there.": "この矢印はすでにあります。"
 },
 "ko": {
  "_name": "한국어",
@@ -4107,7 +4129,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Reset position": "자동 배치로 되돌리기",
  "This move no longer exists": "이 수는 더 이상 존재하지 않습니다",
  "(move not found)": "(수를 찾을 수 없음)",
- "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json에 기록된 연구의 모든 수(막다른 길 포함). 노드를 드래그해 배치하고, 제목을 클릭해 읽을 수 있습니다."
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json에 기록된 연구의 모든 수(막다른 길 포함). 노드를 드래그해 배치하고, 제목을 클릭해 읽을 수 있습니다.",
+ "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "화살표를 그리려면 선택한 수 아래의 +를 다른 수로 끌어 놓으세요. 화살표를 클릭하면 종류를 바꾸거나 삭제할 수 있습니다.",
+ "Drag onto another move to draw an arrow": "다른 수로 끌어 화살표 그리기",
+ "That arrow is already there.": "이 화살표는 이미 있습니다."
 },
 "es": {
  "_name": "Español",
@@ -4978,7 +5003,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Reset position": "Restablecer posición",
  "This move no longer exists": "Este paso ya no existe",
  "(move not found)": "(paso no encontrado)",
- "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "Cada paso de la investigación según kifu.json, incluidos los callejones sin salida. Arrastra un nodo para colocarlo; haz clic en un título para leerlo."
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "Cada paso de la investigación según kifu.json, incluidos los callejones sin salida. Arrastra un nodo para colocarlo; haz clic en un título para leerlo.",
+ "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "Para trazar una flecha, arrastre el + bajo la jugada seleccionada hasta otra jugada; haga clic en una flecha para cambiarla o eliminarla.",
+ "Drag onto another move to draw an arrow": "Arrastre hasta otra jugada para trazar una flecha",
+ "That arrow is already there.": "Esa flecha ya existe."
 }
 }
 </script>
@@ -5546,13 +5574,15 @@ function renderKifu(host,K){
   const q=h('input',{type:'search',value:V.q,placeholder:tr('Search the moves'),'aria-label':tr('Search the moves'),
     oninput:e=>{V.q=e.target.value;applyKifuFilter(host,K,F,P)},onkeydown:e=>{if(e.key==='Enter'){const f=all.find(x=>kifuHit(x,V.q.trim().toLowerCase()));if(f)selectMove(f.id,true)}}});
   const zb=(t,label,fn)=>h('button',{type:'button',text:t,'aria-label':label,onclick:fn});
-  if(canEditKifu()){const sel=V.sel;
-    host.append(h('div',{class:'kbar kedit'},[seg(tr('Kifu'),{view:'Preview',edit:'Edit'},V.edit?'edit':'view',v=>V.edit=v==='edit'),
-      V.edit?h('button',{type:'button',class:'btn small primary',text:'+ '+tr('Next move'),title:tr('Add a move after the selected one'),onclick:()=>addMove(V.sel)}):null,
-      V.edit&&K.byId.get(sel)&&K.byId.get(sel).m.status!=='done'?h('button',{type:'button',class:'btn small',text:tr('Close this move'),onclick:()=>closeMoveDialog(V.sel)}):null,
-      V.edit?h('span',{class:'kln',text:tr('Changes are saved to {file} at once and recorded.',{file:KIFU_FILE})}):null]))}
+  const editing=canEditKifu()&&V.edit;
+  if(editing){const sel=V.sel; // view or edit is chosen by the buttons at the top (Kifu view, Kifu edit)
+    host.append(h('div',{class:'kbar kedit'},[
+      h('button',{type:'button',class:'btn small primary',text:'+ '+tr('Next move'),title:tr('Add a move after the selected one'),onclick:()=>addMove(V.sel)}),
+      K.byId.get(sel)&&K.byId.get(sel).m.status!=='done'?h('button',{type:'button',class:'btn small',text:tr('Close this move'),onclick:()=>closeMoveDialog(V.sel)}):null,
+      h('span',{class:'kln',text:tr('Changes are saved to {file} at once and recorded.',{file:KIFU_FILE})}),
+      V.layout==='list'?null:h('span',{class:'kln',text:tr('To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.')})]))}
   host.append(h('div',{class:'kbar'},[seg(tr('Layout'),KIFU_LAYOUTS,V.layout,v=>{V.layout=v;V.scroll=null}),seg(tr('Highlight'),KIFU_MODES,V.mode,v=>V.mode=v),
-    V.layout==='list'?null:h('label',{class:'kchkb'},[h('input',{type:'checkbox',checked:V.xl?'':null,onchange:e=>{V.xl=e.target.checked;render()}}),tr('Cross links')]),
+    V.layout==='list'||editing?null:h('label',{class:'kchkb'},[h('input',{type:'checkbox',checked:V.xl?'':null,onchange:e=>{V.xl=e.target.checked;render()}}),tr('Cross links')]),
     h('label',{class:'ksearch'},[q,h('span',{class:'kqn'})]),
     V.layout==='list'?null:h('div',{class:'kzoom'},[zb('−',tr('Zoom out'),()=>zoomKifu(V.z-.15)),zb('+',tr('Zoom in'),()=>zoomKifu(V.z+.15)),
       h('button',{type:'button',class:'wide',text:tr('Fit'),onclick:()=>zoomKifu('fit')})]),
@@ -5599,7 +5629,8 @@ function kifuSVG(K,F,P,V){
     // a move can be dragged to a place of its own (m.pos, tree diagram only); make room for it
     K.list.forEach(x=>{const p=x.m.pos;if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){pos.set(x.id,{x:p.x,y:p.y});W=Math.max(W,p.x+220);H=Math.max(H,p.y+40)}});
   }
-  const svg=el('svg',{class:'ktree'+(V.xl?'':' noxl'),viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'group','aria-label':tr('{n} moves',{n:K.list.length}),'data-mode':V.mode});
+  const edit=canEditKifu()&&V.edit;
+  const svg=el('svg',{class:'ktree'+(V.xl||edit?'':' noxl')+(edit?' kediting':''),viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'group','aria-label':tr('{n} moves',{n:K.list.length}),'data-mode':V.mode});
   svg.dataset.w=W;svg.dataset.h=H;
   const defs=el('defs',{},svg);
   ['clue','corrects','supports'].forEach(k=>{const mk=el('marker',{id:'kah-'+k,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},defs);
@@ -5614,7 +5645,8 @@ function kifuSVG(K,F,P,V){
     const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,off=Math.min(90,len*.28);
     const cx=mx-dy/len*off,cy=my+dx/len*off,sh=12/len,d=`M${a.x},${a.y}Q${cx},${cy} ${b.x-dx*sh},${b.y-dy*sh}`;
     const g=el('g',{class:'kxw'},xg);el('path',{d,class:'xl '+k,'marker-end':`url(#kah-${k})`},g);el('path',{d,class:'xhit'},g);
-    el('title',{},g).textContent=textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?': '+l.note:'')}));
+    el('title',{},g).textContent=x.id+' '+textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?': '+l.note:'');
+    if(edit)g.addEventListener('click',e=>arrowMenu(e.clientX,e.clientY,x.id,l))}));
   K.list.forEach(x=>{const p=pos.get(x.id),f=F.get(x.id),m=x.m,leafLbl=!x.kids.length||V.layout==='time';
     const g=el('g',{class:`knode sh-${f.shape}`+(P.on.has(x.id)?' onpath':'')+(f.user?' tr-user':'')+(f.mismatch?' mis':'')+(f.chain.level?'':' noch')+(x.id===V.sel?' sel':''),
       transform:`translate(${p.x},${p.y})`,tabindex:0,role:'button','data-id':x.id,'aria-label':tr(SHAPE_TEXT[f.shape])+': '+(m.title||x.id)},svg);
@@ -5627,7 +5659,8 @@ function kifuSVG(K,F,P,V){
     el('text',{class:'klbl',x:lx,y:ly},g).textContent=t.length>max?t.slice(0,max-1)+'…':t;
     g.addEventListener('click',()=>{if(g.dataset.justDragged){delete g.dataset.justDragged;return}selectMove(x.id,false)});
     g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectMove(x.id,false)}});
-    if(V.layout==='tree'&&canEditKifu()&&V.edit)bindNodeDrag(g,x.id,svg,p)});
+    if(V.layout==='tree'&&edit)bindNodeDrag(g,x.id,svg,p);
+    if(edit)bindArrowHandle(g,x.id,svg,p)});
   return svg}
 function svgPoint(svg,clientX,clientY){const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
 function bindNodeDrag(g,id,svg,start0){ // drag a move to a place of its own; a small move is still a click (selectMove)
@@ -5648,6 +5681,44 @@ function bindNodeDrag(g,id,svg,start0){ // drag a move to a place of its own; a 
     down=null};
   g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
 }
+/* Arrows between moves (links), drawn on the tree: the selected move shows a + below it; drag it onto another move and choose
+   what the arrow says. The arrow belongs to the move it starts from (m.links). Clicking an arrow changes or deletes it. */
+const ARROW_TYPES=['clue','corrects','supports'];
+function bindArrowHandle(g,id,svg,p){
+  const hd=el('g',{class:'khandle'},g);el('circle',{cx:0,cy:21,r:6.5},hd);el('path',{d:'M-3.5,21H3.5M0,17.5V24.5'},hd);
+  el('title',{},hd).textContent=tr('Drag onto another move to draw an arrow');
+  let line=null;
+  hd.addEventListener('pointerdown',e=>{if(e.button!==0||!e.isPrimary)return;e.stopPropagation();e.preventDefault();
+    hd.setPointerCapture(e.pointerId);line=el('path',{class:'kdrawl',d:`M${p.x},${p.y}L${p.x},${p.y}`},svg)});
+  hd.addEventListener('pointermove',e=>{if(!line)return;const b=svgPoint(svg,e.clientX,e.clientY);line.setAttribute('d',`M${p.x},${p.y}L${b.x},${b.y}`);
+    $$('.knode.kdrop',svg).forEach(n=>n.classList.remove('kdrop'));const t=moveUnder(e,id);if(t)t.classList.add('kdrop')});
+  const end=e=>{if(!line)return;line.remove();line=null;try{hd.releasePointerCapture(e.pointerId)}catch(x){}
+    $$('.knode.kdrop',svg).forEach(n=>n.classList.remove('kdrop'));
+    const t=e.type==='pointerup'&&moveUnder(e,id);if(t)arrowMenu(e.clientX,e.clientY,id,null,t.dataset.id)};
+  hd.addEventListener('pointerup',end);hd.addEventListener('pointercancel',end);
+  hd.addEventListener('click',e=>e.stopPropagation())}
+function moveUnder(e,not){const n=document.elementFromPoint(e.clientX,e.clientY),g=n&&n.closest('#treehost .knode');return g&&g.dataset.id!==not?g:null}
+function arrowMenu(cx,cy,from,link,to){ // a new arrow (link null, to given) or an existing one (link)
+  closeArrowMenu();to=link?link.to:to;
+  const pick=type=>{closeArrowMenu();setArrow(from,link,type,to)};
+  const m=h('div',{id:'kamenu',role:'menu'},[h('div',{class:'kamt',text:from+' → '+to}),
+    ...ARROW_TYPES.map(k=>h('button',{type:'button',role:'menuitem',class:'kam-'+k+(link&&link.type===k?' on':''),text:textOf(LINK_TEXT,k),onclick:()=>pick(k)})),
+    link?h('button',{type:'button',role:'menuitem',class:'kamdel',text:tr('Delete'),onclick:()=>pick(null)}):null,
+    h('button',{type:'button',role:'menuitem',class:'kamx',text:tr('Cancel'),onclick:closeArrowMenu})]);
+  document.body.append(m);
+  const r=m.getBoundingClientRect();m.style.left=Math.max(8,Math.min(cx+6,innerWidth-r.width-8))+'px';m.style.top=Math.max(8,Math.min(cy+6,innerHeight-r.height-8))+'px';
+  m.querySelector('button').focus();
+  m.addEventListener('keydown',e=>{if(e.key==='Escape')closeArrowMenu()});
+  setTimeout(()=>document.addEventListener('pointerdown',closeArrowMenu.out=e=>{if(!m.contains(e.target))closeArrowMenu()}),0)}
+function closeArrowMenu(){const m=$('#kamenu');if(m)m.remove();if(closeArrowMenu.out){document.removeEventListener('pointerdown',closeArrowMenu.out);closeArrowMenu.out=null}}
+function setArrow(from,link,type,to){ // add (link null), change the type of, or delete (type null) one arrow; read fresh, so the arrow is found again by type and target
+  to=link?link.to:to;
+  return kifuWrite(d=>{const m=d.moves[from];if(!m||!d.moves[to]||from===to)return false;
+    const before=Array.isArray(m.links)?m.links:[],after=before.map(l=>({...l}));
+    if(link){const i=after.findIndex(l=>l&&l.type===link.type&&l.to===to);if(i<0||after[i].type===type)return false;
+      if(type)after[i].type=type;else after.splice(i,1)}
+    else{if(after.some(l=>l&&l.type===type&&l.to===to)){toast(tr('That arrow is already there.'));return false}after.push({type,to})}
+    if(after.length)m.links=after;else delete m.links;kifuChange(d,from,'links',before,after.length?after:null)})}
 function resetMovePos(id){kifuWrite(d=>{const m=d.moves[id];if(!m||!m.pos)return false;const before={...m.pos};delete m.pos;kifuChange(d,id,'pos',before,null)})}
 function zoomKifu(z,quiet){const V=kifuView(),svg=$('#treehost svg.ktree'),stage=$('#treehost .kstage');if(!svg)return;
   const W=+svg.dataset.w,H=+svg.dataset.h;
