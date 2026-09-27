@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Check duetsheet.html before a commit.
+"""Check duetkifu.html before a commit.
 
 1. Code, comments and docs are English: CJK, kana, Hangul and full-width characters may appear
-   only inside the translation block (<script type="application/json" id="duetsheet-i18n">).
+   only inside the translation block (<script type="application/json" id="duetkifu-i18n">).
 2. The translation block is valid JSON, every language has a "_name", and no translation
    changes the {placeholders} of its English source.
 3. Every tr('...') string used in the code has an entry in the reference table (zh-Hant),
@@ -19,8 +19,8 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')   # language names print on any console
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-HTML = os.path.join(ROOT, 'duetsheet.html')
-OPEN = '<script type="application/json" id="duetsheet-i18n">'
+HTML = os.path.join(ROOT, 'duetkifu.html')
+OPEN = '<script type="application/json" id="duetkifu-i18n">'
 REFERENCE = 'zh-Hant'
 WIDE = re.compile('[\u3000-\u9fff\uac00-\ud7af\uf900-\ufaff\uff00-\uffef]')
 PH = re.compile(r'\{(\w+)\}')
@@ -45,14 +45,14 @@ def placeholders(s):
 src = open(HTML, encoding='utf-8').read()
 a = src.find(OPEN)
 if a < 0:
-    sys.exit('ERROR translation block not found in duetsheet.html')
+    sys.exit('ERROR translation block not found in duetkifu.html')
 b = src.index('</script>', a)
 block, outside = src[a + len(OPEN):b], src[:a] + src[b:]
 
 # 1. wide characters outside the translation block, in every text file of the repository
 for i, line in enumerate(outside.split('\n'), 1):
     if WIDE.search(line):
-        err(f'duetsheet.html (outside the translation block), line ~{i}: {line.strip()[:80]}')
+        err(f'duetkifu.html (outside the translation block), line ~{i}: {line.strip()[:80]}')
 for dirpath, dirnames, files in os.walk(ROOT):
     dirnames[:] = [d for d in dirnames if not d.startswith('.')]
     for f in files:
@@ -119,7 +119,7 @@ else:
     finally:
         os.unlink(f.name)
     if r.returncode:
-        err('JavaScript syntax error in duetsheet.html:\n' + (r.stderr or r.stdout).strip())
+        err('JavaScript syntax error in duetkifu.html:\n' + (r.stderr or r.stdout).strip())
     else:
         print('JavaScript syntax: OK')
 

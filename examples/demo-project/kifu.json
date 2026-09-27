@@ -1,0 +1,409 @@
+{
+ "schema": "duetkifu/0.1",
+ "kifu": {
+  "meta": {
+   "question": "Which combination of additives A and B gives the highest score?",
+   "context": "Synthetic demo data, not experimental results: four cycles of 15 formulations each.",
+   "metric": {
+    "name": "score",
+    "unit": "",
+    "better": "higher"
+   },
+   "groups": {
+    "C": "Cycles",
+    "X": "Dead ends",
+    "R": "Corrections",
+    "A": "Audit"
+   },
+   "createdAt": "2026-04-06T09:00:00Z"
+  }
+ },
+ "moves": {
+  "Q": {
+   "id": "Q",
+   "no": 1,
+   "title": "Which additives A and B give the highest score?",
+   "kind": "question",
+   "status": "active",
+   "group": "C",
+   "why": "Screen formulations in cycles of 15 runs, and let each cycle choose where the next one looks.",
+   "trigger": {
+    "kind": "user"
+   },
+   "when": "4/06",
+   "at": "2026-04-06",
+   "by": "user",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "The question itself: no numbers of its own."
+   }
+  },
+  "C1": {
+   "id": "C1",
+   "no": 2,
+   "title": "Cycle 1: 15 formulations over the whole range",
+   "kind": "attempt",
+   "parent": "Q",
+   "group": "C",
+   "status": "done",
+   "outcome": "success",
+   "why": "Start without assumptions: spread the first 15 runs over A and B from 0 to 5 wt%.",
+   "result": {
+    "text": "Median score 0.15, but one run stood out: 0.89 at A 2.14, B 1.47 wt%.",
+    "value": 0.892,
+    "n": 15
+   },
+   "note": "Most of the range scores low; the one good run is the lead to follow.",
+   "population": "Cycle 1, all 15 runs",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "4/10",
+   "at": "2026-04-10",
+   "by": "user",
+   "links": [
+    {
+     "type": "clue",
+     "to": "C3",
+     "note": "the 0.89 run at A 2.14 wt% was the first sign of the good region"
+    }
+   ],
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle1-runs.csv",
+      "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+      "size": 356,
+      "modified": "2026-09-25T14:09:51.912776Z",
+      "role": "raw"
+     }
+    ]
+   }
+  },
+  "X1": {
+   "id": "X1",
+   "no": 3,
+   "title": "High additive B (above 3.5 wt%)",
+   "kind": "attempt",
+   "parent": "C1",
+   "group": "X",
+   "status": "done",
+   "outcome": "failure",
+   "cause": "idea",
+   "causeConfirmed": true,
+   "why": "B is cheap: if more of it helped, the formulation would cost less.",
+   "reason": "None of the 3 runs with B above 3.5 wt% in cycles 1 and 2 scored above 0.06.",
+   "result": {
+    "text": "3 runs with B above 3.5 wt%, best score 0.06.",
+    "n": 3
+   },
+   "population": "Cycles 1 and 2, runs with B above 3.5 wt%",
+   "trigger": {
+    "kind": "self"
+   },
+   "when": "4/10",
+   "at": "2026-04-10",
+   "by": "claude",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle1-runs.csv",
+      "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+      "size": 356,
+      "modified": "2026-09-25T14:09:51.912776Z",
+      "role": "raw"
+     },
+     {
+      "path": "data/cycle2-runs.csv",
+      "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+      "size": 365,
+      "modified": "2026-09-25T14:09:51.923629Z",
+      "role": "raw"
+     }
+    ]
+   }
+  },
+  "C2": {
+   "id": "C2",
+   "no": 4,
+   "title": "Cycle 2: the model's suggestions",
+   "kind": "attempt",
+   "parent": "C1",
+   "group": "C",
+   "status": "done",
+   "outcome": "inconclusive",
+   "cause": "method",
+   "causeConfirmed": true,
+   "why": "Let the model pick 15 formulations from cycle 1.",
+   "reason": "The best run reached only 0.74; the cycle mixed a search of the edges with runs near the lead.",
+   "result": {
+    "text": "Median 0.31, best 0.74: higher than cycle 1 overall, lower at the top.",
+    "value": 0.74,
+    "n": 15
+   },
+   "note": "Read at first as \"the model got worse\"; see the correction R1.",
+   "population": "Cycle 2, all 15 runs",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "4/17",
+   "at": "2026-04-17",
+   "by": "user",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle2-runs.csv",
+      "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+      "size": 365,
+      "modified": "2026-09-25T14:09:51.923629Z",
+      "role": "raw"
+     }
+    ]
+   }
+  },
+  "R1": {
+   "id": "R1",
+   "no": 5,
+   "title": "Cycle 2 was exploring the edges on purpose",
+   "kind": "correction",
+   "parent": "C2",
+   "group": "R",
+   "status": "done",
+   "outcome": "success",
+   "why": "The low top score of cycle 2 looked like a worse model. The runs say otherwise.",
+   "result": {
+    "text": "6 of 15 runs were at A below 1 or above 3 wt%; the 4 runs between 2 and 3 wt% had a median of 0.50.",
+    "n": 15
+   },
+   "note": "The model was not worse; it spent half the cycle checking the edges.",
+   "population": "Cycle 2, all 15 runs, split by A",
+   "trigger": {
+    "kind": "user"
+   },
+   "when": "4/18",
+   "at": "2026-04-18",
+   "by": "user",
+   "links": [
+    {
+     "type": "corrects",
+     "to": "C2"
+    }
+   ],
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle2-runs.csv",
+      "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+      "size": 365,
+      "modified": "2026-09-25T14:09:51.923629Z",
+      "role": "raw"
+     }
+    ]
+   }
+  },
+  "X2": {
+   "id": "X2",
+   "no": 6,
+   "title": "Low additive A (below 1 wt%)",
+   "kind": "attempt",
+   "parent": "C2",
+   "group": "X",
+   "status": "done",
+   "outcome": "failure",
+   "cause": "idea",
+   "causeConfirmed": true,
+   "why": "A little A might be enough.",
+   "reason": "The 5 runs with A below 1 wt% in cycles 1 and 2 scored 0.15 at best.",
+   "result": {
+    "text": "5 runs, best score 0.15.",
+    "n": 5
+   },
+   "population": "Cycles 1 and 2, runs with A below 1 wt%",
+   "trigger": {
+    "kind": "self"
+   },
+   "when": "4/18",
+   "at": "2026-04-18",
+   "by": "claude",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle1-runs.csv",
+      "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+      "size": 356,
+      "modified": "2026-09-25T14:09:51.912776Z",
+      "role": "raw"
+     },
+     {
+      "path": "data/cycle2-runs.csv",
+      "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+      "size": 365,
+      "modified": "2026-09-25T14:09:51.923629Z",
+      "role": "raw"
+     }
+    ]
+   }
+  },
+  "C3": {
+   "id": "C3",
+   "no": 7,
+   "title": "Cycle 3: concentrate on A 1.9–3.31 wt%",
+   "kind": "attempt",
+   "parent": "C2",
+   "group": "C",
+   "status": "done",
+   "outcome": "success",
+   "why": "Cycles 1 and 2 point to the middle of the A range; stop exploring the edges.",
+   "result": {
+    "text": "14 of 15 runs scored 0.7 or more; median 0.85, best 0.96 at A 2.51, B 1.54 wt%.",
+    "value": 0.957,
+    "n": 15
+   },
+   "note": "The search has found the high-scoring region (Figure 1 of the report).",
+   "population": "Cycle 3, all 15 runs",
+   "trigger": {
+    "kind": "self"
+   },
+   "when": "4/24",
+   "at": "2026-04-24",
+   "by": "user",
+   "milestone": {
+    "kind": "turning-point",
+    "reason": "From here the question is where exactly in this region, not where."
+   },
+   "evidence": {
+    "steps": [
+     "s-combine-cycles"
+    ],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle3-runs.csv",
+      "sha256": "91ad19632d9a4b69ee60e91c403f6d5c5a674514f7d799395099d755df438423",
+      "size": 365,
+      "modified": "2026-09-25T14:09:51.930121Z",
+      "role": "raw"
+     },
+     {
+      "path": "derived_data/cycles1-3.csv",
+      "sha256": "1b89f96c8af97687633021a8ee8bbd0a5e77a6e9905dc23096266d718a2d3911",
+      "size": 955,
+      "modified": "2026-09-25T14:09:51.947156Z",
+      "role": "table",
+      "note": "cycles 1 to 3, combined"
+     }
+    ]
+   }
+  },
+  "AUD": {
+   "id": "AUD",
+   "no": 8,
+   "title": "Recompute the top five from the raw files",
+   "kind": "audit",
+   "parent": "C3",
+   "group": "A",
+   "status": "done",
+   "outcome": "success",
+   "why": "Before writing it up, check that the table of the best runs comes out of the raw files unchanged.",
+   "result": {
+    "text": "Rerunning combine_cycles.py gives the same table; the top five are runs #40, #43, #39, #36, #44.",
+    "n": 5
+   },
+   "population": "Cycles 1 to 3",
+   "trigger": {
+    "kind": "self"
+   },
+   "when": "4/25",
+   "at": "2026-04-25",
+   "by": "claude",
+   "links": [
+    {
+     "type": "supports",
+     "to": "C3"
+    }
+   ],
+   "evidence": {
+    "steps": [
+     "s-combine-cycles"
+    ],
+    "checks": [],
+    "files": [
+     {
+      "path": "derived_data/cycles1-3.csv",
+      "sha256": "1b89f96c8af97687633021a8ee8bbd0a5e77a6e9905dc23096266d718a2d3911",
+      "size": 955,
+      "modified": "2026-09-25T14:09:51.947156Z",
+      "role": "table"
+     }
+    ]
+   }
+  },
+  "C4": {
+   "id": "C4",
+   "no": 9,
+   "title": "Cycle 4: confirm the region (A 1.97–2.88 wt%)",
+   "kind": "attempt",
+   "parent": "C3",
+   "group": "C",
+   "status": "active",
+   "why": "Repeat inside the region with new formulations, to see whether the scores hold.",
+   "result": {
+    "text": "Measured, not in the report yet: median 0.87, best 0.96.",
+    "value": 0.962,
+    "n": 15
+   },
+   "population": "Cycle 4, all 15 runs",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/01",
+   "at": "2026-05-01",
+   "by": "user",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle4-runs.csv",
+      "sha256": "90914930196853d3ce400ce26d293e79fcac4c7d0d25f9ec3bff6c0499d4ca1b",
+      "size": 365,
+      "modified": "2026-09-25T14:09:51.938672Z",
+      "role": "raw"
+     }
+    ]
+   }
+  },
+  "P1": {
+   "id": "P1",
+   "no": 10,
+   "title": "Region A 2–3, B 1.8–3.4 wt%",
+   "kind": "attempt",
+   "parent": "C4",
+   "group": "C",
+   "status": "planned",
+   "why": "The next steps of the report: look for higher scores at larger B inside the good A range.",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/08",
+   "by": "user",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Planned: not run yet."
+   }
+  }
+ },
+ "changes": {}
+}

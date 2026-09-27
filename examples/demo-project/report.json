@@ -94,7 +94,8 @@
    "breakBefore": "auto",
    "type": "text",
    "text": "Run additional experiments in the region A = 2–3 and B = 1.8–3.4 wt% to check whether higher scores exist.",
-   "createdAt": "2026-09-22T00:00:00.000Z"
+   "createdAt": "2026-09-22T00:00:00.000Z",
+   "move": "P1"
   }
  },
  "datasets": {

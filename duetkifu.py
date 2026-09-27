@@ -1,36 +1,35 @@
 #!/usr/bin/env python3
-"""Duetsheet launcher: open a report for a data folder in the browser, with no folder picker.
+"""Duetkifu launcher: open a report for a data folder in the browser, with no folder picker.
 
-    python duetsheet.py [FOLDER]            start Duetsheet for FOLDER (default: the current folder)
-    python duetsheet.py check [FOLDER]      check the report in FOLDER and exit (exit code 1 on errors)
+    python duetkifu.py [FOLDER]            start Duetkifu for FOLDER (default: the current folder)
+    python duetkifu.py check [FOLDER]      check the report in FOLDER and exit (exit code 1 on errors)
                                             (--deep: re-read every file instead of trusting size and date)
-    python duetsheet.py step FOLDER --script S --in PATTERN --out PATTERN
+    python duetkifu.py step FOLDER --script S --in PATTERN --out PATTERN
                                             record a computation step: which script turned which files into which
-    python duetsheet.py annotations FOLDER  print the open annotations with what they point at (compact JSON for agents)
-    python duetsheet.py tree FOLDER         print the chapters as a tree of research branches, with their status and data
-    python duetsheet.py kifu check FOLDER   check kifu.json, the research record next to report.json (also part of check)
-    python duetsheet.py kifu tree FOLDER    print the moves of the research record as a tree
-    python duetsheet.py index FOLDER        build or update the search index of the folder (kept in ~/.duetsheet/index/)
-    python duetsheet.py find FOLDER "WORDS" search the text of every file in the folder; prints short excerpts
-    python duetsheet.py kifu show FOLDER MOVE
+    python duetkifu.py annotations FOLDER  print the open annotations with what they point at (compact JSON for agents)
+    python duetkifu.py kifu check FOLDER   check kifu.json, the research record next to report.json (also part of check)
+    python duetkifu.py kifu tree FOLDER    print the moves of the research record as a tree
+    python duetkifu.py index FOLDER        build or update the search index of the folder (kept in ~/.duetkifu/index/)
+    python duetkifu.py find FOLDER "WORDS" search the text of every file in the folder; prints short excerpts
+    python duetkifu.py kifu show FOLDER MOVE
                                             one move of the record with its data chain and excerpts of its source
-    python duetsheet.py extract FOLDER REPORT.html|SLIDES.pptx
+    python duetkifu.py extract FOLDER REPORT.html|SLIDES.pptx
                                             write the figures and tables of a report or slide deck to files, as a step
-    python duetsheet.py wait FOLDER         for an agent: wait until the user clicks "Ask the agent to revise", then exit
-    python duetsheet.py agent-status FOLDER working|done|failed [--note TEXT]
+    python duetkifu.py wait FOLDER         for an agent: wait until the user clicks "Ask the agent to revise", then exit
+    python duetkifu.py agent-status FOLDER working|done|failed [--note TEXT]
                                             for an agent: tell the page what it is doing
-    python duetsheet.py install-skill       install the /duetsheet skill for Claude Code
-    python duetsheet.py shortcut [FOLDER]   put a shortcut on the desktop that starts Duetsheet for FOLDER
-    python duetsheet.py init-agent [FOLDER] add a marked section to AGENTS.md and CLAUDE.md in FOLDER that points any agent to Duetsheet
+    python duetkifu.py install-skill       install the /duetkifu skill for Claude Code
+    python duetkifu.py shortcut [FOLDER]   put a shortcut on the desktop that starts Duetkifu for FOLDER
+    python duetkifu.py init-agent [FOLDER] add a marked section to AGENTS.md and CLAUDE.md in FOLDER that points any agent to Duetkifu
 
 Where the report lives:
   - If FOLDER contains report.json, FOLDER is the project folder (raw data in FOLDER/data/).
-  - Otherwise the report goes into FOLDER/duetsheet/ and FOLDER itself is the raw data folder.
+  - Otherwise the report goes into FOLDER/duetkifu/ and FOLDER itself is the raw data folder.
     Raw data files are only read, never written.
-  - Raw data stays outside duetsheet/ but inside FOLDER. Files computed from it (derived data, the scripts
-    that compute them) go into FOLDER/duetsheet/derived_data/ and FOLDER/duetsheet/scripts/.
+  - Raw data stays outside duetkifu/ but inside FOLDER. Files computed from it (derived data, the scripts
+    that compute them) go into FOLDER/duetkifu/derived_data/ and FOLDER/duetkifu/scripts/.
 
-The launcher serves duetsheet.html on 127.0.0.1 and lets that page read and write the project
+The launcher serves duetkifu.html on 127.0.0.1 and lets that page read and write the project
 folder. Every request needs a random token that is only given to the browser window it opens.
 Problems the page reports are printed here and appended to errors.log in the project folder,
 so an agent running this command sees them.
@@ -40,13 +39,24 @@ Python 3.8 or later, standard library only.
 import argparse, base64, csv, datetime, glob, hashlib, hmac, html.parser, http.server, json, mimetypes, os, pathlib, posixpath, re, secrets, shutil, socket, sqlite3, subprocess, sys, tempfile, threading, time, urllib.parse, webbrowser, zipfile
 import xml.etree.ElementTree as ET
 
-VERSION = '0.7.0'
-SCHEMA = 'duetsheet/0.7'
+VERSION = '0.8.0'
+SCHEMA = 'duetsheet/0.7'   # the report format is Duetsheet's; Duetkifu adds kifu.json next to it
 HERE = pathlib.Path(__file__).resolve().parent
-PAGE = HERE / 'duetsheet.html'
-SUBDIR = 'duetsheet'
-OWN = ('report.json', 'kifu.json', 'errors.log', 'assets', 'exports', 'habits', 'lang')   # what Duetsheet may write in the project folder
-SKIP_DIRS = {'.git', 'node_modules', '__pycache__', SUBDIR}
+PAGE = HERE / 'duetkifu.html'
+SUBDIR = 'duetkifu'
+WORKSPACES = (SUBDIR, 'duetsheet')   # duetsheet/: workspaces made by Duetsheet or before the rename, still opened as they are
+OWN = ('report.json', 'kifu.json', 'errors.log', 'assets', 'exports', 'habits', 'lang')   # what Duetkifu may write in the project folder
+SKIP_DIRS = {'.git', 'node_modules', '__pycache__', *WORKSPACES}
+
+
+def home_dir(name, env, old_ok=False):
+    """~/.duetkifu/<name>, or the folder in the environment variable DUETKIFU_<env> (DUETSHEET_<env> also works).
+    With old_ok, ~/.duetkifu/<name> is used while only that one exists (personal habits kept before the rename)."""
+    v = os.environ.get('DUETKIFU_' + env) or os.environ.get('DUETSHEET_' + env)
+    if v:
+        return pathlib.Path(v)
+    new, old = pathlib.Path.home() / '.duetkifu' / name, pathlib.Path.home() / '.duetsheet' / name
+    return old if old_ok and old.is_dir() and not new.exists() else new
 
 for stream in (sys.stdout, sys.stderr):
     try:
@@ -56,20 +66,23 @@ for stream in (sys.stdout, sys.stderr):
 
 
 def say(*parts):
-    print('[duetsheet]', *parts, flush=True)
+    print('[duetkifu]', *parts, flush=True)
 
 
 def project_of(root):
     """(project folder, raw data folder) for a folder the user opened."""
     if (root / 'report.json').is_file():
         return root, root / 'data'
+    for name in WORKSPACES:
+        if (root / name).is_dir():
+            return root / name, root
     return root / SUBDIR, root
 
 
 def atomic_write(path, data):
     """Write bytes through a temporary file and a rename, retrying while a sync client holds the file."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + '.' + secrets.token_hex(4) + '.duetsheet-tmp')
+    tmp = path.with_name(path.name + '.' + secrets.token_hex(4) + '.duetkifu-tmp')
     tmp.write_bytes(data)
     for attempt in range(5):
         try:
@@ -228,9 +241,7 @@ def block_dataset_ids(b):
     return []
 
 
-# ---------------------------------------------------------------- chapters and branches (duetsheet/0.7)
-
-STATUSES = ('active', 'paused', 'stopped', 'done')
+# ---------------------------------------------------------------- chapters
 
 
 def ordered_blocks(rep):
@@ -252,130 +263,16 @@ def is_chapter(b):
 
 
 def chapters(rep):
-    """Chapters in reading order and a list of problems. A chapter is a text block with a title; the blocks after it,
-    up to the next chapter, belong to it. Without "parent" a chapter follows the previous chapter of the main line
-    (the chapters without a parent). Each chapter: {id, title, status, parent, explicit, main, depth, blocks, kids}."""
-    chs, by, problems, cur = [], {}, [], None
+    """Chapters in reading order: a chapter is a text block with a title, and the blocks after it, up to the next
+    chapter, belong to it. Each chapter: {id, title, blocks}. (Duetsheet 0.7 also let a chapter branch off another,
+    with parent and status; the research record, kifu.json, does that now, and those fields are ignored.)"""
+    chs = []
     for b in ordered_blocks(rep):
         if is_chapter(b):
-            cur = {'id': b.get('id'), 'title': b.get('title'), 'block': b, 'blocks': [b], 'explicit': None,
-                   'parent': None, 'main': False, 'depth': 0, 'kids': []}
-            chs.append(cur)
-            by[cur['id']] = cur
-        elif cur:
-            cur['blocks'].append(b)
-    for c in chs:
-        p = c['block'].get('parent')
-        if p in (None, ''):
-            continue
-        if p == c['id'] or p not in by:
-            problems.append(f'blocks.{c["id"]}.parent "{p}" is not another chapter (a text block with a title)')
-        else:
-            c['explicit'] = p
-    for c in chs:
-        seen, x = {c['id']}, c['explicit']
-        while x:
-            if x in seen:
-                problems.append(f'blocks.{c["id"]}.parent: the branches form a loop')
-                c['explicit'] = None
-                break
-            seen.add(x)
-            x = by[x]['explicit']
-    prev = None
-    for c in chs:
-        s = c['block'].get('status')
-        if s not in (None, '') and s not in STATUSES:
-            problems.append(f'blocks.{c["id"]}.status must be active, paused, stopped or done')
-        c['status'] = s if s in STATUSES else 'active'
-        if c['explicit']:
-            c['parent'] = c['explicit']
-        else:
-            c['parent'], c['main'], prev = prev, True, c['id']
-    for c in chs:
-        if c['parent']:
-            by[c['parent']]['kids'].append(c)
-    for c in chs:   # the child that continues a line: the next main-line chapter, else the first branch
-        c['kids'].sort(key=lambda k: not k['main'])
-    stack = [(c, 0) for c in reversed(chs) if not c['parent']]
-    while stack:
-        c, d = stack.pop()
-        c['depth'] = d
-        stack += [(k, d + (1 if i else 0)) for i, k in reversed(list(enumerate(c['kids'])))]
-    return chs, problems
-
-
-def chapter_data(rep, c):
-    """(dataset ids, step ids from the first computation to the last) that a chapter uses."""
-    datasets = rep.get('datasets') if isinstance(rep.get('datasets'), dict) else {}
-    extra = c['block'].get('datasets') if isinstance(c['block'].get('datasets'), list) else []
-    ids = list(dict.fromkeys([i for b in c['blocks'] for i in block_dataset_ids(b)] + [i for i in extra if isinstance(i, str)]))
-    steps = [s for s in (rep.get('steps') or {}).values() if isinstance(s, dict) and isinstance(s.get('outputs'), list)]
-    made = {}
-    for s in sorted(steps, key=lambda s: str(s.get('at') or '')):   # the latest step that wrote a file counts
-        for r in s['outputs']:
-            if isinstance(r, dict) and r.get('path'):
-                made[norm(r['path'])] = s
-    used, seen = {}, set()
-    todo = [((datasets.get(i) or {}).get('source') or {}).get('path') for i in ids]
-    while todo:
-        p = todo.pop()
-        if not isinstance(p, str) or norm(p) in seen:
-            continue
-        seen.add(norm(p))
-        s = made.get(norm(p))
-        if s and s.get('id') not in used:
-            used[s.get('id')] = s
-            todo += [r.get('path') for r in s.get('inputs') or [] if isinstance(r, dict)]
-    return ids, [s.get('id') for s in sorted(used.values(), key=lambda s: str(s.get('at') or ''))]
-
-
-def print_tree(root):
-    """The chapters as an indented tree: status, data, computations, and what a branch adds."""
-    project, _ = project_of(root)
-    try:
-        rep = json.loads((project / 'report.json').read_text(encoding='utf-8-sig'))
-    except (OSError, ValueError) as err:
-        say('ERROR', 'cannot read report.json:', err)
-        return 1
-    chs, problems = chapters(rep)
-    title = ((rep.get('report') or {}).get('meta') or {}).get('title') or ''
-    print(f'{title}: {len(chs)} chapter(s), {sum(1 for c in chs if c["explicit"])} branch(es)')
-    if not chs:
-        print('  no chapters yet: a chapter is a text block with a title')
-    by = {c['id']: c for c in chs}
-    data = {c['id']: chapter_data(rep, c) for c in chs}
-
-    def line(c):
-        ind = '    ' * c['depth']
-        print(f'{ind}{"+-" if c["explicit"] else "* "} [{c["status"]}] {c["title"]}  ({c["id"]})')
-        ids, steps = data[c['id']]
-        if c['explicit']:
-            print(f'{ind}     branches from: {by[c["parent"]]["title"]} ({c["parent"]})')
-        if ids:
-            print(f'{ind}     data: {", ".join(ids)}')
-        if steps:
-            print(f'{ind}     steps: {" -> ".join(steps)}')
-        if c['explicit']:
-            pids, psteps = data[c['parent']]
-            new = [s for s in steps if s not in psteps] + [i for i in ids if i not in pids]
-            if new:
-                print(f'{ind}     new in this branch: {", ".join(new)}')
-
-    def lane(c):
-        x = c
-        while x:
-            line(x)
-            for k in x['kids']:
-                if k['depth'] > x['depth']:
-                    lane(k)
-            x = x['kids'][0] if x['kids'] and x['kids'][0]['depth'] == x['depth'] else None
-
-    for c in chs:
-        if not c['parent']:
-            lane(c)
-    for p in problems:
-        say('ERROR', p)
-    return 1 if problems else 0
+            chs.append({'id': b.get('id'), 'title': b.get('title'), 'blocks': [b]})
+        elif chs:
+            chs[-1]['blocks'].append(b)
+    return chs
 
 
 # ---------------------------------------------------------------- the research record (duetkifu/0.1)
@@ -798,7 +695,7 @@ def check_chain(project, root, rep, deep, out=None):
                 ok = False
             elif not inside(root, project, r['path']):
                 errors.append(f'{where}: {role} "{r["path"]}" is outside the folder "{root.name}". Raw data must be inside "{root.name}" '
-                              f'(outside duetsheet/), and paths are relative to the folder of report.json')
+                              f'(outside duetkifu/), and paths are relative to the folder of report.json')
                 ok = False
             elif not re.fullmatch(r'[0-9a-f]{64}', str(r.get('sha256', ''))):
                 warnings.append(f'{where}: {role} "{r["path"]}" has no sha256, so changes to it cannot be seen')
@@ -914,7 +811,7 @@ STYLE_FIELDS = {'font.family', 'font.size', 'font.label', 'marker', 'line', 'tic
 
 def check_report(project, root=None, deep=False, out=None):
     """Return (errors, warnings, notes) for project/report.json, as lists of strings.
-    root is the folder the user opens (the parent of duetsheet/, or project itself).
+    root is the folder the user opens (the parent of duetkifu/, or project itself).
     out, when given, receives 'report' (the parsed report) and 'stale' (see check_chain)."""
     errors, warnings, notes = [], [], []
     root = root or project
@@ -1042,22 +939,6 @@ def check_report(project, root=None, deep=False, out=None):
             elif not str(im.get('src', '')).startswith('data:image/'):
                 errors.append(f'{where}.image needs "asset" or a data:image/ "src"')
 
-    chs, problems = chapters(rep)
-    errors += problems
-    for key, b in blocks.items():
-        if not isinstance(b, dict):
-            continue
-        for f in ('parent', 'status', 'datasets'):
-            if b.get(f) not in (None, '', []) and not is_chapter(b):
-                warnings.append(f'blocks.{key}.{f} is only used on chapters (text blocks with a title)')
-        if b.get('datasets') is not None:
-            if not isinstance(b['datasets'], list) or not all(isinstance(i, str) for i in b['datasets']):
-                errors.append(f'blocks.{key}.datasets must be a list of dataset ids')
-            else:
-                errors += [f'blocks.{key}.datasets: "{i}" is not in datasets' for i in b['datasets'] if i not in datasets]
-    if any(c['explicit'] or c['block'].get('status') for c in chs):
-        counts = ', '.join(f'{n} {s}' for s in STATUSES for n in [sum(1 for c in chs if c['status'] == s)] if n)
-        notes.append(f'{len(chs)} chapters, {sum(1 for c in chs if c["explicit"])} branches ({counts})')
 
     for key, a in (rep.get('annotations') or {}).items():
         if not isinstance(a, dict):
@@ -1126,16 +1007,16 @@ def run_check(root, deep=False):
 
 # ---------------------------------------------------------------- the page asks the agent to act
 # The page's "Ask the agent to revise" button reaches an agent (Claude Code, Codex, ...) through small files in
-# ~/.duetsheet/run/<folder name>-<hash of the project path>/ (outside the project, so a sync client such as OneDrive
+# ~/.duetkifu/run/<folder name>-<hash of the project path>/ (outside the project, so a sync client such as OneDrive
 # does not upload a file every few seconds), so any agent that can run a command in the background can answer:
 #   launcher.json  written every few seconds by the running launcher (so waiting agents notice when it stops)
 #   request.json   the latest request from the page: {id, kind, open, at}. It carries no text, only a kind from KINDS.
-#   listening.json written every few seconds while an agent runs "duetsheet.py wait"
-#   status.json    what the agent reported with "duetsheet.py agent-status": {request, state, at, note}
+#   listening.json written every few seconds while an agent runs "duetkifu.py wait"
+#   status.json    what the agent reported with "duetkifu.py agent-status": {request, state, at, note}
 # A request is only a notice; the agent reads the annotations from report.json and treats them as feedback.
 
-RUN_DIR = pathlib.Path(os.environ.get('DUETSHEET_RUN_DIR') or pathlib.Path.home() / '.duetsheet' / 'run')
-PERSONAL_DIR = pathlib.Path(os.environ.get('DUETSHEET_HABITS_DIR') or pathlib.Path.home() / '.duetsheet' / 'habits')   # habits for all projects
+RUN_DIR = home_dir('run', 'RUN_DIR')
+PERSONAL_DIR = home_dir('habits', 'HABITS_DIR', old_ok=True)   # habits for all projects
 KINDS = ('revise',)
 STATES = ('working', 'done', 'failed')
 FRESH_S = 15          # an agent is listening when listening.json is younger than this
@@ -1145,7 +1026,7 @@ LAUNCHER_STALE_S = 30
 def agent_file(project, name):
     p = project.resolve()
     key = hashlib.sha1(str(p).lower().encode('utf-8')).hexdigest()[:12]
-    label = re.sub(r'[^\w.-]+', '_', (p.parent.name if p.name == SUBDIR else p.name))[:40]
+    label = re.sub(r'[^\w.-]+', '_', (p.parent.name if p.name in WORKSPACES else p.name))[:40]
     return RUN_DIR / f'{label}-{key}' / name
 
 
@@ -1190,7 +1071,7 @@ def wait_for_request(root):
     Meant to run in the background; each line it prints is something the agent should act on."""
     project, _ = project_of(root)
     if age_s(read_json(agent_file(project, 'launcher.json'))) > LAUNCHER_STALE_S:
-        say('LAUNCHER NOT RUNNING: start it first:', f'python "{HERE / "duetsheet.py"}" "{root}"')
+        say('LAUNCHER NOT RUNNING: start it first:', f'python "{HERE / "duetkifu.py"}" "{root}"')
         return 3
     beat = 0
     try:
@@ -1204,7 +1085,7 @@ def wait_for_request(root):
                     'Report progress with agent-status, then run wait again.')
                 return 0
             if age_s(read_json(agent_file(project, 'launcher.json'))) > LAUNCHER_STALE_S:
-                say('LAUNCHER STOPPED: Duetsheet is no longer running for', root)
+                say('LAUNCHER STOPPED: Duetkifu is no longer running for', root)
                 return 3
             time.sleep(1)
     except KeyboardInterrupt:
@@ -1236,7 +1117,7 @@ def open_annotations(root):
     blocks, datasets = rep.get('blocks') or {}, rep.get('datasets') or {}
     rounds, changes = (rep.get('rounds') or {}).values(), (rep.get('changes') or {}).values()
     last = max((r.get('at', '') for r in rounds if isinstance(r, dict)), default='')
-    chap_of = {b.get('id'): c for c in chapters(rep)[0] for b in c['blocks']}
+    chap_of = {b.get('id'): c for c in chapters(rep) for b in c['blocks']}
     kifu, _ = read_json_file(project / KIFU_FILE) if (project / KIFU_FILE).is_file() else (None, None)
     moves = kifu.get('moves') if isinstance(kifu, dict) and isinstance(kifu.get('moves'), dict) else {}
     out = []
@@ -1254,8 +1135,8 @@ def open_annotations(root):
             blk['image'] = {k: v for k, v in blk['image'].items() if k != 'src'}
         item = {'annotation': a, 'block': blk}
         ch = chap_of.get(t.get('blockId'))
-        if ch:   # the chapter (research branch) the block belongs to
-            item['chapter'] = {'id': ch['id'], 'title': ch['title'], 'status': ch['status'], 'branchesFrom': ch['explicit']}
+        if ch:   # the chapter the block belongs to
+            item['chapter'] = {'id': ch['id'], 'title': ch['title']}
         info = lambda ds: {'id': ds.get('id'), 'title': ds.get('title'), 'columns': ds.get('columns'),
                            'rows': len(ds.get('rows') or []), 'source': (ds.get('source') or {}).get('path')}
         dss = [datasets[i] for i in block_dataset_ids(b) if isinstance(datasets.get(i), dict)]
@@ -1291,7 +1172,7 @@ def open_annotations(root):
 # ---------------------------------------------------------------- the server
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = 'Duetsheet/' + VERSION
+    server_version = 'Duetkifu/' + VERSION
     root = None       # the folder the user opened
     token = ''
     port = 0
@@ -1322,7 +1203,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return True
 
     def authorised(self):
-        if not hmac.compare_digest(self.headers.get('X-Duetsheet-Token', ''), self.token):
+        if not hmac.compare_digest(self.headers.get('X-Duetkifu-Token', ''), self.token):
             self.send(403, 'missing or wrong token')
             return False
         return True
@@ -1360,7 +1241,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if not self.allowed():
             return
         path = urllib.parse.urlsplit(self.path).path
-        if path in ('/', '/index.html', '/duetsheet.html'):
+        if path in ('/', '/index.html', '/duetkifu.html'):
             return self.send(200, PAGE.read_bytes(), 'text/html; charset=utf-8')
         if not self.authorised():
             return
@@ -1383,7 +1264,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     return self.send(404, 'not found')
                 items = []
                 for c in sorted(p.iterdir(), key=lambda c: c.name):
-                    if c.name.startswith('.') or c.name.endswith('.duetsheet-tmp'):
+                    if c.name.startswith('.') or c.name.endswith(('.duetkifu-tmp', '.duetkifu-tmp')):
                         continue
                     st = c.stat()
                     items.append({'name': c.name, 'kind': 'directory' if c.is_dir() else 'file', 'size': st.st_size, 'mtime': st.st_mtime_ns // 1_000_000})
@@ -1487,7 +1368,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             p, _ = t
             if not self.writable(p):
-                return self.send(403, 'Duetsheet only writes in its own project folder')
+                return self.send(403, 'Duetkifu only writes in its own project folder')
             p.mkdir(parents=True, exist_ok=True)
             return self.send(200)
         self.send(404, 'not found')
@@ -1495,7 +1376,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_PUT(self):
         if not self.allowed() or not self.authorised():
             return
-        if urllib.parse.urlsplit(self.path).path == '/api/personal':   # {profile?, writing?} -> ~/.duetsheet/habits/
+        if urllib.parse.urlsplit(self.path).path == '/api/personal':   # {profile?, writing?} -> ~/.duetkifu/habits/
             try:
                 new = json.loads(self.rfile.read(min(int(self.headers.get('Content-Length', 0) or 0), 2_000_000)).decode('utf-8'))
                 assert isinstance(new, dict)
@@ -1512,10 +1393,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         p, is_dir = t
         if is_dir or not self.writable(p):
-            return self.send(403, 'Duetsheet only writes in its own project folder')
+            return self.send(403, 'Duetkifu only writes in its own project folder')
         body = self.rfile.read(int(self.headers.get('Content-Length', 0) or 0))
         p.parent.mkdir(parents=True, exist_ok=True)
-        tmp = p.with_name(p.name + '.' + secrets.token_hex(4) + '.duetsheet-tmp')
+        tmp = p.with_name(p.name + '.' + secrets.token_hex(4) + '.duetkifu-tmp')
         tmp.write_bytes(body)
         for attempt in range(5):   # a sync client (OneDrive, Dropbox) may hold the file for a moment
             try:
@@ -1545,10 +1426,10 @@ class Server(http.server.ThreadingHTTPServer):
 def serve(root, port, open_browser):
     project, data = project_of(root)
     if not PAGE.is_file():
-        say('ERROR', f'{PAGE} not found; keep duetsheet.py next to duetsheet.html')
+        say('ERROR', f'{PAGE} not found; keep duetkifu.py next to duetkifu.html')
         return 1
     try:
-        stable_app(False)  # keep ~/.duetsheet/app (used by shortcuts) as new as this plugin version
+        stable_app(False)  # keep ~/.duetkifu/app (used by shortcuts) as new as this plugin version
     except OSError as err:
         say('WARNING', 'could not update', STABLE, err)
     if (project / 'report.json').is_file():
@@ -1568,7 +1449,7 @@ def serve(root, port, open_browser):
         return 1
     Handler.root, Handler.token, Handler.port = root, token, httpd.server_address[1]
     url = f'http://127.0.0.1:{Handler.port}/#token={token}'
-    say('Duetsheet', VERSION, 'for', root)
+    say('Duetkifu', VERSION, 'for', root)
     say('Report:', project / 'report.json')
     say('Raw data (read only):', data)
     say('Open:', url)
@@ -1579,7 +1460,7 @@ def serve(root, port, open_browser):
 
     stop = threading.Event()
 
-    def heartbeat():   # lets "duetsheet.py wait" notice when the launcher stops
+    def heartbeat():   # lets "duetkifu.py wait" notice when the launcher stops
         while not stop.is_set():
             try:
                 write_json(agent_file(project, 'launcher.json'), {'at': now_iso(), 'pid': os.getpid(), 'port': Handler.port})
@@ -1608,7 +1489,7 @@ def record_step(root, a):
     project, _ = project_of(root)
     path = project / 'report.json'
     if not path.is_file():
-        say('ERROR', f'{path} does not exist; write the report (or start Duetsheet once) before recording steps')
+        say('ERROR', f'{path} does not exist; write the report (or start Duetkifu once) before recording steps')
         return 1
     fp = Fingerprints(project)
 
@@ -1821,11 +1702,11 @@ def read_pptx(path):
 
 
 def extract_report(root, report, note=''):
-    """Write the embedded images and the tables of an HTML report under duetsheet/derived_data/report_figures/<name>/,
+    """Write the embedded images and the tables of an HTML report under duetkifu/derived_data/report_figures/<name>/,
     with index.json (section, heading, caption of each), and record it as a step."""
     project, _ = project_of(root)
     if not (project / 'report.json').is_file():
-        say('ERROR', f'{project / "report.json"} does not exist; start Duetsheet once before extracting')
+        say('ERROR', f'{project / "report.json"} does not exist; start Duetkifu once before extracting')
         return 1
     src = pathlib.Path(report).expanduser()
     src = (src if src.is_absolute() else pathlib.Path.cwd() / src).resolve()
@@ -1881,8 +1762,8 @@ def extract_report(root, report, note=''):
             say(f'Removed step "{sid}"')
         return 0
     (out / 'index.json').write_text(json.dumps({'report': rel, 'items': index}, ensure_ascii=False, indent=1) + '\n', encoding='utf-8', newline='\n')
-    step = argparse.Namespace(script='', inputs=[rel], outputs=[f'{base}/*'], command=f'python duetsheet.py extract "{root.name}" "{rel}"',
-                              param=[], id=sid, by='claude', note=note or f'Figures and tables pulled out of {src.name} (duetsheet.py extract)')
+    step = argparse.Namespace(script='', inputs=[rel], outputs=[f'{base}/*'], command=f'python duetkifu.py extract "{root.name}" "{rel}"',
+                              param=[], id=sid, by='claude', note=note or f'Figures and tables pulled out of {src.name} (duetkifu.py extract)')
     say(f'{rel}: {nf} figure(s) and {nt} table(s) -> {base}/')
     return record_step(root, step)
 
@@ -1892,11 +1773,11 @@ def extract_report(root, report, note=''):
 # (mostly embedded images), slides, notes. Reading them to find one sentence costs an agent a lot. `index` keeps the
 # text of each file, cut into pieces with where each piece is (section, slide, sheet, move), in an SQLite database with
 # full-text search; `find` searches it and prints short excerpts, and `kifu show` prints one move with the excerpts of
-# its source. The database lives outside the project (~/.duetsheet/index/), because a sync client such as OneDrive
+# its source. The database lives outside the project (~/.duetkifu/index/), because a sync client such as OneDrive
 # can lock or duplicate a database file; it can be deleted at any time and is rebuilt. A file is read again only when
 # its size or modification time changed. Nothing in the folder is changed.
 
-INDEX_DIR = pathlib.Path(os.environ.get('DUETSHEET_INDEX_DIR') or pathlib.Path.home() / '.duetsheet' / 'index')
+INDEX_DIR = home_dir('index', 'INDEX_DIR')
 INDEX_VERSION = '1'
 PIECE = 1500          # characters per piece of text
 TEXT_EXT = {'.md', '.txt', '.py', '.r', '.m', '.jl', '.js', '.sh', '.ps1', '.bat', '.yaml', '.yml', '.toml', '.ini', '.cfg', '.log', '.tex', '.bib', '.rst'}
@@ -1907,7 +1788,7 @@ SKIP_INDEX_DIRS = {'.git', 'node_modules', '__pycache__', '.ipynb_checkpoints'}
 def index_file(project):
     p = project.resolve()
     key = hashlib.sha1(str(p).lower().encode('utf-8')).hexdigest()[:12]
-    label = re.sub(r'[^\w.-]+', '_', (p.parent.name if p.name == SUBDIR else p.name))[:40]
+    label = re.sub(r'[^\w.-]+', '_', (p.parent.name if p.name in WORKSPACES else p.name))[:40]
     return INDEX_DIR / f'{label}-{key}.sqlite'
 
 
@@ -2162,7 +2043,7 @@ def update_index(root, quiet=False):
         d = pathlib.Path(dirpath)
         dirs[:] = [x for x in dirs if not x.startswith('.') and x not in SKIP_INDEX_DIRS and not (d == project and x == CACHE_FILE[0])]
         for fn in files:
-            if fn.startswith('.') or fn.endswith('.duetsheet-tmp') or fn.startswith('~$'):
+            if fn.startswith('.') or fn.endswith(('.duetkifu-tmp', '.duetkifu-tmp')) or fn.startswith('~$'):
                 continue
             p = d / fn
             try:
@@ -2306,7 +2187,7 @@ def kifu_show(root, mid, refresh=True):
                 print(body[:900] + ('...' if len(body) > 900 else ''))
                 shown += 1
         elif rows:
-            print(f'\n({len(rows)} indexed piece(s) of {path}; search them with: duetsheet.py find FOLDER "<words>")')
+            print(f'\n({len(rows)} indexed piece(s) of {path}; search them with: duetkifu.py find FOLDER "<words>")')
     tabs = [f for f in ev.get('files') or [] if isinstance(f, dict) and f.get('role') == 'table']
     for f in tabs[:4]:
         r = con.execute("SELECT body FROM chunks WHERE path=? AND loc='columns'", (norm(f.get('path')),)).fetchone()
@@ -2318,23 +2199,23 @@ def kifu_show(root, mid, refresh=True):
 # ---------------------------------------------------------------- the Claude Code skill
 
 def install_skill(target):
-    src = HERE / 'skills' / 'duetsheet' / 'SKILL.md'
+    src = HERE / 'skills' / 'duetkifu' / 'SKILL.md'
     if not src.is_file():
         say('ERROR', f'{src} not found')
         return 1
-    dest = pathlib.Path(target).expanduser() / 'duetsheet'
+    dest = pathlib.Path(target).expanduser() / 'duetkifu'
     dest.mkdir(parents=True, exist_ok=True)
     text = src.read_text(encoding='utf-8').replace('${CLAUDE_PLUGIN_ROOT}', str(HERE))
     (dest / 'SKILL.md').write_text(text, encoding='utf-8')
     say('Installed', dest / 'SKILL.md')
-    say('In Claude Code, type /duetsheet (in a new session) to start.')
+    say('In Claude Code, type /duetkifu (in a new session) to start.')
     return 0
 
 
 # ---------------------------------------------------------------- a stable place for shortcuts and pointers
 
-APP_FILES = ('duetsheet.py', 'duetsheet.html', 'AGENTS.md', 'schema/report.schema.json')
-STABLE = pathlib.Path.home() / '.duetsheet' / 'app'
+APP_FILES = ('duetkifu.py', 'duetkifu.html', 'AGENTS.md', 'schema/report.schema.json')
+STABLE = pathlib.Path.home() / '.duetkifu' / 'app'
 
 
 def from_plugin_cache():
@@ -2344,7 +2225,7 @@ def from_plugin_cache():
 
 def stable_app(create):
     """The folder that shortcuts and AGENTS.md pointers should name. A Claude Code plugin lives in a cache folder
-    that changes with every update, so from there Duetsheet copies itself to ~/.duetsheet/app and names that."""
+    that changes with every update, so from there Duetkifu copies itself to ~/.duetkifu/app and names that."""
     if not from_plugin_cache():
         return HERE
     if create or STABLE.is_dir():
@@ -2356,7 +2237,7 @@ def stable_app(create):
 
 # ---------------------------------------------------------------- a pointer for other agents
 
-MARK_START, MARK_END = '<!-- duetsheet:start -->', '<!-- duetsheet:end -->'
+MARK_START, MARK_END = '<!-- duetkifu:start -->', '<!-- duetkifu:end -->'
 
 
 def init_agent(root):
@@ -2364,21 +2245,22 @@ def init_agent(root):
     py = f'"{sys.executable}"' if ' ' in sys.executable else sys.executable
     block = '\n'.join([
         MARK_START,
-        '## Duetsheet report',
+        '## Duetkifu: the report and the research record',
         '',
-        'This folder is reviewed with Duetsheet: the user reads and annotates the report in the browser while you write and revise it.',
+        'This folder is kept with Duetkifu: the report (report.json) and the record of every move of the research, dead ends included'
+        ' (kifu.json). The user reads, annotates and edits both in the browser while you write and revise them.',
         '',
         f'- Read the full rules before you change anything: `{app / "AGENTS.md"}`',
         f'- The report: `{project / "report.json"}`. Raw data files are only read, never changed.',
-        f'- Raw data stays inside "{root.name}", outside `duetsheet/`. Files computed from it go into `duetsheet/derived_data/`,'
-        ' the scripts into `duetsheet/scripts/`; record every script run with `duetsheet.py step`.',
-        f'- Check after every write: `{py} "{app / "duetsheet.py"}" check "{root}"`',
-        f'- Start it for the user (keep it running in the background): `{py} "{app / "duetsheet.py"}" "{root}"`',
-        f'- Then listen for the page\'s "Ask the agent to revise" button (also in the background): `{py} "{app / "duetsheet.py"}" wait "{root}"`;'
+        f'- Raw data stays inside "{root.name}", outside `duetkifu/`. Files computed from it go into `duetkifu/derived_data/`,'
+        ' the scripts into `duetkifu/scripts/`; record every script run with `duetkifu.py step`.',
+        f'- Check after every write: `{py} "{app / "duetkifu.py"}" check "{root}"`',
+        f'- Start it for the user (keep it running in the background): `{py} "{app / "duetkifu.py"}" "{root}"`',
+        f'- Then listen for the page\'s "Ask the agent to revise" button (also in the background): `{py} "{app / "duetkifu.py"}" wait "{root}"`;'
         ' see "Answer the Ask the agent to revise button" in AGENTS.md.',
         MARK_END, ''])
     # The same section in AGENTS.md (Codex, Copilot, Cursor and others) and CLAUDE.md (Claude Code). Only the part between
-    # the markers is Duetsheet's: running this again replaces it, and everything else in the files is kept as it is.
+    # the markers is Duetkifu's: running this again replaces it, and everything else in the files is kept as it is.
     # A marker counts only on a line of its own, so text that merely mentions it is never replaced.
     section = re.compile('^' + re.escape(MARK_START) + r'[ \t]*$.*?^' + re.escape(MARK_END) + r'[ \t]*$', re.M | re.S)
     for name in ('AGENTS.md', 'CLAUDE.md'):
@@ -2391,7 +2273,7 @@ def init_agent(root):
             new = (old.rstrip('\n') + '\n\n' if old.strip() else '') + block
         f.write_text(new, encoding='utf-8')
         say('Updated' if old else 'Created', f)
-    say('Agents that read AGENTS.md or CLAUDE.md (Claude Code, Codex, Copilot, Cursor and others) now know how to use Duetsheet here.')
+    say('Agents that read AGENTS.md or CLAUDE.md (Claude Code, Codex, Copilot, Cursor and others) now know how to use Duetkifu here.')
     return 0
 
 
@@ -2417,27 +2299,27 @@ def shortcut_name(root):
         title = json.loads((project / 'report.json').read_text(encoding='utf-8-sig'))['report']['meta']['title']
     except Exception:
         pass
-    name = str(title or (root.parent.name if root.name == SUBDIR else root.name)).strip()
+    name = str(title or (root.parent.name if root.name in WORKSPACES else root.name)).strip()
     name = re.sub(r'[\\/:*?"<>|\x00-\x1f]+', ' ', name).strip()[:60] or 'report'
-    return 'Duetsheet - ' + name
+    return 'Duetkifu - ' + name
 
 
 def make_shortcut(root, target):
     dest = pathlib.Path(target).expanduser() if target else desktop_dir()
     dest.mkdir(parents=True, exist_ok=True)
-    name, py, script = shortcut_name(root), sys.executable, stable_app(True) / 'duetsheet.py'
+    name, py, script = shortcut_name(root), sys.executable, stable_app(True) / 'duetkifu.py'
     if os.name == 'nt':
         # The .lnk is made in a temporary folder and then moved: Windows may keep PowerShell from writing to the
         # desktop (controlled folder access) while still letting Python do it. WScript.Shell only creates the file:
         # it stores paths in the ANSI code page, so the paths are set through Shell.Application, which keeps Unicode.
         link = dest / (name + '.lnk')
-        tmp = pathlib.Path(tempfile.mkdtemp(prefix='duetsheet-')) / 'shortcut.lnk'
+        tmp = pathlib.Path(tempfile.mkdtemp(prefix='duetkifu-')) / 'shortcut.lnk'
         q = lambda v: "'" + str(v).replace("'", "''") + "'"
         args = f'"{script}" "{root}"'
         ps = (f'$w=(New-Object -ComObject WScript.Shell).CreateShortcut({q(tmp)});$w.TargetPath={q(os.environ.get("COMSPEC", "cmd.exe"))};$w.Save();'
               f'$s=(New-Object -ComObject Shell.Application).NameSpace({q(tmp.parent)}).ParseName({q(tmp.name)}).GetLink;'
               f'$s.Path={q(py)};$s.Arguments={q(args)};$s.WorkingDirectory={q(root)};'
-              f'$s.Description={q("Start Duetsheet for " + root.name)};$s.Save()')
+              f'$s.Description={q("Start Duetkifu for " + root.name)};$s.Save()')
         enc = base64.b64encode(ps.encode('utf-16-le')).decode('ascii')
         r = subprocess.run(['powershell', '-NoProfile', '-NonInteractive', '-EncodedCommand', enc], capture_output=True, text=True, errors='replace')
         try:
@@ -2460,8 +2342,8 @@ def make_shortcut(root, target):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description='Duetsheet launcher', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
-    ap.add_argument('args', nargs='*', help='[check | step | annotations | tree | kifu check|tree|show | extract | index | find | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
+    ap = argparse.ArgumentParser(description='Duetkifu launcher', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
+    ap.add_argument('args', nargs='*', help='[check | step | annotations | kifu check|tree|show | extract | index | find | wait | agent-status | install-skill | shortcut | init-agent] [FOLDER]')
     ap.add_argument('--note', default='', help='step, agent-status: a short note')
     ap.add_argument('--port', type=int, default=0, help='port (default: first free port from 8765)')
     ap.add_argument('--no-browser', action='store_true', help='do not open a browser window')
@@ -2480,7 +2362,7 @@ def main(argv=None):
     st.add_argument('--by', default='claude', choices=('claude', 'user'), help='who ran it (claude stands for any agent)')
     ap.add_argument('--version', action='version', version=VERSION)
     a = ap.parse_args(argv)
-    cmds = ('check', 'step', 'annotations', 'tree', 'kifu', 'extract', 'index', 'find', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
+    cmds = ('check', 'step', 'annotations', 'kifu', 'extract', 'index', 'find', 'wait', 'agent-status', 'install-skill', 'shortcut', 'init-agent', 'serve')
     cmd = a.args[0] if a.args and a.args[0] in cmds else 'serve'
     rest = a.args[1:] if a.args and a.args[0] == cmd else a.args
     if cmd == 'install-skill':
@@ -2488,25 +2370,25 @@ def main(argv=None):
     state = None
     if cmd == 'agent-status':
         if not rest or rest[-1] not in STATES:
-            say('ERROR', 'usage: duetsheet.py agent-status FOLDER working|done|failed [--note TEXT]')
+            say('ERROR', 'usage: duetkifu.py agent-status FOLDER working|done|failed [--note TEXT]')
             return 1
         rest, state = rest[:-1], rest[-1]
     sub = None
     if cmd == 'kifu':
         if not rest or rest[0] not in ('check', 'tree', 'show') or (rest[0] == 'show' and len(rest) < 3):
-            say('ERROR', 'usage: duetsheet.py kifu check|tree FOLDER, or kifu show FOLDER MOVE')
+            say('ERROR', 'usage: duetkifu.py kifu check|tree FOLDER, or kifu show FOLDER MOVE')
             return 1
         sub, rest = rest[0], rest[1:]
         if sub == 'show':
             rest, move = rest[:1], rest[1]
     if cmd == 'find':
         if len(rest) < 2:
-            say('ERROR', 'usage: duetsheet.py find FOLDER "WORDS" [--limit N]')
+            say('ERROR', 'usage: duetkifu.py find FOLDER "WORDS" [--limit N]')
             return 1
         rest, query = rest[:1], ' '.join(rest[1:])
     if cmd == 'extract':
         if len(rest) < 2:
-            say('ERROR', 'usage: duetsheet.py extract FOLDER REPORT.html [REPORT.html ...]')
+            say('ERROR', 'usage: duetkifu.py extract FOLDER REPORT.html [REPORT.html ...]')
             return 1
         rest, reports = rest[:1], rest[1:]
     root = pathlib.Path(rest[0] if rest else os.getcwd()).expanduser().resolve()
@@ -2519,8 +2401,6 @@ def main(argv=None):
         return record_step(root, a)
     if cmd == 'annotations':
         return open_annotations(root)
-    if cmd == 'tree':
-        return print_tree(root)
     if cmd == 'kifu':
         return kifu_show(root, move, not a.no_refresh) if sub == 'show' else run_kifu(root, sub, a.deep)
     if cmd == 'index':
