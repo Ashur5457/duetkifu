@@ -178,13 +178,6 @@ main{min-width:0}
 .toc .tocl:hover{text-decoration:underline}
 .toc .lead{flex:1 1 20px;border-bottom:1px dotted var(--line)}
 .toc .pg{color:var(--muted);font-variant-numeric:tabular-nums}
-.toc .stc{font-weight:400}
-/* chapters and branches */
-.stc{display:inline-block;font:500 11.5px/1.5 var(--sans);padding:0 7px;border-radius:9px;border:1px solid currentColor;white-space:nowrap;vertical-align:middle}
-.st-active{--st:var(--accent)}.st-paused{--st:var(--c2)}.st-stopped{--st:var(--c0)}.st-done{--st:var(--ok)}
-.stc.st-active,.stc.st-paused,.stc.st-stopped,.stc.st-done{color:var(--st)}
-.btitle .stc{margin-left:10px}
-.brof{color:var(--muted);font-size:13px;margin:-2px 0 6px}
 #tree{max-width:980px}
 .treeintro{color:var(--muted);font-size:13.5px;margin:0 0 14px}
 .tlane{display:flex;flex-direction:column;gap:10px}
@@ -197,15 +190,7 @@ main{min-width:0}
 .tnode .tm{color:var(--muted);font-size:13px}
 .tnode .tl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13.5px}
 .tnode .tl .k{color:var(--muted)}
-.tnode .tl.newhere{color:var(--c2);font-weight:600}
-.tnode .tl.newhere .k{color:var(--c2)}
-.tnode .tc{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13px;margin-top:2px}
-.tnode .tc select{font-size:13px;padding:2px 4px;max-width:260px}
-.tnode .tc .sp{flex:1}
 /* the research record (kifu.json): a discovery tree */
-.tswitch{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 12px}
-.tswitch button{border:0;background:var(--paper);color:var(--ink);padding:4px 14px;font:inherit;font-size:13px;cursor:pointer}
-.tswitch button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 #tree.kifu{max-width:1320px}
 .kq{font:700 19px/1.45 var(--serif);margin:0 0 6px;max-width:75ch}
 .kstats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
@@ -247,6 +232,8 @@ main{min-width:0}
 .kedge.dead{stroke-dasharray:4 3}.kedge.todo{stroke:var(--accent);stroke-dasharray:3 3;opacity:.7}
 .kedge.onpath{stroke:var(--accent);stroke-width:2.6}
 .knode{cursor:pointer;outline:none}
+.knode.draggable{cursor:grab}
+.knode.dragging{cursor:grabbing;opacity:.85}
 .klbl{font:500 12.5px var(--sans);fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4.5px;stroke-linejoin:round}
 .knode.sh-dead .klbl{fill:var(--muted)}
 .knode.onpath .klbl,.knode.sh-dir .klbl,.knode.sh-out .klbl,.knode.sh-root .klbl{font-weight:700}
@@ -293,6 +280,10 @@ main{min-width:0}
 .ksrc{font-size:13px;color:var(--muted)}.ksrc a{color:var(--accent)}
 .ksrc .mono,.kdata .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere}
 .kdata{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.kcomments{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column}
+.kcomments h3{font-size:15px;margin:0 0 4px}
+.kcomments .anno{padding:8px 0}
+.kcomments .cbox{margin-top:8px}
 .kdata h3{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px;margin:0}
 .kchain{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--muted)}
 .kdata h5{margin:8px 0 2px;font-size:12.5px;font-weight:500;color:var(--muted)}
@@ -549,9 +540,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
 <header class="top"><div class="in">
   <h1 id="doc-title">Duetsheet</h1>
   <div class="seg" id="modes" role="group" aria-label="Mode">
-    <button type="button" data-mode="view" aria-pressed="true">View</button>
-    <button type="button" data-mode="edit" aria-pressed="false">Edit</button>
-    <button type="button" data-mode="tree" aria-pressed="false">Kifu</button>
+    <button type="button" data-mode="view" aria-pressed="true">Report view</button>
+    <button type="button" data-mode="edit" aria-pressed="false">Report edit</button>
+    <button type="button" data-mode="kifu-view" aria-pressed="false">Kifu view</button>
+    <button type="button" data-mode="kifu-edit" aria-pressed="false">Kifu edit</button>
   </div>
   <span class="hint" id="hint"></span>
   <button type="button" class="btn issues" id="issuesBtn" hidden aria-label="Problems"></button>
@@ -1483,7 +1475,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Why this move": "為什麼走這一手",
  "Background": "背景",
  "The whole record": "整份棋譜",
- "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 的啟動程式已經停止，現在無法讀取或儲存任何東西。請重新啟動它（例如用桌面捷徑），再重新整理這個頁面。"
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 的啟動程式已經停止，現在無法讀取或儲存任何東西。請重新啟動它（例如用桌面捷徑），再重新整理這個頁面。",
+ "Report view": "報告閱覽",
+ "Report edit": "報告編輯",
+ "Kifu view": "棋譜閱覽",
+ "Kifu edit": "棋譜編輯",
+ "Move": "手",
+ "Recompute this": "重算這一手",
+ "Needs a clearer reason": "原因說得不夠清楚",
+ "Add to the report": "加進報告",
+ "Reopen this": "重新打開這一手",
+ "Recompute this against the raw files and say whether it still holds.": "請對照原始檔重算這一手，說它還成不成立。",
+ "Write down why this move stopped, and what would make it worth reopening.": "請寫下這一手為什麼停下，以及什麼情況下值得重新打開。",
+ "Add the report chapter that discusses this move to its source.": "請把講到這一手的報告章節加進它的出處。",
+ "Check whether this move corrects or is corrected by another one.": "請查一下這一手有沒有更正別的手，或被別的手更正。",
+ "Placed by hand on the tree diagram.": "已在樹狀圖上手動移動過位置。",
+ "Drag this move on the tree diagram to place it by hand.": "在樹狀圖上拖曳這一手可以手動安排位置。",
+ "Reset position": "恢復自動位置",
+ "This move no longer exists": "這一手已經不存在了",
+ "(move not found)": "（找不到這一手）",
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（來自 kifu.json），包含走不通的路。拖曳節點可以安排位置；點標題可以閱讀。"
 },
 "zh-Hans": {
  "_name": "简体中文",
@@ -2335,7 +2346,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Why this move": "为什么走这一手",
  "Background": "背景",
  "The whole record": "整份棋谱",
- "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 的启动程序已经停止，现在无法读取或保存任何内容。请重新启动它（例如用桌面快捷方式），再刷新这个页面。"
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 的启动程序已经停止，现在无法读取或保存任何内容。请重新启动它（例如用桌面快捷方式），再刷新这个页面。",
+ "Report view": "报告阅览",
+ "Report edit": "报告编辑",
+ "Kifu view": "棋谱阅览",
+ "Kifu edit": "棋谱编辑",
+ "Move": "手",
+ "Recompute this": "重算这一手",
+ "Needs a clearer reason": "原因说得不够清楚",
+ "Add to the report": "加入报告",
+ "Reopen this": "重新打开这一手",
+ "Recompute this against the raw files and say whether it still holds.": "请对照原始文件重算这一手，说它还成不成立。",
+ "Write down why this move stopped, and what would make it worth reopening.": "请写下这一手为什么停下，以及什么情况下值得重新打开。",
+ "Add the report chapter that discusses this move to its source.": "请把讲到这一手的报告章节加入它的出处。",
+ "Check whether this move corrects or is corrected by another one.": "请查一下这一手有没有更正别的手，或被别的手更正。",
+ "Placed by hand on the tree diagram.": "已在树状图上手动移动过位置。",
+ "Drag this move on the tree diagram to place it by hand.": "在树状图上拖动这一手可以手动安排位置。",
+ "Reset position": "恢复自动位置",
+ "This move no longer exists": "这一手已经不存在了",
+ "(move not found)": "（找不到这一手）",
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（来自 kifu.json），包括走不通的路。拖动节点可以安排位置；点标题可以阅读。"
 },
 "ja": {
  "_name": "日本語",
@@ -3187,7 +3217,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Why this move": "なぜこの手か",
  "Background": "背景",
  "The whole record": "棋譜全体",
- "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet の起動プログラムが停止したため、読み込みも保存もできません。もう一度起動して（デスクトップのショートカットなど）、このページを再読み込みしてください。"
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet の起動プログラムが停止したため、読み込みも保存もできません。もう一度起動して（デスクトップのショートカットなど）、このページを再読み込みしてください。",
+ "Report view": "レポート閲覧",
+ "Report edit": "レポート編集",
+ "Kifu view": "棋譜閲覧",
+ "Kifu edit": "棋譜編集",
+ "Move": "手",
+ "Recompute this": "これを再計算",
+ "Needs a clearer reason": "理由がわかりにくい",
+ "Add to the report": "レポートに追加",
+ "Reopen this": "この手を再開",
+ "Recompute this against the raw files and say whether it still holds.": "元データでこの手を再計算し、まだ成り立つか教えてください。",
+ "Write down why this move stopped, and what would make it worth reopening.": "なぜこの手を止めたか、どうなれば再開する価値があるか書いてください。",
+ "Add the report chapter that discusses this move to its source.": "この手を扱うレポートの章を出典に追加してください。",
+ "Check whether this move corrects or is corrected by another one.": "この手が他の手を訂正しているか、訂正されているか確認してください。",
+ "Placed by hand on the tree diagram.": "ツリー図で手動配置済み。",
+ "Drag this move on the tree diagram to place it by hand.": "ツリー図でこの手をドラッグすると手動で配置できます。",
+ "Reset position": "自動配置に戻す",
+ "This move no longer exists": "この手はもうありません",
+ "(move not found)": "（該当する手が見つかりません）",
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json に記録された研究のすべての手（行き止まりも含む）。ノードをドラッグして配置し、タイトルをクリックして読めます。"
 },
 "ko": {
  "_name": "한국어",
@@ -4039,7 +4088,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Why this move": "왜 이 수인가",
  "Background": "배경",
  "The whole record": "기보 전체",
- "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 실행 프로그램이 멈춰서 더 이상 읽거나 저장할 수 없습니다. 다시 실행한 뒤(예: 바탕화면 바로 가기) 이 페이지를 새로 고치세요."
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "Duetsheet 실행 프로그램이 멈춰서 더 이상 읽거나 저장할 수 없습니다. 다시 실행한 뒤(예: 바탕화면 바로 가기) 이 페이지를 새로 고치세요.",
+ "Report view": "보고서 보기",
+ "Report edit": "보고서 편집",
+ "Kifu view": "기보 보기",
+ "Kifu edit": "기보 편집",
+ "Move": "수",
+ "Recompute this": "이것을 재계산",
+ "Needs a clearer reason": "이유가 불명확함",
+ "Add to the report": "보고서에 추가",
+ "Reopen this": "이 수를 다시 열기",
+ "Recompute this against the raw files and say whether it still holds.": "원시 파일로 이 수를 재계산해서 아직 성립하는지 알려주세요.",
+ "Write down why this move stopped, and what would make it worth reopening.": "이 수를 왜 멈췄는지, 어떤 경우에 다시 열 가치가 있는지 적어주세요.",
+ "Add the report chapter that discusses this move to its source.": "이 수를 다루는 보고서 장을 출처에 추가해 주세요.",
+ "Check whether this move corrects or is corrected by another one.": "이 수가 다른 수를 정정하는지, 정정되는지 확인해 주세요.",
+ "Placed by hand on the tree diagram.": "트리 그림에서 손으로 배치함.",
+ "Drag this move on the tree diagram to place it by hand.": "트리 그림에서 이 수를 드래그하면 손으로 배치할 수 있습니다.",
+ "Reset position": "자동 배치로 되돌리기",
+ "This move no longer exists": "이 수는 더 이상 존재하지 않습니다",
+ "(move not found)": "(수를 찾을 수 없음)",
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json에 기록된 연구의 모든 수(막다른 길 포함). 노드를 드래그해 배치하고, 제목을 클릭해 읽을 수 있습니다."
 },
 "es": {
  "_name": "Español",
@@ -4891,7 +4959,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Why this move": "Por qué este paso",
  "Background": "Contexto",
  "The whole record": "Todo el registro",
- "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "El lanzador de Duetsheet se ha detenido, así que ya no se lee ni se guarda nada. Vuelve a iniciarlo (por ejemplo con el acceso directo del escritorio) y recarga esta página."
+ "The Duetsheet launcher has stopped, so nothing is read or saved any more. Start it again (for example with the desktop shortcut), then reload this page.": "El lanzador de Duetsheet se ha detenido, así que ya no se lee ni se guarda nada. Vuelve a iniciarlo (por ejemplo con el acceso directo del escritorio) y recarga esta página.",
+ "Report view": "Ver informe",
+ "Report edit": "Editar informe",
+ "Kifu view": "Ver kifu",
+ "Kifu edit": "Editar kifu",
+ "Move": "Paso",
+ "Recompute this": "Recalcular esto",
+ "Needs a clearer reason": "Necesita una razón más clara",
+ "Add to the report": "Añadir al informe",
+ "Reopen this": "Reabrir esto",
+ "Recompute this against the raw files and say whether it still holds.": "Recalcula este paso con los archivos brutos y di si se sostiene.",
+ "Write down why this move stopped, and what would make it worth reopening.": "Anota por qué se detuvo este paso y qué lo haría valer la pena reabrir.",
+ "Add the report chapter that discusses this move to its source.": "Añade a su fuente el capítulo del informe que trata este paso.",
+ "Check whether this move corrects or is corrected by another one.": "Comprueba si este paso corrige a otro o es corregido por otro.",
+ "Placed by hand on the tree diagram.": "Colocado a mano en el diagrama de árbol.",
+ "Drag this move on the tree diagram to place it by hand.": "Arrastra este paso en el diagrama de árbol para colocarlo a mano.",
+ "Reset position": "Restablecer posición",
+ "This move no longer exists": "Este paso ya no existe",
+ "(move not found)": "(paso no encontrado)",
+ "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "Cada paso de la investigación según kifu.json, incluidos los callejones sin salida. Arrastra un nodo para colocarlo; haz clic en un título para leerlo."
 }
 }
 </script>
@@ -5272,8 +5359,7 @@ function buildTable(b,host){
 /* ---------- Blocks (view style) ---------- */
 function buildViewBlock(b,interactive){
   const d=h('div',{class:'blk','data-id':b.id});
-  if(b.title)d.append(h('h2',{class:'btitle'},[b.title,isChapter(b)&&statusOf(b)!=='active'?statusChip(statusOf(b)):null]));
-  if(isChapter(b)){const c=chapters().byId.get(b.id);if(c&&c.explicit)d.append(h('p',{class:'brof',text:tr('Branch of "{t}"',{t:chapters().byId.get(c.parent).b.title})}))}
+  if(b.title)d.append(h('h2',{class:'btitle'},[b.title]));
   if(b.type==='text')d.append(h('div',{class:'md',html:md(b.text)}));
   else if(b.type==='chart'){const svg=el('svg',{});d.append(svg);const G=drawChart(svg,b);if(G){S.geo[b.id]=G;if(interactive)bindDraw(G,svg)}}
   else if(b.type==='table')buildTable(b,d);
@@ -5287,15 +5373,11 @@ function buildViewBlock(b,interactive){
 function buildOutline(b){
   const all=orderedBlocks(),rest=all.slice(all.findIndex(x=>x.id===b.id)+1).filter(x=>x.title&&x.type!=='outline');
   if(!rest.length)return h('p',{class:'cap',text:tr('Blocks with a title after this one will be listed here.')});
-  let under=false,depth=0; // indent figures and tables only once a heading is above them; chapters by their branch depth
-  const C=chapters();
-  return h('ol',{class:'toc'},rest.map(x=>{const p=pageOfBlock(x.id),c=x.type==='text'&&C.byId.get(x.id);if(x.type==='text'){under=true;depth=c?c.depth:depth}
-    const li=h('li',{class:under&&x.type!=='text'?'l2':'l1'},[
+  let under=false; // indent figures and tables only once a heading is above them
+  return h('ol',{class:'toc'},rest.map(x=>{const p=pageOfBlock(x.id);if(x.type==='text')under=true;
+    return h('li',{class:under&&x.type!=='text'?'l2':'l1'},[
       h('button',{type:'button',class:'tocl',text:x.title,onclick:()=>jumpTo(x.id)}),
-      c&&C.usesStatus?statusChip(statusOf(x)):null,
-      h('span',{class:'lead'}),h('span',{class:'pg',text:p>=0?String(p+1):''})]);
-    if(depth)li.style.paddingLeft=(depth*1.5+(under&&x.type!=='text'?1.5:0))+'em';
-    return li}));
+      h('span',{class:'lead'}),h('span',{class:'pg',text:p>=0?String(p+1):''})])}));
 }
 /* Blocks that stay together. "avoid" goes under the previous block; "beside" starts a right-hand column next to the group. */
 function blockGroups(blocks){
@@ -5313,113 +5395,20 @@ function buildGroup(g,interactive){
   return [h('div',{class:'duo'},[col('main',g.main),col('side',g.side)])];
 }
 
-/* ---------- Chapters and branches (duetsheet/0.7) ----------
-   A chapter is a text block with a title; the blocks after it, up to the next chapter, belong to it.
-   parent: the chapter it branches from. Without one, a chapter follows the previous chapter of the main line
-   (the chapters without a parent), so an older report is one straight line.
-   status: active, paused, stopped or done (none means active). datasets: extra datasets the chapter uses. */
-const STATUSES=['active','paused','stopped','done'];
-const STATUS_TEXT={active:'Active',paused:'Paused',stopped:'Stopped',done:'Done'};
+/* A chapter is just a text block with a title (a report section); "isChapter" is used for the table of contents
+   and to let a chapter block name which move of the research record it tells (block.move -> kifu.json move id).
+   Duetsheet/0.7 also let a chapter branch off another with parent/status, drawn as a tree in this same Tree mode;
+   that is gone (2026-09-27) — the research record (kifu.json) now owns branches, status and dead ends, and a
+   report is read as one straight line again, as before v0.7. */
 const isChapter=b=>!!b&&b.type==='text'&&!!String(b.title||'').trim();
-const statusOf=b=>STATUSES.includes(b&&b.status)?b.status:'active';
-const statusChip=st=>h('span',{class:'stc st-'+st,text:trc('status',STATUS_TEXT[st])});
-function chapters(){ // rebuilt on every render
-  if(S.chapMemo)return S.chapMemo;
-  const list=[],byId=new Map(),problems=[];let cur=null;
-  orderedBlocks().forEach(b=>{if(isChapter(b)){cur={id:b.id,b,blocks:[b],explicit:null,parent:null,kids:[],depth:0};list.push(cur);byId.set(b.id,cur)}else if(cur)cur.blocks.push(b)});
-  list.forEach(c=>{const p=c.b.parent;if(p==null||p==='')return;
-    if(p===c.id||!byId.has(p)){problems.push(tr('Chapter "{t}" branches from "{p}", which is not a chapter of this report; it is shown on the main line.',{t:c.b.title,p:String(p)}));return}
-    c.explicit=p});
-  list.forEach(c=>{const seen=new Set([c.id]);for(let x=c.explicit;x;x=byId.get(x).explicit){
-    if(seen.has(x)){problems.push(tr('Chapter "{t}" is part of a loop of branches; it is shown on the main line.',{t:c.b.title}));c.explicit=null;break}seen.add(x)}});
-  list.forEach(c=>{if(c.b.status!=null&&c.b.status!==''&&!STATUSES.includes(c.b.status))problems.push(tr('Chapter "{t}" has an unknown status "{s}"; it is shown as active.',{t:c.b.title,s:String(c.b.status)}))});
-  let prevMain=null;
-  list.forEach(c=>{if(c.explicit)c.parent=c.explicit;else{c.parent=prevMain;c.main=true;prevMain=c.id}});
-  list.forEach(c=>{if(c.parent)byId.get(c.parent).kids.push(c)});
-  // the child that continues a chapter's line: the next main-line chapter, otherwise the first branch; the others branch off
-  list.forEach(c=>c.kids.sort((a,b)=>(b.main?1:0)-(a.main?1:0)));
-  const roots=list.filter(c=>!c.parent),walk=(c,d)=>{c.depth=d;c.kids.forEach((k,i)=>walk(k,i?d+1:d))};roots.forEach(c=>walk(c,0));
-  const usesStatus=list.some(c=>c.b.status!=null&&c.b.status!=='');
-  S.chapLogged=S.chapLogged||new Set();
-  problems.forEach(m=>{if(!S.chapLogged.has(m)){S.chapLogged.add(m);logIssue('warning',m)}});
-  return S.chapMemo={list,byId,roots,usesStatus,of:id=>{let c=null;for(const x of list){if(x.blocks.some(b=>b.id===id)){c=x;break}}return c}};
-}
-function chapterData(c){ // the datasets a chapter uses and every step they come from
-  if(c.data)return c.data;
-  const ids=new Set();c.blocks.forEach(b=>blockDatasetIds(b).forEach(id=>ids.add(id)));
-  (Array.isArray(c.b.datasets)?c.b.datasets:[]).forEach(id=>ids.add(id));
-  const datasets=[...ids].map(id=>S.datasets.get(id)).filter(Boolean);
-  const C=chain(),steps=new Set(),seen=new Set();
-  const up=p=>{p=normPath(p);if(seen.has(p))return;seen.add(p);const s=C.madeBy.get(p);if(!s||steps.has(s))return;steps.add(s);(s.inputs||[]).forEach(r=>r&&r.path&&up(r.path))};
-  datasets.forEach(d=>d.source&&d.source.path&&up(d.source.path));
-  const withSrc=datasets.filter(d=>d.source&&d.source.path);
-  return c.data={datasets,steps:[...steps].sort((a,b)=>(a.at||'')<(b.at||'')?-1:1),
-    state:withSrc.length?worst(withSrc.map(d=>C.datasetStatus(d).state)):null};
-}
-function chapterDiff(c){ // what a chapter uses that the chapter it branches from does not
-  const p=c.parent&&chapters().byId.get(c.parent);if(!p)return null;
-  const a=chapterData(c),b=chapterData(p),bs=new Set(b.steps.map(s=>s.id)),bd=new Set(b.datasets.map(d=>d.id));
-  return{steps:a.steps.filter(s=>!bs.has(s.id)),datasets:a.datasets.filter(d=>!bd.has(d.id)),parent:p};
-}
-async function saveChapter(b,patch){ // parent or status; an empty value removes the field
-  const n={...b};Object.entries(patch).forEach(([k,v])=>{if(v==null||v==='')delete n[k];else n[k]=v});
-  await saveBlock(n);
-}
-async function branchFrom(c){ // a new chapter after this one and its branches, so the branches already there keep their place
-  leaveField();
-  const id=uid('b-'),t=now();
-  const b={id,type:'text',title:tr('New branch of "{t}"',{t:c.b.title}),text:tr('What this branch tries, and why.'),caption:'',breakBefore:'page',parent:c.id,status:'active',createdAt:t};
-  const o=orderedBlocks().map(x=>x.id),sub=[],walk=x=>{sub.push(x);x.kids.forEach(k=>{if(k.explicit)walk(k)})};walk(c);
-  const at=Math.max(...sub.flatMap(x=>x.blocks.map(y=>o.indexOf(y.id))));o.splice(at+1,0,id);
-  S.blocks.set(id,b);S.meta={...S.meta,order:o};
-  await put('blocks/'+id,b);await put('report/meta',S.meta);
-  await recordChange({blockId:id,field:'add',before:null,after:typeName('text'),name:b.title});
-  setMode('edit');
-  const n=$(`.cw[data-id="${id}"]`);if(n){n.scrollIntoView({behavior:'smooth',block:'center'});const ti=n.querySelector('.ed-title');if(ti){ti.focus({preventScroll:true});ti.select()}}
-}
 function renderTree(){
-  const host=$('#treehost');host.replaceChildren();S.geo={};$('#tree').classList.remove('kifu');
-  const C=chapters(),K=S.kifu?kifuModel():null,both=!!K&&K.list.length>0&&C.list.length>0;
-  const view=K&&K.list.length&&!(both&&S.treeView==='chapters')?'kifu':'chapters';
-  if(both)host.append(h('div',{class:'tswitch',role:'group','aria-label':tr('Show')},[['kifu','Kifu'],['chapters','Chapters']].map(([v,t])=>
-    h('button',{type:'button','aria-pressed':String(view===v),text:tr(t),onclick:()=>{S.treeView=v;render()}}))));
-  $('#hint').textContent=S.readonly?$('#hint').textContent:tr(view==='kifu'?'Every move of the research from kifu.json, dead ends included.':HINT.tree);
-  if(view==='kifu'){renderKifu(host,K);return}
-  if(K&&!K.list.length)host.append(h('p',{class:'treeintro',text:tr('{file} has no moves yet.',{file:KIFU_FILE})}));
-  if((!K||!K.list.length)&&canEditKifu())host.append(h('p',{},[h('button',{type:'button',class:'btn small primary',text:tr('Start a research record'),onclick:startKifu}),
+  const host=$('#treehost');host.replaceChildren();S.geo={};$('#tree').classList.add('kifu');
+  const K=S.kifu?kifuModel():null;
+  $('#hint').textContent=S.readonly?$('#hint').textContent:tr(HINT.tree);
+  if(K&&K.list.length){renderKifu(host,K);return}
+  host.append(h('p',{class:'treeintro',text:tr('{file} has no moves yet.',{file:KIFU_FILE})}));
+  if(canEditKifu())host.append(h('p',{},[h('button',{type:'button',class:'btn small primary',text:tr('Start a research record'),onclick:startKifu}),
     h('span',{class:'kln',text:' '+tr('Every attempt, dead ends included, goes into {file} next to report.json.',{file:KIFU_FILE})})]));
-  if(!C.list.length){host.append(h('p',{class:'treeintro',text:tr('Text blocks with a title are chapters. This report has none yet: give a text block a title in Edit mode.')}));return}
-  host.append(h('p',{class:'treeintro',text:S.readonly?tr('Each box is a chapter. Click a title to read it.')
-    :tr('Each box is a chapter. Set its status, or where it branches from; click a title to read it. The reading order does not change.')}));
-  const lane=(c,out)=>{for(let x=c;x;x=x.kids[0]&&x.kids[0].depth===x.depth?x.kids[0]:null){
-      out.push(treeNode(x));const br=x.kids.filter(k=>k.depth>x.depth);
-      if(br.length)out.push(h('div',{class:'tbr'},br.map(k=>{const l=[];lane(k,l);return h('div',{class:'tlane'},l)})))}
-    return out};
-  C.roots.forEach(r=>host.append(h('div',{class:'tlane'},lane(r,[]))));
-}
-function treeNode(c){
-  const C=chapters(),b=c.b,st=statusOf(b),data=chapterData(c),diff=chapterDiff(c),p=pageOfBlock(b.id);
-  const n={chart:0,table:0,image:0};c.blocks.forEach(x=>{if(n[x.type]!=null)n[x.type]++});
-  const counts=[n.chart?tr('{n} charts',{n:n.chart}):'',n.table?tr('{n} tables',{n:n.table}):'',n.image?tr('{n} images',{n:n.image}):''].filter(Boolean);
-  const kids=[h('div',{class:'th'},[statusChip(st),
-    h('button',{type:'button',class:'tt',text:b.title,title:tr('Read this chapter'),onclick:()=>{setMode('view');jumpTo(b.id)}}),
-    h('span',{class:'tm',text:[p>=0?tr('page {n}',{n:p+1}):'',...counts].filter(Boolean).join(' · ')})])];
-  if(c.explicit&&!c.main){const pc=C.byId.get(c.parent);kids.push(h('div',{class:'tl'},[h('span',{class:'k',text:tr('Branches from')}),h('span',{text:pc.b.title})]))}
-  if(data.datasets.length)kids.push(h('div',{class:'tl'},[data.state?dot(data.state):null,h('span',{class:'k',text:tr('Data')}),
-    h('span',{text:data.datasets.map(d=>d.title||d.id).join(tr(', '))})]));
-  if(data.steps.length)kids.push(h('div',{class:'tl'},[h('span',{class:'k',text:tr('Computed by')}),h('span',{text:data.steps.map(scriptName).join(' → ')})]));
-  if(diff&&c.explicit&&(diff.steps.length||diff.datasets.length)){
-    const parts=[...diff.steps.map(scriptName),...diff.datasets.map(d=>d.title||d.id)];
-    kids.push(h('div',{class:'tl newhere'},[h('span',{class:'k',text:tr('New in this branch')}),h('span',{text:parts.join(tr(', '))})]))}
-  if(!S.readonly){
-    const ss=h('select',{'aria-label':tr('Status'),onchange:e=>saveChapter(b,{status:e.target.value})},STATUSES.map(s=>h('option',{value:s,text:trc('status',STATUS_TEXT[s])})));ss.value=st;
-    const below=new Set();const mark=x=>{below.add(x.id);x.kids.forEach(k=>{if(k.explicit)mark(k)})};mark(c); // itself and its branches
-    const ps=h('select',{'aria-label':tr('Branches from'),onchange:e=>saveChapter(b,{parent:e.target.value})},
-      [h('option',{value:'',text:tr('(main line)')}),...C.list.filter(x=>!below.has(x.id)).map(x=>h('option',{value:x.id,text:x.b.title}))]);
-    ps.value=c.explicit||'';
-    kids.push(h('div',{class:'tc'},[h('label',{},[tr('Status')+' ',ss]),h('label',{},[tr('Branches from')+' ',ps]),h('span',{class:'sp'}),
-      h('button',{type:'button',class:'btn small',text:tr('Branch from here'),title:tr('Add a new chapter that branches from this one'),onclick:()=>branchFrom(c)})]))}
-  return h('div',{class:'tnode st-'+st,'data-id':b.id},kids);
 }
 
 /* ---------- The research record (kifu.json, duetkifu/0.1) ----------
@@ -5607,6 +5596,8 @@ function kifuSVG(K,F,P,V){
       if(!x.kids.length)pos.set(x.id,{x:ML+d*COL,y:MT+leaf++*ROW});
       else{x.kids.forEach(k=>lay(k,d+1));pos.set(x.id,{x:ML+d*COL,y:(pos.get(x.kids[0].id).y+pos.get(x.kids[x.kids.length-1].id).y)/2})}};
     K.list.filter(x=>!x.parent).forEach(r=>lay(r,0));W=ML+maxD*COL+260;H=MT+Math.max(0,leaf-1)*ROW+40;
+    // a move can be dragged to a place of its own (m.pos, tree diagram only); make room for it
+    K.list.forEach(x=>{const p=x.m.pos;if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){pos.set(x.id,{x:p.x,y:p.y});W=Math.max(W,p.x+220);H=Math.max(H,p.y+40)}});
   }
   const svg=el('svg',{class:'ktree'+(V.xl?'':' noxl'),viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'group','aria-label':tr('{n} moves',{n:K.list.length}),'data-mode':V.mode});
   svg.dataset.w=W;svg.dataset.h=H;
@@ -5634,9 +5625,30 @@ function kifuSVG(K,F,P,V){
     if(f.chain.level&&f.chain.level!=='none')el('circle',{cx:-9,cy:9,r:3.2,class:`kdot lv-${f.chain.level} st-${f.chain.state||'unchecked'}`},g);
     const t=String(m.title||x.id),max=leafLbl?26:15,lx=leafLbl?(f.shape==='root'?18:12):-4,ly=leafLbl?4.5:(f.shape==='root'?-19:-13);
     el('text',{class:'klbl',x:lx,y:ly},g).textContent=t.length>max?t.slice(0,max-1)+'…':t;
-    g.addEventListener('click',()=>selectMove(x.id,false));
-    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectMove(x.id,false)}})});
+    g.addEventListener('click',()=>{if(g.dataset.justDragged){delete g.dataset.justDragged;return}selectMove(x.id,false)});
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectMove(x.id,false)}});
+    if(V.layout==='tree'&&canEditKifu()&&V.edit)bindNodeDrag(g,x.id,svg,p)});
   return svg}
+function svgPoint(svg,clientX,clientY){const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
+function bindNodeDrag(g,id,svg,start0){ // drag a move to a place of its own; a small move is still a click (selectMove)
+  g.classList.add('draggable');
+  let down=null;
+  g.addEventListener('pointerdown',e=>{if(e.button!==0||!e.isPrimary)return;
+    down={cx:e.clientX,cy:e.clientY,x0:start0.x,y0:start0.y,moved:false};g.setPointerCapture(e.pointerId)});
+  g.addEventListener('pointermove',e=>{if(!down)return;
+    if(!down.moved&&Math.hypot(e.clientX-down.cx,e.clientY-down.cy)<5)return;
+    down.moved=true;g.classList.add('dragging');
+    const a=svgPoint(svg,down.cx,down.cy),b=svgPoint(svg,e.clientX,e.clientY);
+    down.nx=down.x0+(b.x-a.x);down.ny=down.y0+(b.y-a.y);
+    g.setAttribute('transform',`translate(${down.nx},${down.ny})`)});
+  const end=e=>{if(!down)return;g.classList.remove('dragging');try{g.releasePointerCapture(e.pointerId)}catch(x){}
+    if(down.moved){g.dataset.justDragged='1';const nx=Math.round(down.nx),ny=Math.round(down.ny);
+      kifuWrite(d=>{const m=d.moves[id];if(!m)return false;const before=m.pos?{...m.pos}:null;const after={x:nx,y:ny};
+        if(before&&before.x===after.x&&before.y===after.y)return false;m.pos=after;kifuChange(d,id,'pos',before,after)})}
+    down=null};
+  g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+}
+function resetMovePos(id){kifuWrite(d=>{const m=d.moves[id];if(!m||!m.pos)return false;const before={...m.pos};delete m.pos;kifuChange(d,id,'pos',before,null)})}
 function zoomKifu(z,quiet){const V=kifuView(),svg=$('#treehost svg.ktree'),stage=$('#treehost .kstage');if(!svg)return;
   const W=+svg.dataset.w,H=+svg.dataset.h;
   if(z==='fit')z=Math.min((stage.clientWidth-8)/W,(stage.clientHeight-8)/H);
@@ -5751,7 +5763,8 @@ async function startKifu(){ // a record for a folder that has none yet: the rese
     d.schema='duetkifu/0.1';d.kifu={meta:{question:'',createdAt:now()}};
     d.moves.Q={id:'Q',no:1,parent:null,title:tr('What does this research ask?'),kind:'question',status:'active',trigger:{kind:'user'},by:'user',at:now().slice(0,10),evidence:{steps:[],checks:[]}};
     kifuChange(d,'Q','add',null,d.moves.Q.title)});
-  const V=kifuView();V.sel='Q';V.edit=true;S.treeView='kifu';render()}
+  const V=kifuView();V.sel='Q';V.edit=true;S.mode='tree';document.body.dataset.mode='tree';
+  $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===currentModeButton())));render()}
 let kifuPick=null;
 function kifuFilePicks(){ // files a move can point at: the top of the folder, derived data and extracted figures, imported data
   if(kifuPick)return kifuPick;
@@ -5798,7 +5811,9 @@ function moveEditor(x,K,F){ // the selected move as a form
     fld(tr('Follows'),sel('parent',K.list.filter(y=>!below.has(y.id)).map(y=>h('option',{value:y.id,text:moveNo(y.m)+' '+y.id+' '+(y.m.title||'')})),true)),
     h('div',{class:'kf2'},[fld(tr('Group'),(()=>{const i=inp('group');i.setAttribute('list','kgroups');return i})(),gl),
       fld(tr('When'),inp('when','text','8/24')),fld(tr('Date'),inp('at','date'))]),
-    h('div',{class:'kf2'},[fld(tr('Started by'),sel('trigger.kind',opt(TRIGGER_TEXT),true)),fld(tr('Who'),inp('trigger.who'))])));
+    h('div',{class:'kf2'},[fld(tr('Started by'),sel('trigger.kind',opt(TRIGGER_TEXT),true)),fld(tr('Who'),inp('trigger.who'))]),
+    m.pos?h('p',{class:'kln'},[tr('Placed by hand on the tree diagram.')+' ',h('button',{type:'button',class:'linkbtn',text:tr('Reset position'),onclick:()=>resetMovePos(id)})]):
+      h('p',{class:'kln',text:tr('Drag this move on the tree diagram to place it by hand.')})));
   // review marks
   const markSel=(field,map,noteKey)=>{const s=h('select',{onchange:e=>{const v=e.target.value,cur=m[field]&&typeof m[field]==='object'?m[field]:{};
       editMove(id,field,v?{...cur,kind:v}:null)}},[h('option',{value:'',text:'—'}),...opt(map)]);s.value=(m[field]&&m[field].kind)||'';return s};
@@ -5844,6 +5859,7 @@ function moveEditor(x,K,F){ // the selected move as a form
   if(ch.length)out.push(h('details',{class:'klog'},[h('summary',{text:tr('Changes to this move ({n})',{n:ch.length})}),
     h('ul',{},ch.slice(0,30).map(c=>h('li',{},[h('span',{class:'kdate',text:shortTime(c.at)+' '+(c.by==='claude'?tr('by the agent'):tr('by you'))+' '}),
       h('b',{text:c.field}),h('span',{text:': '+(c.before==null?'—':plainText(c.before)).slice(0,60)+' → '+(c.after==null?'—':plainText(c.after)).slice(0,60)})])))]));
+  out.push(moveComments(id)||'',moveCommentBox(id));
   return out;
 }
 
@@ -5950,6 +5966,7 @@ function movePanel(x,K,F){ // the selected move, in full (as a form in Edit)
         c.decidedBy?h('div',{class:'kln',text:c.decidedBy==='user'?tr('decided by you'):tr('decided by {who}',{who:c.decidedBy})}):null,
         c.note?h('div',{class:'kln',text:c.note}):null])])))])]));
   out.push(box);
+  out.push(moveComments(x.id)||'');
   return out;
 }
 
@@ -6135,7 +6152,7 @@ function category(f){if(f==='title'||f==='text'||f==='caption')return tr('Text')
 function valueText(f,v,blockId){
   if(f==='dataset')return v?tr('{n} rows, {c} columns',{n:v.rows,c:v.columns}):tr('(none)');
   if(f==='parent')return v?blockName(v):tr('(main line)');
-  if(f==='status')return trc('status',STATUS_TEXT[STATUSES.includes(v)?v:'active']);
+  if(f==='status')return String(v||'active'); // duetsheet/0.7 chapter branches: removed, kept only so old change-log entries still render
   if(f==='datasets')return Array.isArray(v)&&v.length?v.map(id=>{const d=S.datasets.get(id);return d?(d.title||d.id):id}).join(tr(', ')):tr('(none)');
   if(f==='chart.dataset'||f==='table.dataset'){const d=S.datasets.get(v);return d?(d.title||d.id):String(v??'')}
   if(f==='chart.series')return Array.isArray(v)&&v.length?v.map(s=>s.label||((S.datasets.get(s.dataset)||{}).title)||s.dataset).join(tr(', ')):tr('(none)');
@@ -6315,7 +6332,8 @@ const PRESETS={
   text:['More concise','More formal','Add data','Add citation','Claim too strong','Translate'],
   chart:['Change chart type','Change axes','Use log scale','Add error bars','Add trend line','Highlight key points','Change colours'],
   table:['Add units','Change sort','Add/remove columns','Highlight key points'],
-  image:['Crop','Add labels','Replace image','Add caption']};
+  image:['Crop','Add labels','Replace image','Add caption'],
+  move:['Recompute this','Needs a clearer reason','Add to the report','Reopen this']};
 const tagId=label=>label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const TAG_LABEL=new Map(Object.values(PRESETS).flat().map(l=>[tagId(l),l]));
 [['add-data-files','Add these files to the chart'],['replace-data-files','Replace the data with these files']].forEach(([id,l])=>TAG_LABEL.set(id,l)); // requests made from Folder > Data
@@ -6353,7 +6371,7 @@ function commentBox(b){
   tools.push(h('span',{class:'sp'}));
   tools.push(h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:()=>submitDraft(b.id)}));
   tools.push(h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:()=>submitAndAsk(b.id)}));
-  box.append(ta,examplesFor(d.target&&d.target.kind!=='block'&&b.type==='chart'?'region':isChapter(b)?'chapter':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},tools));
+  box.append(ta,examplesFor(d.target&&d.target.kind!=='block'&&b.type==='chart'?'region':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},tools));
   if(visual)box.append(h('p',{class:'chint',text:b.type==='chart'?tr('Draw around points on the chart with the mouse, or click one point.'):tr('Draw around a region of the figure with the mouse.')}));
   return box;
 }
@@ -6371,6 +6389,49 @@ async function submitDraft(id){
 }
 async function submitAndAsk(id){if(await submitDraft(id))await askAgent()}
 
+/* A move of the research record is annotated the same way as a report block (target.kind:"move", moveId): a comment
+   box under it in Kifu Edit, replies threaded, and the same "Ask the agent to revise" pipeline — a move is, in effect,
+   a page of its own that the agent can be asked to work on, the way a report block is. */
+function moveCommentBox(id){
+  const key='move:'+id,d=draftOf(key);
+  const box=h('div',{class:'cbox'});
+  box.append(h('div',{class:'chips'},(PRESETS.move||[]).map(label=>{const tid=tagId(label);
+    const c=h('button',{type:'button',class:'chip','aria-pressed':String(d.tags.includes(tid)),text:tr(label)});
+    c.onclick=()=>{d.tags=d.tags.includes(tid)?d.tags.filter(x=>x!==tid):[...d.tags,tid];c.setAttribute('aria-pressed',String(d.tags.includes(tid)))};return c})));
+  const ta=h('textarea',{class:'cin',rows:'2',placeholder:tr('Describe what to change (or just pick tags above). Ctrl + Enter to send.'),'data-fid':fid({id:key},'comment')});ta.value=d.text;
+  ta.addEventListener('input',()=>{d.text=ta.value});
+  ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();submitMoveDraft(id)}});
+  const tools=[h('span',{class:'sp'}),
+    h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:()=>submitMoveDraft(id)}),
+    h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:()=>submitAndAskMove(id)})];
+  box.append(ta,examplesFor('move',ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},tools));
+  return box;
+}
+async function submitMoveDraft(id){
+  const key='move:'+id,d=draftOf(key),text=d.text.trim();
+  if(!text&&!d.tags.length){toast(tr('Write a comment or pick a tag first'));return false}
+  const no=S.annos.reduce((m,a)=>Math.max(m,a.no||0),0)+1;
+  const a={id:uid('a'),no,target:{kind:'move',moveId:id},tags:[...d.tags],text,status:'open',reply:'',createdAt:now()};
+  if(d.withFiles!==false&&S.fsel&&S.fsel.size){a.files=[...S.fsel].map(normPath).sort();S.fsel.clear()}
+  S.drafts.delete(key);S.annos=[...S.annos,a];render();
+  await put('annotations/'+a.id,a);toast(tr('Comment sent #')+no);
+  return true;
+}
+async function submitAndAskMove(id){if(await submitMoveDraft(id))await askAgent()}
+function moveComments(id){ // the thread for this move, wherever it is shown (View or Edit)
+  const list=S.annos.filter(a=>a.target&&a.target.kind==='move'&&a.target.moveId===id).sort((p,q)=>(q.no||0)-(p.no||0));
+  if(!list.length)return null;
+  return h('div',{class:'kcomments'},[h('h3',{text:tr('Comments')}),...list.map(a=>{const done=a.status==='done';
+    return h('div',{class:'anno'+(done?' is-done':'')},[
+      h('div',{class:'atop'},[h('span',{class:'no',text:String(a.no||'?')}),h('span',{class:'chip2',text:done?tr('Done'):tr('Open')})]),
+      a.tags&&a.tags.length?h('p',{class:'tags'},a.tags.map(x=>h('span',{class:'tag',text:tagText(x)}))):null,
+      a.text?h('p',{class:'txt',text:a.text}):null,
+      ...threadOf(a).map(m=>h('p',{class:'reply'+(m.by==='user'?' me':'')},[h('strong',{text:m.by==='user'?tr('You: '):tr('Agent: ')}),m.text])),
+      !S.readonly&&threadOf(a).some(m=>m.by!=='user')?replyBox(a):null,
+      !S.readonly?h('div',{class:'acts'},[h('button',{type:'button',text:done?tr('Reopen'):tr('Mark done'),onclick:()=>setStatus(a,done?'open':'done')}),
+        h('button',{type:'button',text:tr('Delete'),onclick:()=>removeAnno(a)})]):null])})]);
+}
+
 /* Example requests: general scientific wording the user can insert and edit; [...] marks what to fill in */
 const EXAMPLES={
   chart:[['Appearance',['Use a log scale for the Y axis.','Set the Y axis range from […] to […].','Make it a line chart, sorted by […].']],
@@ -6383,8 +6444,7 @@ const EXAMPLES={
   table:[['',['Sort by […] and show the first […] rows.','Add units to the column headers.','Add a column with […].','Show the mean and standard deviation per […].']]],
   text:[['',['Make it shorter and keep the numbers.','Give the source dataset for every number.','Make the conclusion more cautious: separate what the data shows from interpretation.','Add a short method paragraph: how the numbers were computed.']]],
   image:[['',['Replace it with […].','Crop the white space and enlarge […].','Write a caption that explains the axes and units.']]],
-  chapter:[['Text',['Make it shorter and keep the numbers.','Give the source dataset for every number.','Make the conclusion more cautious: separate what the data shows from interpretation.','Add a short method paragraph: how the numbers were computed.']],
-    ['Branch',['In this branch, use […] instead of […]; keep everything else as in the chapter it branches from.','Compute this branch into new files, and do not change the files of the chapter it branches from.','Compare the result of this branch with the chapter it branches from, in one chart.','Write down why this branch stopped, and what would make it worth reopening.']]]};
+  move:[['',['Recompute this against the raw files and say whether it still holds.','Write down why this move stopped, and what would make it worth reopening.','Add the report chapter that discusses this move to its source.','Check whether this move corrects or is corrected by another one.']]]};
 function examplesFor(kind,ta,d){ // a closed list; a click puts the sentence into the comment box, to edit
   const groups=EXAMPLES[kind];if(!groups)return null;
   const insert=s=>{const v=ta.value,at=ta.selectionStart??v.length,pre=v.slice(0,at),sep=pre&&!/\s$/.test(pre)?' ':'';
@@ -6411,8 +6471,6 @@ function renderEdit(){
     del.onclick=()=>{if(del.dataset.arm){removeBlock(b.id)}else{del.dataset.arm='1';del.textContent=tr('Confirm delete?');setTimeout(()=>{if(del.isConnected){delete del.dataset.arm;del.textContent=tr('Delete')}},3000)}};
     card.append(h('div',{class:'chead'},[
       h('span',{class:'hdl',title:tr('Drag to reorder'),text:'⠿'}),h('span',{text:isChapter(b)?tr('Chapter'):typeName(b.type)}),
-      isChapter(b)&&(chapters().usesStatus||b.parent)?statusChip(statusOf(b)):null,
-      isChapter(b)&&chapters().byId.get(b.id).explicit?h('span',{class:'meta',text:tr('Branch of "{t}"',{t:blockName(chapters().byId.get(b.id).parent)})}):null,
       tooTall?h('span',{class:'warn',text:tr('Taller than one page; it will shrink or scroll in view mode')}):null,
       blockDatasetIds(b).some(id=>S.stale.has(id))?h('span',{class:'warn',text:tr('Source data changed since import')}):
         blockChainState(b)==='stale'?h('span',{class:'warn',text:tr('Needs recomputing')}):null,
@@ -6446,11 +6504,13 @@ function renderCompact(){
 }
 
 /* ---------- Comment text ---------- */
-const KIND={block:'Block',point:'Data point',box:'Box',lasso:'Lasso'};
+const KIND={block:'Block',point:'Data point',box:'Box',lasso:'Lasso',move:'Move'};
 function ids(l){const a=(l||[]).slice(0,10).map(i=>'#'+i).join(' ');return(l||[]).length>10?a+' …':a}
 function blockName(id){const b=S.blocks.get(id);if(!b){const c=S.changes.find(c=>c.blockId===id&&c.name);return c?c.name:tr('(deleted block)')}return b.title||tr('{t} block',{t:typeName(b.type)})}
 function describe(t){
-  try{const nm=blockName(t.blockId);
+  try{
+    if(t.kind==='move'){const mv=(S.kifu&&S.kifu.data&&S.kifu.data.moves)||{},m=mv[t.moveId];return m?moveNo(m)+' '+(m.title||t.moveId):tr('(move not found)')}
+    const nm=blockName(t.blockId);
     if(t.kind==='block')return nm+(t.quote?tr(': "{q}"',{q:t.quote.length>40?t.quote.slice(0,40)+'…':t.quote}):'');
     if(t.kind==='point'){const b=S.blocks.get(t.blockId),ds=b&&b.chart&&pointDataset(b,t),r=ds&&ds.rows.find(r=>r.id===t.rowId),s=b&&ds?seriesFor(b,ds.id):{};
       return tr('{nm}: data point #{id}',{nm,id:t.rowId})+(t.datasetId&&ds?' · '+seriesName(s):'')+(r?tr(' ({xl} {xv}, {yl} {yv})',{xl:colLabel(ds,s.x),xv:fmt(r[s.x]),yl:colLabel(ds,s.y),yv:fmt(r[s.y])}):'')}
@@ -6497,7 +6557,7 @@ function renderAnnos(){
       ...threadOf(a).map(m=>h('p',{class:'reply'+(m.by==='user'?' me':'')},[h('strong',{text:m.by==='user'?tr('You: '):tr('Agent: ')}),m.text])),
       !S.readonly&&threadOf(a).some(m=>m.by!=='user')?replyBox(a):null,
       h('div',{class:'acts'},[
-        h('button',{type:'button',text:tr('Jump to'),onclick:()=>jumpTo(t.blockId,a.id)}),
+        h('button',{type:'button',text:tr('Jump to'),onclick:()=>t.kind==='move'?jumpToMove(t.moveId):jumpTo(t.blockId,a.id)}),
         h('button',{type:'button',text:done?tr('Reopen'):tr('Mark done'),onclick:()=>setStatus(a,done?'open':'done')}),
         h('button',{type:'button',text:tr('Delete'),onclick:()=>removeAnno(a)})])]))});
 }
@@ -6506,6 +6566,10 @@ function jumpTo(id,annoId){
   if(S.mode==='view'){const p=pageOfBlock(id);if(p>=0&&p!==S.page){S.page=p;render()}}
   const n=S.mode==='view'?$(`#pagehost .blk[data-id="${id}"]`):$(`.cw[data-id="${id}"]`);
   if(n){n.scrollIntoView({behavior:'smooth',block:'center'});const f=[n,...(annoId?$$(`[data-anno="${annoId}"]`):[])];f.forEach(x=>x.classList.add('flash'));setTimeout(()=>f.forEach(x=>x.classList.remove('flash')),1800)}
+}
+function jumpToMove(id){
+  if(!S.kifu||!(S.kifu.data.moves||{})[id]){toast(tr('This move no longer exists'));return}
+  setMode(canEditKifu()?'kifu-edit':'kifu-view');selectMove(id,true);
 }
 
 /* ---------- Panel: change log ---------- */
@@ -6907,7 +6971,7 @@ function renderQuick(){
   const ta=h('textarea',{rows:'3',placeholder:tr('What should change here? Ctrl + Enter to send.')});ta.value=d.text;
   ta.addEventListener('input',()=>{d.text=ta.value});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendQuick()}});
-  kids.push(ta,examplesFor(b.type==='chart'?'region':isChapter(b)?'chapter':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
+  kids.push(ta,examplesFor(b.type==='chart'?'region':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
     h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:sendQuick}),
     h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:async()=>{if(await sendQuick())await askAgent()}})]));
   box.replaceChildren(...kids);box.hidden=false;
@@ -6929,7 +6993,7 @@ function editingNow(){const a=document.activeElement;return a&&a.closest&&a.clos
 function render(){
   if(!S.meta)return;
   if(editingNow()){S.deferred=true;return}
-  S.deferred=false;S.chainMemo=null;S.chapMemo=null;S.kifuMemo=null;
+  S.deferred=false;S.chainMemo=null;S.kifuMemo=null;
   const focusF=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fid;
   paginate();
   $('#doc-title').textContent=S.meta.title||'Duetsheet';document.title=(S.meta.title||'Duetsheet')+tr(' | Duetsheet');
@@ -6942,9 +7006,17 @@ document.addEventListener('focusout',()=>setTimeout(()=>{if(S.deferred&&!editing
 
 /* ---------- Modes and buttons ---------- */
 const HINT={view:'Use the arrow keys or the buttons below to turn pages.',edit:'Edit directly; drag ⠿ to reorder; click the divider between blocks to change page breaks; leave comments under each block.',
-  tree:'The chapters as a tree of research branches, with their status and the data they use.'};
-function setMode(m){leaveField();S.mode=m;document.body.dataset.mode=m;if(S.draw){S.draw=null;document.body.dataset.draw=''}
-  $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+  tree:'Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.'};
+/* The four top buttons map to the three page modes (view/edit/tree); the two Kifu buttons both mean mode "tree" and
+   differ only in kifuView().edit, since the discovery tree and its edit form share the same page section. */
+function currentModeButton(){
+  if(S.mode!=='tree')return S.mode;
+  return canEditKifu()&&kifuView().edit?'kifu-edit':'kifu-view'}
+function setMode(btn){leaveField();
+  const m=btn==='kifu-view'||btn==='kifu-edit'?'tree':btn;
+  S.mode=m;document.body.dataset.mode=m;if(S.draw){S.draw=null;document.body.dataset.draw=''}
+  if(m==='tree')kifuView().edit=btn==='kifu-edit'&&canEditKifu();
+  $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===currentModeButton())));
   document.body.classList.toggle('nopanel',m!=='edit'&&!S.panelInView);
   $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render()}
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});

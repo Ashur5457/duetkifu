@@ -120,6 +120,7 @@
           }
         },
         "dataOutside": { "type": "boolean", "description": "true when the raw data of this move is outside the opened folder, so it cannot join the data chain." },
+        "pos": { "type": "object", "properties": { "x": { "type": "number" }, "y": { "type": "number" } }, "description": "Where the user dragged this move on the tree diagram (SVG units). Only the tree layout reads it; time and list layouts ignore it." },
         "evidence": {
           "type": "object",
           "properties": {

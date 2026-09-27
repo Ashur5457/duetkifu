@@ -1237,10 +1237,17 @@ def open_annotations(root):
     rounds, changes = (rep.get('rounds') or {}).values(), (rep.get('changes') or {}).values()
     last = max((r.get('at', '') for r in rounds if isinstance(r, dict)), default='')
     chap_of = {b.get('id'): c for c in chapters(rep)[0] for b in c['blocks']}
+    kifu, _ = read_json_file(project / KIFU_FILE) if (project / KIFU_FILE).is_file() else (None, None)
+    moves = kifu.get('moves') if isinstance(kifu, dict) and isinstance(kifu.get('moves'), dict) else {}
     out = []
     for a in sorted((a for a in (rep.get('annotations') or {}).values() if isinstance(a, dict) and a.get('status') != 'done'),
                     key=lambda a: a.get('no', 0)):
         t = a.get('target') or {}
+        if t.get('kind') == 'move':   # a comment on one move of the research record (kifu.json), not a report block
+            m = moves.get(t.get('moveId'))
+            out.append({'annotation': a, 'move': m if isinstance(m, dict) else None,
+                       'moveNote': None if isinstance(m, dict) else f'move "{t.get("moveId")}" is not in {KIFU_FILE}'})
+            continue
         b = blocks.get(t.get('blockId')) or {}
         blk = {k: v for k, v in b.items() if k not in ('createdAt', 'updatedAt')}
         if isinstance(blk.get('image'), dict):   # no image data in the output
