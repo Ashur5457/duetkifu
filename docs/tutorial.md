@@ -1,239 +1,178 @@
-# Duetsheet tutorial
+# Duetkifu tutorial
 
-This tutorial walks through one full review cycle: open a report, bring in raw data, trace a figure back to it, comment on a figure, let an AI agent revise the report, and check what it changed. It uses the demo project in [`examples/demo-project`](../examples/demo-project) (synthetic data, not experimental results).
+Duetkifu keeps a research project as two files that you and an AI agent write together: the **record** of every move of the research (`kifu.json`), dead ends included, and the **report** that tells the finished story (`report.json`).
 
-You need a desktop computer. There are two ways to open a report:
+![The research loop: open a move, compute with recorded scripts, close it (dead ends too, with why), decide on the tree, tell it in the report](research-loop.svg)
 
-- **From Claude Code (fastest)**: install once (section 0), then see section 0b. Claude starts Duetsheet for your data folder and the report opens by itself.
-- **By hand**: open `duetsheet.html` in Chrome or Edge and choose the folder (steps 1 and 2 below). No install is needed.
+This tutorial uses the demo project in [`examples/demo-project`](../examples/demo-project): four cycles of a formulation search, with synthetic data (not experimental results) and a small record of 10 moves.
 
-A third path, Claude Artifacts on claude.ai, is at the end.
+1. [Install](#1-install) (once)
+2. [Start](#2-start)
+3. [Read the record](#3-read-the-record)
+4. [Edit the record on the tree](#4-edit-the-record-on-the-tree)
+5. [Let the agent write, and check what it wrote](#5-let-the-agent-write-and-check-what-it-wrote)
+6. [Where each number comes from](#6-where-each-number-comes-from)
+7. [Large folders: search instead of reading](#7-large-folders-search-instead-of-reading)
+8. [The report: review it with the agent](#8-the-report-review-it-with-the-agent)
 
-## 0. Install
+Then: [raw data, habits and languages](#9-raw-data-habits-and-languages) and [what to do when something goes wrong](#when-something-goes-wrong).
 
-Every way of using Duetsheet on your computer needs **Python 3.8 or later** (nothing else: no packages to install). Check with `python --version`.
+You need a desktop computer with Chrome or Edge, and Python 3.8 or later (no packages to install).
+
+## 1. Install
 
 ### With Claude Code in a terminal, VS Code or JetBrains
 
-In Claude Code (with a subscription or an API key), type these two lines once:
-
 ```
-/plugin marketplace add Ashur5457/duetsheet
-/plugin install duetsheet@duetsheet
+/plugin marketplace add Ashur5457/duetkifu
+/plugin install duetkifu@duetkifu
 ```
 
-Start a new session and type `/`: **duetsheet** is in the list.
-
-- **Update**: `/plugin marketplace update duetsheet`, then start a new session.
-- **Remove**: `/plugin uninstall duetsheet@duetsheet`.
+Start a new session and type `/`: **duetkifu** is in the list. Update with `/plugin marketplace update duetkifu`; remove with `/plugin uninstall duetkifu@duetkifu`.
 
 ### With the Claude desktop app, or without the plugin system
 
-The desktop app cannot add plugin marketplaces with `/plugin`. Install the skill from a copy of the repository instead (you need [git](https://git-scm.com/)). In a terminal, in the folder where you want to keep Duetsheet:
+In a terminal, in the folder where you want to keep Duetkifu (you need [git](https://git-scm.com/)):
 
 ```bash
-git clone https://github.com/Ashur5457/duetsheet.git && python duetsheet/duetsheet.py install-skill
+git clone https://github.com/Ashur5457/duetkifu.git && python duetkifu/duetkifu.py install-skill
 ```
 
-This installs the `/duetsheet` skill into `~/.claude/skills/`, where the desktop app, the terminal and the editor extensions all find it. Start a new session and type `/`: **duetsheet** is in the list.
+This installs the `/duetkifu` skill into `~/.claude/skills/`, where the desktop app, the terminal and the editor extensions all find it. To update: `git pull` in the `duetkifu` folder, then `python duetkifu.py install-skill` again. No git? [Download the ZIP](https://github.com/Ashur5457/duetkifu/archive/refs/heads/main.zip) and run `python duetkifu.py install-skill` in the unzipped folder.
 
-- **Update**: run `git pull` in the `duetsheet` folder, then `python duetsheet.py install-skill` again.
-- **Moved the folder?** Run `python duetsheet.py install-skill` again from its new place.
-- **Remove**: delete the folder `~/.claude/skills/duetsheet`.
-- No git? [Download the ZIP](https://github.com/Ashur5457/duetsheet/archive/refs/heads/main.zip), unzip it, and run `python duetsheet.py install-skill` in the unzipped folder.
+### With other AI agents (Copilot, Cursor, Codex, Gemini CLI and others)
 
-### With other AI agents (Copilot, Cursor, Codex, Gemini CLI, Cline and others)
-
-These agents do not use Claude Code skills, but most of them read an `AGENTS.md` file in the folder they work in. Get Duetsheet (clone or [download the ZIP](https://github.com/Ashur5457/duetsheet/archive/refs/heads/main.zip)), then, once per data folder:
+Once per data folder:
 
 ```bash
-python path/to/duetsheet.py init-agent "path/to/data-folder"
+python path/to/duetkifu.py init-agent "path/to/data-folder"
 ```
 
-It adds a short section to `AGENTS.md` and `CLAUDE.md` in the data folder (or creates the files) that tells any agent where the full rules are and how to check, start and listen to the report. Claude Code reads `CLAUDE.md` when you open it in that folder, so it knows the rules from the first message. Existing content in those files is kept: only the part between `<!-- duetsheet:start -->` and `<!-- duetsheet:end -->` belongs to Duetsheet, and running the command again only refreshes that part.
+It adds a short marked section to `AGENTS.md` and `CLAUDE.md` in the folder that tells any agent where the rules are. Everything else in those files is kept. Duetkifu never calls an AI model itself.
 
-Duetsheet itself never calls an AI model or needs an API key: your agent reads and writes `report.json`.
+## 2. Start
 
-### Opening a report later without an agent
+**From Claude Code.** Open Claude Code in the folder that holds your raw data and type `/duetkifu`. Tell Claude what you want: a report from the data, a record of the research so far (from your reports and slides), or both. Claude proposes them, writes them after you agree, checks them and opens the page, already connected to the folder.
 
-- `python path/to/duetsheet.py shortcut "path/to/data-folder"` puts a shortcut on your desktop. Double-click it to open the report; keep the window that opens while you use it.
-- To show the report to someone who has nothing installed, click **Export read-only copy** at the top of the page and send them the HTML file from `exports/`. It opens in any browser.
+**Without an agent.** `python path/to/duetkifu.py "path/to/data-folder"`, or open [`duetkifu.html`](../duetkifu.html) in Chrome or Edge and click **Open project folder**. To follow this tutorial, open `examples/demo-project` (work on a copy: the page saves into it).
 
-## 0b. Start from Claude Code
-
-Open Claude Code in the folder that holds your raw data and type `/duetsheet`. Claude reads `AGENTS.md`, proposes a report, writes it after you agree, checks it with `duetsheet.py check`, and starts the launcher. Your browser opens the report, already connected to the folder: skip to step 3.
-
-Without Claude Code you can start the launcher yourself: `python path/to/duetsheet.py "path/to/data-folder"`.
-
-Duetsheet keeps everything it writes in a `duetsheet/` subfolder of your data folder (`report.json`, uploaded images, exports, your figure habits). The raw data files stay where they are and are never modified.
-
-**One rule to know before you start: where files go.** Your raw data must be *inside* the folder you open, but *outside* `duetsheet/`; any subfolders are fine. What is computed from it goes *inside* `duetsheet/`: tables in `derived_data/`, the scripts that compute them in `scripts/`.
+**Where files go.** Duetkifu keeps everything it writes in a `duetkifu/` subfolder of your data folder. Raw data stays *inside* the folder you open but *outside* `duetkifu/`, and is only read. What is computed from it goes *inside* `duetkifu/`.
 
 ```
 my-experiment/                the folder you open
   Data_R1/run001.xlsx         raw data: stays where it is, only read
-  notes/instrument.csv
-  duetsheet/                  made by Duetsheet
-    report.json
+  duetkifu/                   made by Duetkifu
+    kifu.json                 the research record
+    report.json               the report
     derived_data/cells.csv    tables computed from the raw data
     scripts/make_cells.py     the scripts that compute them
 ```
 
-If some of your data is somewhere else (another drive, your Downloads folder), move or copy it into the folder first; Claude will ask you rather than do it. Only files inside the folder can be traced from a figure back to the raw data (section 3b).
+A folder you already review with Duetsheet has a `duetsheet/` subfolder instead: Duetkifu opens it as it is. (The demo uses a simpler layout, with both files at the top and the raw data in `data/`.)
 
-## 1. Open Duetsheet
+The four buttons at the top switch between **Report view**, **Report edit**, **Kifu view** and **Kifu edit**. The **?** button explains the mode you are in.
 
-Download [`duetsheet.html`](../duetsheet.html) (or clone the repository) and open it in Chrome or Edge. The first time, a short welcome card explains the four steps. You can bring it back at any time with the **?** button.
+## 3. Read the record
 
-![Welcome card](welcome.png)
+Click **Kifu view**. The research question is on the left; each move follows the move it was based on.
 
-The interface follows your browser language (English, Traditional Chinese, Simplified Chinese, Japanese, Korean or Spanish). Change it from the menu at the top right, or add your own language there ([how](translating.md)).
+![The record of the demo as a tree, with the move "Cycle 3" open](kifu-tree.png)
 
-## 2. Open the project folder
+- **The shape says how a move ended**: a filled dot holds, a crossed circle is a dead end, an orange diamond corrects an earlier move, a hexagon is an independent audit, an open circle is not resolved yet, a dashed square is planned. The legend above the tree lists them all.
+- **Arrows**: a dotted arrow is a clue (the good run of cycle 1 pointed at the region cycle 3 found), a dashed orange arrow a correction, a grey dashed arrow support.
+- **The small dot at the lower left of a move** is its data chain: filled green when its numbers are recomputed from the raw files and nothing changed, red when something changed, a ring when its sources are named.
+- **Click a move** to read it on the right: why it was made, the result, what it means, the population its numbers refer to, its data chain, and the comments on it.
+- **Highlight** shows only the main path (the moves the report tells), the dead ends, the corrections and open questions, the moves you started, the checks that do not match, or the moves with no data chain yet. **Timeline** puts the moves on their dates; **List** shows them as cards.
 
-Until you open a folder, the yellow bar reminds you that nothing is saved. Click **Open project folder** and choose `examples/demo-project`. For your own work, choose the folder that holds your raw data: Duetsheet creates `duetsheet/report.json` in it.
+In the demo, two dead ends are worth reading: *High additive B* failed because the idea was wrong (all three runs scored low), and *Cycle 2* ended inconclusive, until the correction *R1* showed that half of that cycle was spent on the edges on purpose.
 
-![The page before a folder is opened](open-folder.png)
+## 4. Edit the record on the tree
 
-The bar turns green: every change is now saved to `report.json` automatically. **View** shows the report as 16:9 pages; turn pages with the arrow keys or the buttons below.
+Click **Kifu edit**. The first time, a short card explains the tree; **How to edit on the tree** brings it back.
 
-![View mode with a project folder open](view-mode.png)
+![Editing a dead end: the result buttons beside the move, and the form with what you decide and what the agent wrote](kifu-edit.png)
 
-A project folder looks like this:
+On the tree:
 
-```
-demo-project/
-  report.json      the report
-  data/            raw data (CSV, TSV, JSON)
-  derived_data/    tables computed from the raw data
-  scripts/         the scripts that compute them
-  habits/          your own example figures and .mplstyle files
-  assets/          images uploaded in the page (created when needed)
-  exports/         files the page exports (created when needed)
-```
+- **Set the result**: select a move; the small buttons beside it set ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end or no conclusion asks for its cause and one sentence why.
+- **Move it**: drag a move to place it. Drop it onto another move to make it follow that move.
+- **Arrows and new moves**: drag the **+** under the selected move onto another move to draw an arrow (clue, corrects, supports), or onto empty space to add the next move there. Click an arrow to change or delete it.
+- **+ Next move** above the tree adds a move after the selected one.
 
-The demo uses this project layout, with `report.json` at the top and the raw data in `data/`. When you open your own data folder, the same files go into its `duetsheet/` subfolder instead, and every data file in the folder (subfolders included) is listed in the Folder tab.
+The form on the right has three parts:
 
-## 3. Bring in raw data
+1. **You decide**: the title, the result, the cause of a dead end (and whether it is confirmed), and a review mark such as *good move* or *doubtful*.
+2. **Written part**: why this move, the result, what it means, the population. This is the part the agent can write for you (section 5).
+3. **Advanced** (closed): kind, dates, the branch it belongs to, a milestone, the list of arrows, the data chain, the source report.
 
-Open the **Folder** tab in the panel. Files in `data/` are listed with their status. Click **Import** next to `cycle4-runs.csv`.
+Every change is saved to `kifu.json` at once, and listed under the move with who made it.
 
-![The Folder tab after importing a data file](folder-tab.png)
+## 5. Let the agent write, and check what it wrote
 
-The file becomes a dataset. Duetsheet records where it came from: the path and a SHA-256 fingerprint of the file. If the file changes later, the Folder tab says "changed since import", charts that use it show a warning in Edit mode, and **Update** imports the new version (the change log keeps both).
+Writing down why each move was made and what came of it is the part nobody has time for. Let the agent do it, and check.
 
-**Many files at once.** Tick files (Shift-click ticks a range; the box on a folder ticks the whole folder). A bar appears at the bottom: **Add to a chart…** or **Replace the data of a chart…** asks which chart, lets you add a note (for example *one series per round*), and creates a comment with the exact file list for your agent; **Ask the agent to revise** sends it. **Datasets in the report** lists every dataset with the charts that use it; tick several and **Delete selected datasets** (the files are never touched).
+- **Ask for it**: in the written part of a move, click **Ask the agent to fill this in**. It sends a comment on the move and asks the agent. The agent writes the text from the move's sources and names the files it used.
+- **Or comment**: under any move, write a comment and pick a tag: **Fill in this move**, **Recompute this**, **Needs a clearer reason**, **Add to the report**, **Reopen this**. **Send and ask the agent** sends it; the agent answers under the comment.
+- **Check it**: what the agent wrote and you have not looked at yet is marked in orange, with the count in the written part's heading. Edit it, or click **Looked at it** (or **Looked at all of it**). Looking without changing is recorded too.
+- **What stays yours**: the result of a move, a confirmed cause, marks and milestones. The agent suggests a cause as unconfirmed; you tick **Confirmed**.
 
-Files are grouped by folder: **Import all** imports every file of one folder at once. **Show in folder** opens the file's folder in File Explorer or Finder (with the launcher; otherwise it copies the path).
+While you work with the agent, it keeps the record by itself: it opens a move before each thing it tries and closes it with the result, and a dead end with the reason (see "Keep the record as you work" in [`AGENTS.md`](../AGENTS.md)).
 
-To plot the new data, switch to **Edit**, click **Add chart**, open **Chart settings** and pick the dataset.
+## 6. Where each number comes from
 
-## 3b. Trace a figure back to its raw data
+Every move says where its numbers come from, at one of three levels:
 
-Most report data is not a raw file: a script combines or summarises raw files into a table first. Duetsheet keeps that chain. Every time your agent runs a script, it records a **step** (`python duetsheet.py step`): the script, the command, the parameters, and every input and output file with its fingerprint.
+- **Recomputed**: steps of the data chain recompute them from the raw files. Each number the move states can have a **check**: the stated number, the recomputed one, and whether they match (yes, close, no, or not reproducible). A mismatch is listed for you; nothing is rewritten to agree.
+- **Sourced**: the report, table, figure or slides the numbers were taken from, each with a fingerprint. If a file changes or goes missing, the move shows it.
+- **No data**: a sentence saying why, for example "only discussed in a meeting" or "planned, not run yet".
 
-Under each chart and table, a small line shows where its data comes from, for example *Source: cycles1-3.csv ← combine_cycles.py ← 3 raw files*. Its dot shows the state of the whole chain:
+`python duetkifu.py check <folder>` checks both files and lists the moves whose files changed, the checks that do not match, the causes you have not confirmed yet, and the moves with no data chain. `python duetkifu.py kifu tree <folder>` prints the record as text.
 
-- **green**: every file is exactly as recorded;
-- **red**: something changed or is missing (a raw file, a script, a derived table), so the figure needs recomputing;
-- **grey**: not checked (for example in a read-only copy, where the files are not at hand).
+## 7. Large folders: search instead of reading
 
-Click the line to see the whole chain: the dataset, the derived file, the step that made it, and its inputs, down to the raw files (grouped by folder).
+A real research folder can hold thousands of files and reports of several megabytes. The agent does not read them whole:
 
-The **Folder** tab has the **Data chain** overview: every derived file with the script and inputs it comes from and how many charts use it, then the raw data grouped by folder, then the scripts. It works backwards too: open a raw data folder and click **What depends on these files?**, or click a single file, to see which derived files, datasets and charts would change if it did.
+- `python duetkifu.py find <folder> "words"` searches the text of every file (reports by section, Word by heading, slides by slide, spreadsheets by sheet and header, the record by move), in any language, and prints short excerpts with where they are. The index is kept outside the folder, in `~/.duetkifu/index/`, and updated only for files that changed.
+- `python duetkifu.py kifu show <folder> <move>` prints one move with its data chain and the parts of its sources that concern it.
+- `python duetkifu.py extract <folder> <report.html>` writes the figures and tables of an HTML report or a slide deck into `derived_data/report_figures/`, with their section and caption. A move that points at them shows them in place.
 
-**New data.** A step remembers the patterns its inputs were found with, for example `Data_TOSCAT/*/raw data_ch*.xlsx`. To add a new round or replace files, just put them into the folder with File Explorer or Finder; there is no path to type. The Folder tab then lists them as *new, not used yet*, and the steps that should use them turn red. Ask your agent to recompute (or click **Ask the agent to revise**).
+## 8. The report: review it with the agent
 
-Raw data can be large. Duetsheet compares size and modification date first and only reads a file again when they differ; the launcher keeps the fingerprints it computed in `duetsheet/cache/`. `python duetsheet.py check <folder>` reports the same states as warnings, and `check --deep` reads every file.
+The report works as in [Duetsheet](https://github.com/Ashur5457/duetsheet): the agent writes, you review, one button asks the agent to revise, every change is kept.
 
-## 4. Review: edit and comment
+![View mode of the report](view-mode.png)
 
-Switch to **Edit**. You can:
+**Review** (**Report edit**): change titles, text and captions directly; under **Quick adjustments and download**, change a chart's type, axes or scale. On a chart, hold the mouse button and draw around the points you mean, as in a paint program, or click one point; **Box on figure** draws a rectangle. The comment stores the data range and the ids of the points, which is what the agent reads. Under every block, write a comment with tags or an **Example request**.
 
-- change titles, text and captions directly (every change is recorded);
-- make quick chart adjustments (type, axis labels, range, log scale) and download the chart's data (CSV) or the chart itself (SVG, PNG) from **Quick adjustments and download**;
-- for anything else (other data, columns, several series, panels, fits, error bars), write a comment: **Example requests** under each comment box offers general sentences to start from (for example *Plot […] and […] in this chart, in different colours*), with […] for you to fill in. Files you ticked in the Folder tab can be attached, so you never type file names. **Send and ask the agent** sends the comment and asks the agent in one click;
-- drag blocks to reorder them and click the dividers to control page breaks;
-- write a comment under any block, with preset tags such as **Use log scale** or **Highlight key points**.
+![A free-hand region and a single data point marked on a chart, with the comments in the panel](edit-annotate.png)
 
-On a chart you can point at the exact data: hold the mouse button and draw around points, as in a paint program (a line follows the mouse and closes when you let go), or simply click one point. For a rectangle, click **Box on figure** first. The comment then stores the data range and the ids of the points inside it, which is what the agent reads.
-
-![A lasso and a single data point marked on a chart, with the comments in the panel](edit-annotate.png)
-
-When you have finished a batch of feedback, click **Finish this round** at the top of the page (it appears as soon as you change something), or in the **Changes** tab.
-
-## 5. Let your agent revise the report
-
-**With one button.** If Claude Code started the report (`/duetsheet`), it keeps listening in the background. Click **Ask the agent to revise** at the top: it finishes your round and hands your comments to the agent. Next to the button you see *Request sent*, then *The agent is revising the report…*, then *The agent handled N comments*; the report reloads by itself. Waiting costs the agent nothing; only the revision itself uses it.
-
-If no agent is listening (for example, you opened the report with a desktop shortcut), the button shows a prompt to copy and paste into your agent. Your request is kept, and the agent picks it up and then keeps listening for the next one.
-
-**By asking.** You can also open your AI agent (Claude Code, Codex, Gemini CLI, Cursor, ...) in the same folder and ask:
-
-> Read AGENTS.md from the Duetsheet repository, then read the open annotations in report.json and revise the report.
-
-[`AGENTS.md`](../AGENTS.md) tells the agent how to make the smallest change for each comment, record every change as its own, reply under each comment, and close its round. Keep Duetsheet open: within a few seconds the page reloads `report.json` and shows the agent's work.
+**Ask the agent to revise**: if Claude Code started Duetkifu, it listens in the background at no cost. The button hands it your comments; the page shows its progress and reloads. It answers under each comment; answer back with **Reply**. Without a listening agent, the button gives you a prompt to paste.
 
 ![The agent's replies under each comment, and Figure 1 now on a log axis](agent-reply.png)
 
-Comments the agent handled are marked **Done** with its reply. A comment it could not settle stays **Open**, with a question for you. To answer the agent, write under its reply and click **Reply**: the comment opens again, and the next **Ask the agent to revise** sends your answer. The agent bar above the report shows whether an agent is listening and what it is doing.
-
-## 6. Check what changed
-
-The **Changes** tab shows the current round; **Show full history** shows every round. Text changes are shown as inline differences; setting changes read as "before → after". Each change can be reverted on its own.
-
-The timeline has one row per block and one column per round. Filled markers are edits (blue: you, purple: the agent), circles are comments. Click a column to see only that round.
+**Check what changed**: the **Changes** tab lists every change of the round, by you or the agent, as inline differences; **Show full history** shows every round, and each change can be reverted. The timeline has one row per block and one column per round.
 
 ![The change history and the timeline](change-log.png)
 
-## 7. Teach it your figure style and your writing
+**Tie the report to the record**: a chapter of the report (a text block with a title) can name the move it tells. Those moves make the main path of the tree. The comment tag **Add to the report** on a move asks the agent to write such a chapter.
 
-The **Folder** tab has two parts: **Data** (the data chain and your data files) and **Habits**.
+## 9. Raw data, habits and languages
 
-Put figures you like in `habits/figures/`: SVG exports from Origin, matplotlib, R or other tools, and `.mplstyle` files. In Folder > Habits, click **Learn my habits**.
+- **Raw data**: the **Folder** tab lists the data files; **Import** turns one into a dataset with its path and fingerprint. Every script your agent runs is recorded as a step, so each chart shows its data chain (*Source: cycles1-3.csv ← combine_cycles.py ← 3 raw files*), green when every file is as recorded and red when something changed. Put new files into the folder and the steps that should use them turn red.
 
-Duetsheet measures the SVG files exactly (font, sizes, line width, colours, figure width), reads the `.mplstyle` files, and lists what it found. Each suggestion shows which files it is based on; suggestions that most files agree on are ticked. Nothing changes until you click **Apply selected**.
+![The Folder tab after importing a data file](folder-tab.png)
+
+- **Habits**: put figures you like in `habits/figures/` and texts you wrote in `habits/writing/`; **Learn my habits** and your agent suggest a figure style and writing rules, which you tick to keep.
 
 ![Style suggestions learned from the habits folder](style-panel.png)
 
-- **Save current style as my habits** writes `habits/profile.json`. Copy it into the `habits/` folder of your next project to start from the same style.
-- PNG and JPG figures cannot be measured by the page. Ask your agent to look at them: it writes its suggestions to `style/proposal`, and they appear in the Style tab for you to confirm in the same way.
-- **Export** in the Style tab saves the style as a matplotlib `.mplstyle` file (`exports/duetsheet-style.mplstyle`), so your plotting scripts can use it too.
-
-**Your writing.** Put articles or reports you wrote in `habits/writing/` (.md, .txt, .docx, .pdf). **Measure my texts** shows plain numbers (sentence and paragraph length, lists, bold). For the rest, ask your agent: *Learn my writing style from habits/writing/.* Its suggestions (for example *Give the conclusion first, then the numbers*) appear in Folder > Habits with the files each one comes from; tick the ones to keep and click **Apply selected**. You can also add or remove rules yourself. Agents follow these rules whenever they write or revise text.
-
-**Personal habits.** With the launcher, **Save as my personal habits** keeps your figure style and writing rules in `~/.duetsheet/habits/`, and **Load my personal habits** brings them into any new project.
-
-## 8. Other languages
-
-The interface language never changes the report content or the stored data, so people working in different languages can review the same report.
+- **Languages**: the interface follows your browser (English, Traditional Chinese, Simplified Chinese, Japanese, Korean, Spanish); change it at the top right or add your own ([how](translating.md)). The data never changes with the language.
 
 ![The same report with the Japanese interface](language-ja.png)
 
-## 9. The Kifu: the record of the research
-
-A report tells the finished story. The **Kifu** (the Japanese word for the record of a game of shogi or go) keeps every move that led there, including the dead ends. It lives next to the report as `duetsheet/kifu.json`. A folder without one has **Start a Kifu**.
-
-**Reading it (Kifu view).** Each attempt is a move, drawn as a tree from the research question on the left; each move follows the one it was based on. The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. Dotted and dashed arrows are a clue for, corrects and supports. Click a move to see why it was made, what came out, and the files and steps its numbers come from. **Highlight** shows only the main path, the dead ends, the moves you started, or the checks that do not match. Press **?** at any time for this summary.
-
-**Editing it (Kifu edit).** Most of it happens on the tree:
-
-- click a move, then use the small buttons beside it: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why;
-- drag a move to place it; drop it onto another move to make it follow that move;
-- drag the **+** under the move onto another move to draw an arrow (clue, corrects, supports), or onto empty space to add the next move there. Click an arrow to change or delete it.
-
-The form on the right has three parts. **You decide** holds what only you can judge: title, result, cause, and a mark such as *good move*. The **Written part** (why this move, result, what it means, population) is text the agent can write for you: click **Ask the agent to fill this in**. Whatever the agent wrote and you have not looked at yet is marked in orange; edit it or click **Looked at it**. Everything else (kind, dates, arrows, the data chain, the source) is under **Advanced**. Every change is saved to `kifu.json` at once and listed under the move with who made it.
-
-Comments work as in the report: write one under a move, pick a tag such as **Recompute this**, and **Send and ask the agent**.
-
 ## When something goes wrong
 
-Errors and warnings do not just flash by: a **⚠** button appears at the top right with the number of problems. Click it to see each one, with details (for a broken `report.json`, the line and column), and **Copy all** to paste them to your agent. When Duetsheet was started by the launcher, the same problems are printed in the launcher's output and saved in `duetsheet/errors.log`, so Claude Code sees them without you copying anything.
-
-Two common cases are handled for you: `NaN` and `Infinity` written by Python are read as empty values (with a warning), and a save that fails because another program holds the file for a moment (OneDrive, for example) is retried until it succeeds.
-
-## Without a folder, and in Claude
-
-**Firefox, Safari, or no folder**: use **Save report file** to download the report (`*.report.json`) and **Open report file** to continue later. An agent can edit that file the same way as `report.json`.
-
-**In Claude (claude.ai)**: upload `duetsheet.html` to a conversation and ask Claude to "publish this file as an Artifact with the `db`, `assets`, `sample` and `downloads` capabilities". The report is then stored in the Artifact. After reviewing, go back to Claude, paste the Artifact link and say "Read the Duetsheet annotations and revise the report." In an Artifact, the Style tab can also ask Claude to estimate your style from PNG examples.
+- Errors and warnings stay listed under **⚠** at the top, with details and **Copy all**. With the launcher they are also printed for your agent and saved in `errors.log`.
+- **The launcher was closed** while the page stayed open: the page says so once and stops saving. Start it again and reload the page.
+- A file the agent is writing is never half-read: the page keeps the last good version until the file reads correctly.
+- Saves that fail because another program holds the file for a moment (OneDrive, for example) are retried.

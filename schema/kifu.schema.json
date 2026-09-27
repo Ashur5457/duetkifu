@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Ashur5457/duetsheet/blob/main/schema/kifu.schema.json",
+  "$id": "https://github.com/Ashur5457/duetkifu/blob/main/schema/kifu.schema.json",
   "title": "Duetkifu research record (kifu.json)",
-  "description": "The research record next to report.json: every move of a research (each attempt, correction, audit, conclusion and planned option), the move it follows, why it was made, what came of it and, for a dead end, why it ended. The report tells a few lines of it; the record keeps all of them. Paths are relative to the folder of kifu.json. `python duetsheet.py kifu check FOLDER` checks the rules that a schema cannot express (parents, links, evidence steps, required reasons).",
+  "description": "The research record next to report.json: every move of a research (each attempt, correction, audit, conclusion and planned option), the move it follows, why it was made, what came of it and, for a dead end, why it ended. The report tells a few lines of it; the record keeps all of them. Paths are relative to the folder of kifu.json. `python duetkifu.py kifu check FOLDER` checks the rules that a schema cannot express (parents, links, evidence steps, required reasons).",
   "type": "object",
   "required": ["schema", "moves"],
   "properties": {

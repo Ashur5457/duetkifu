@@ -1,6 +1,6 @@
-# Translating Duetsheet
+# Translating Duetkifu
 
-Duetsheet ships with six interface languages: English, Traditional Chinese (`zh-Hant`), Simplified Chinese (`zh-Hans`), Japanese (`ja`), Korean (`ko`) and Spanish (`es`). The first time you open it, it picks the language of your browser. You can switch at any time from the language menu at the top right.
+Duetkifu ships with six interface languages: English, Traditional Chinese (`zh-Hant`), Simplified Chinese (`zh-Hans`), Japanese (`ja`), Korean (`ko`) and Spanish (`es`). The first time you open it, it picks the language of your browser. You can switch at any time from the language menu at the top right.
 
 The interface language only changes buttons, labels and messages. The report content (titles, text, captions) and the stored data (field names, tag ids) are never translated.
 
@@ -22,10 +22,10 @@ A loaded language is kept in your browser (other people do not see it). When a p
 
 Open a pull request, or attach your JSON file to a GitHub issue if you prefer not to touch the code, and we will add it.
 
-The translations live in one block inside `duetsheet.html`:
+The translations live in one block inside `duetkifu.html`:
 
 ```html
-<script type="application/json" id="duetsheet-i18n">
+<script type="application/json" id="duetkifu-i18n">
 {
 "zh-Hant": {
  "_name": "...",

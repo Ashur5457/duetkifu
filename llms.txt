@@ -1,28 +1,30 @@
-# Duetsheet
+# Duetkifu
 
-> Duetsheet (the sheet humans and AI agents play from together, record every move on, and rerun) is an open-source, single-file interactive HTML report that humans and AI agents review and revise together. Users edit text and charts in place, leave per-block comments, and draw box or lasso annotations on charts and images; chart annotations are stored as data-space ranges plus the ids of the enclosed data points. Every edit is recorded with before/after values and its author (human or AI), grouped into review rounds shown on a timeline. The report is plain JSON (report.json) with a published JSON Schema, so any LLM agent can read the feedback and revise the report.
+> Duetkifu is an open-source research record that a researcher and an AI agent keep together: every move of a research (each attempt, correction, independent audit, conclusion and planned option), dead ends included, with the move it follows, why it was made, what came of it and, for a failure, why it ended, with a cause that tells a wrong idea from data that cannot be trusted. Every number says where it comes from: recomputed from the raw files by recorded scripts (with checks of each stated number against the recomputation), sourced from named files with SHA-256 fingerprints, or no data with a reason. The record (kifu.json, format duetkifu/0.1) is drawn as a tree the user reads and edits in one HTML page; the agent writes the text, and the page marks what the agent wrote until the user has looked at it. It includes Duetsheet, the interactive report reviewed with an agent (report.json, format duetsheet/0.7).
 
-Version 0.6. Start it from Claude Code with the /duetsheet skill (install: `/plugin marketplace add Ashur5457/duetsheet`, then `/plugin install duetsheet@duetsheet`), or run `python duetsheet.py <data folder>` (Python standard library only): the report opens in the browser already connected to the folder, and is stored in its duetsheet/ subfolder while raw data is only read. It also runs with no install at all (open duetsheet.html in Chrome or Edge and choose a folder), as a Claude Artifact, or with saved report files in any browser. Problems the page meets are listed under a warning button and, with the launcher, printed for the agent and saved in errors.log; `python duetsheet.py check <folder>` validates report.json. Datasets imported from data/ record their source path and SHA-256, and the page flags data that changed after import. The data chain (steps collection, recorded with `python duetsheet.py step`) links every chart to its dataset, the derived table, the script that computed it, and the raw files, each with its SHA-256; when a raw file or script changes, everything computed from it is flagged, and the Folder tab answers both "where does this figure come from" and "which figures depend on this raw file". An "Ask the agent to revise" button hands the user's comments to an agent waiting in the background (`python duetsheet.py wait <folder>`), which reports progress to the page with `duetsheet.py agent-status`; `duetsheet.py annotations <folder>` prints the open comments compactly so agents need not read large report files. Raw data must stay inside the opened folder, outside duetsheet/; derived tables go into duetsheet/derived_data/ and scripts into duetsheet/scripts/. Each figure keeps its source (tool, script, raw data). The figure style profile can be learned from the user's own SVG figures and .mplstyle files, exported to matplotlib, and suggested by agents for the user to confirm. The interface is available in English, Traditional Chinese, Simplified Chinese, Japanese, Korean and Spanish, and users can load their own translations.
+Version 0.8. Start it from Claude Code with the /duetkifu skill (install: `/plugin marketplace add Ashur5457/duetkifu`, then `/plugin install duetkifu@duetkifu`), or run `python duetkifu.py <data folder>` (Python standard library only): the page opens in the browser already connected to the folder, and both files are stored in its duetkifu/ subfolder (an existing duetsheet/ subfolder is opened as it is) while raw data is only read. `python duetkifu.py check <folder>` validates both files and the data chain; `kifu check|tree|show` work on the record; `find <folder> "words"` searches every file of a large folder through a local SQLite full-text index, so agents read excerpts instead of whole reports; `extract <folder> <report.html|slides.pptx>` pulls out figures and tables; `annotations`, `wait` and `agent-status` let an agent answer the page's "Ask the agent to revise" button. Comments can point at a report block, a data range on a chart, or one move of the record (tags such as fill-in-this-move and recompute-this). Interface in English, Traditional Chinese, Simplified Chinese, Japanese, Korean and Spanish.
 
-Use Duetsheet when an AI agent drafts a data-heavy report (science, finance, engineering, research) and a human expert must check and correct it precisely. Works with Claude Code, Claude on claude.ai, Codex, Gemini CLI, Cursor or any agent that can edit JSON files.
+Use Duetkifu when research is done with AI agents and the whole path must be kept and checkable: what was tried, what failed and why, and where each number comes from. Works with Claude Code, Codex, Gemini CLI, Cursor or any agent that can edit JSON files.
 
 ## Docs
 
-- [README](README.md): what it is, features, quick start (local folder and Claude), FAQ, limitations, roadmap
-- [AGENTS.md](AGENTS.md): data model, how to write report.json safely, and agent tasks (revise from annotations, import raw data with provenance, learn figure habits, write a new report)
+- [README](README.md): what it is, why, features, quick start, FAQ, limitations, roadmap
+- [AGENTS.md](AGENTS.md): both formats, how to write them safely, and agent tasks (keep the record as you work, handle comments on a move, find things in a large folder, revise the report, import data)
 - [Tutorial](docs/tutorial.md): step by step with screenshots
-- [JSON Schema](schema/report.schema.json): formal definition of report.json
-- [Translating](docs/translating.md): how interface translations work and how to add a language
+- [Record schema](schema/kifu.schema.json) and [report schema](schema/report.schema.json)
+- [Translating](docs/translating.md): interface translations
 
 ## Files
 
-- [duetsheet.html](duetsheet.html): the viewer and editor (single self-contained file)
-- [duetsheet.py](duetsheet.py): launcher and checker (`python duetsheet.py <folder>`, `check <folder>`, `step <folder>` to record a computation step of the data chain, `install-skill`, `shortcut <folder>` for a desktop shortcut, `init-agent <folder>` to point any agent that reads AGENTS.md or CLAUDE.md to Duetsheet)
-- [skills/duetsheet/SKILL.md](skills/duetsheet/SKILL.md): the /duetsheet skill for Claude Code
-- [Example project](examples/demo-project/): report.json, data/, derived_data/, scripts/ and habits/ for a demo report with a small data chain (synthetic data)
-- [tools/check.py](tools/check.py): checks translations and English-only code before a commit
+- [duetkifu.html](duetkifu.html): the page (single self-contained file)
+- [duetkifu.py](duetkifu.py): launcher, checker, search index and agent helpers
+- [skills/duetkifu/SKILL.md](skills/duetkifu/SKILL.md): the /duetkifu skill for Claude Code
+- [Example project](examples/demo-project/): a report, a record of 10 moves, raw data, a derived table and its script (synthetic data)
+- [tests/](tests/): tests of the launcher, the record and the agent loop
+- [tools/check.py](tools/check.py): checks translations, English-only code and JavaScript syntax
 
 ## Optional
 
-- [Screenshots](docs/): view mode, figure annotation, Folder tab, change log and timeline, style suggestions
+- [Screenshots](docs/): the record as a tree, editing a move, annotating a chart, the change log
 - [Citation](CITATION.cff)
+- [Duetsheet](https://github.com/Ashur5457/duetsheet): the report alone

@@ -1,12 +1,12 @@
 {
-  "name": "duetsheet",
-  "description": "Interactive reports that you and Claude review and revise together: annotate charts, track every change, and rerun. Adds the /duetsheet skill.",
-  "version": "0.6.0",
+  "name": "duetkifu",
+  "description": "Keep a research project with Claude: the report you review in the browser, and the record of every move of the research, dead ends included, as a tree you edit together and can recompute. Adds the /duetkifu skill.",
+  "version": "0.8.0",
   "author": {
     "name": "Ashur5457"
   },
-  "homepage": "https://github.com/Ashur5457/duetsheet",
-  "repository": "https://github.com/Ashur5457/duetsheet",
+  "homepage": "https://github.com/Ashur5457/duetkifu",
+  "repository": "https://github.com/Ashur5457/duetkifu",
   "license": "MIT",
-  "keywords": ["report", "review", "annotation", "human-in-the-loop", "data", "charts"]
+  "keywords": ["research record", "provenance", "reproducibility", "human-in-the-loop", "report", "annotation", "lab notebook"]
 }

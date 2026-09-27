@@ -1,13 +1,13 @@
 {
-  "name": "duetsheet",
+  "name": "duetkifu",
   "owner": {
     "name": "Ashur5457"
   },
   "plugins": [
     {
-      "name": "duetsheet",
+      "name": "duetkifu",
       "source": "./",
-      "description": "Interactive reports that you and Claude review and revise together. Adds the /duetsheet skill."
+      "description": "The report and the record of every move of a research, kept with Claude. Adds the /duetkifu skill."
     }
   ]
 }
