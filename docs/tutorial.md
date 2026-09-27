@@ -210,6 +210,22 @@ The interface language never changes the report content or the stored data, so p
 
 ![The same report with the Japanese interface](language-ja.png)
 
+## 9. The Kifu: the record of the research
+
+A report tells the finished story. The **Kifu** (the Japanese word for the record of a game of shogi or go) keeps every move that led there, including the dead ends. It lives next to the report as `duetsheet/kifu.json`. A folder without one has **Start a Kifu**.
+
+**Reading it (Kifu view).** Each attempt is a move, drawn as a tree from the research question on the left; each move follows the one it was based on. The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. Dotted and dashed arrows are a clue for, corrects and supports. Click a move to see why it was made, what came out, and the files and steps its numbers come from. **Highlight** shows only the main path, the dead ends, the moves you started, or the checks that do not match. Press **?** at any time for this summary.
+
+**Editing it (Kifu edit).** Most of it happens on the tree:
+
+- click a move, then use the small buttons beside it: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why;
+- drag a move to place it; drop it onto another move to make it follow that move;
+- drag the **+** under the move onto another move to draw an arrow (clue, corrects, supports), or onto empty space to add the next move there. Click an arrow to change or delete it.
+
+The form on the right has three parts. **You decide** holds what only you can judge: title, result, cause, and a mark such as *good move*. The **Written part** (why this move, result, what it means, population) is text the agent can write for you: click **Ask the agent to fill this in**. Whatever the agent wrote and you have not looked at yet is marked in orange; edit it or click **Looked at it**. Everything else (kind, dates, arrows, the data chain, the source) is under **Advanced**. Every change is saved to `kifu.json` at once and listed under the move with who made it.
+
+Comments work as in the report: write one under a move, pick a tag such as **Recompute this**, and **Send and ask the agent**.
+
 ## When something goes wrong
 
 Errors and warnings do not just flash by: a **⚠** button appears at the top right with the number of problems. Click it to see each one, with details (for a broken `report.json`, the line and column), and **Copy all** to paste them to your agent. When Duetsheet was started by the launcher, the same problems are printed in the launcher's output and saved in `duetsheet/errors.log`, so Claude Code sees them without you copying anything.

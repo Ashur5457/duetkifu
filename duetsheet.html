@@ -238,7 +238,8 @@ main{min-width:0}
 .knode.sh-dead .klbl{fill:var(--muted)}
 .knode.onpath .klbl,.knode.sh-dir .klbl,.knode.sh-out .klbl,.knode.sh-root .klbl{font-weight:700}
 .knode:hover .klbl{fill:var(--accent)}
-.khl{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 2.5;opacity:0}
+.khl{fill:transparent;stroke:var(--ink);stroke-width:1.6;stroke-dasharray:3 2.5;opacity:0} /* filled, so the whole ring can be grabbed */
+.ktree.kediting{user-select:none;-webkit-user-select:none}
 .knode.sel .khl,.knode:focus-visible .khl{opacity:1}
 .kyoudot{fill:var(--c5);stroke:var(--paper);stroke-width:1.5}
 .kcorr{fill:var(--c2);stroke:var(--paper);stroke-width:1}
@@ -253,6 +254,11 @@ main{min-width:0}
 .xhit{fill:none;stroke:transparent;stroke-width:12;cursor:help}
 .kediting .xhit{cursor:pointer}.kediting .kxw:hover .xl{stroke-width:3}
 .khandle{display:none;cursor:crosshair}.knode.sel .khandle{display:inline}
+.kquick{display:none}.knode.sel .kquick{display:inline}
+.kq{cursor:pointer}.kq circle{fill:var(--paper);stroke:var(--line);stroke-width:1.4}.kq text{font:700 10px var(--sans);fill:var(--muted);pointer-events:none}
+.kq:hover circle{stroke:var(--ink)}.kq.on circle{stroke-width:2.2}
+.kq-success.on circle{stroke:var(--ok)}.kq-success.on text{fill:var(--ok)}.kq-failure.on circle{stroke:var(--c5)}.kq-failure.on text{fill:var(--c5)}
+.kq-inconclusive.on circle,.kq-active.on circle{stroke:var(--c3)}.kq-inconclusive.on text,.kq-active.on text{fill:var(--c3)}
 .khandle circle{fill:var(--paper);stroke:var(--accent);stroke-width:1.6}.khandle path{stroke:var(--accent);stroke-width:1.8;stroke-linecap:round}
 .khandle:hover circle{fill:var(--accent)}.khandle:hover path{stroke:var(--paper)}
 .kdrawl{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:5 4;pointer-events:none}
@@ -338,6 +344,7 @@ main{min-width:0}
 .kform{display:flex;flex-direction:column;gap:8px}
 .kf{display:flex;flex-direction:column;gap:3px;font-size:13px;min-width:0;flex:1 1 140px}
 .kf>span:first-child{color:var(--muted);font-size:12.5px}
+.kform>.kf,.kfs>.kf,.kfold>.kf{flex:none} /* in a column the 140px basis would be a height */
 .kf input[type=text],.kf input[type=url],.kf input[type=date],.kf input:not([type]),.kf select,.kf textarea,.kadd input,.kadd select,.kform>label>textarea{
   font:inherit;font-size:13.5px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-width:0;width:100%;box-sizing:border-box}
 .kf textarea{resize:vertical;line-height:1.5}
@@ -345,6 +352,14 @@ main{min-width:0}
 .kcb{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);margin-top:2px}
 .kfs{border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
 .kfs legend{font-size:12.5px;font-weight:600;color:var(--muted);padding:0 4px}
+.kfold{border:1px solid var(--line);border-radius:8px;padding:6px 10px}.kfold[open]{padding-bottom:10px}
+.kfold>summary{cursor:pointer;font-size:13px;font-weight:600;padding:2px 0;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.kfold[open]>summary{margin-bottom:6px}.kfold>*+*{margin-top:8px}
+.kfh{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline}
+.kbadge{font-size:11.5px;font-weight:600;color:var(--c2);background:color-mix(in srgb,var(--c2) 12%,transparent);border-radius:999px;padding:1px 8px}
+.kf.knl textarea,.kf.knl input{border-color:var(--c2)}
+.kstate{flex-wrap:wrap}.kstate button[aria-pressed=true].st-success{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.kstate button[aria-pressed=true].st-failure{background:var(--c5);border-color:var(--c5);color:var(--paper)}
 .krowe{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:13px;border-bottom:1px dashed var(--line);padding:2px 0}
 .krowe .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere;flex:1 1 auto}
 .kadd{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -1508,9 +1523,52 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move no longer exists": "這一手已經不存在了",
  "(move not found)": "（找不到這一手）",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（來自 kifu.json），包含走不通的路。拖曳節點可以安排位置；點標題可以閱讀。",
- "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "畫箭頭：把選中那一手下方的 + 拖到另一手上；點箭頭可以改種類或刪除。",
  "Drag onto another move to draw an arrow": "拖到另一手上畫箭頭",
- "That arrow is already there.": "這條箭頭已經有了。"
+ "That arrow is already there.": "這條箭頭已經有了。",
+ "How to edit on the tree": "在樹上怎麼編輯",
+ "Fill in this move": "補齊這一手",
+ "No conclusion": "沒有結論",
+ "Written by the agent, not looked at yet": "agent 寫的、你還沒看過",
+ "Looked at it": "看過了",
+ "You decide": "你決定",
+ "Written part": "說明文字",
+ "{n} of {t} filled in": "已填 {n}／{t} 項",
+ "{n} written by the agent, not looked at yet": "{n} 項 agent 寫的、你還沒看過",
+ "Ask the agent to fill this in": "請 agent 補齊這一手",
+ "Sends a comment on this move and asks the agent": "在這一手留言並請 agent 處理",
+ "Looked at all of it": "全部看過了",
+ "Advanced": "進階",
+ "kind, dates, arrows, data chain, source": "種類、日期、箭頭、資料鏈、出處",
+ "No arrows yet. Drag the + under the move onto another move to draw one.": "還沒有箭頭。把這一手下方的 + 拖到另一手上就能畫。",
+ "looked at, kept": "看過，未修改",
+ "Follow {id} (move under it)": "接在 {id} 後面（移到它底下）",
+ "Only place it here": "只放在這裡",
+ "Add the next move here": "在這裡接著走一手",
+ "Reading the Kifu": "怎麼看棋譜",
+ "The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.": "棋譜是研究的紀錄：每一次嘗試是一手，每一手接在它所根據的那一手後面，最左邊是研究問題。",
+ "Shapes.": "形狀。",
+ "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "形狀代表這一手的結局：實心點＝成立、打叉的圓＝死路、菱形＝更正前面的某一手、空心圓＝還沒解決。樹上方的圖例列出全部形狀。",
+ "Arrows.": "箭頭。",
+ "Dotted and dashed arrows between moves: a clue for, corrects, supports.": "手與手之間的點線、虛線箭頭：線索指向、更正、支持。",
+ "Details.": "細節。",
+ "Click a move to see why it was made, what came out, and the files and steps its numbers come from.": "點一手，右側會顯示為什麼走這一手、結果是什麼，以及數字來自哪些檔案和計算步驟。",
+ "Highlight.": "突顯。",
+ "Show only the main path, the dead ends, the moves you started, or the checks that do not match.": "可以只看主路徑、死路、您觸發的手，或核對不符的地方。",
+ "Comment.": "留言。",
+ "Under a move, write a comment and ask the agent, the same as under a block of the report.": "在一手下方留言並請 agent 修改，跟報告的區塊一樣。",
+ "To change the record, use Kifu edit at the top.": "要修改棋譜，請按上方的「棋譜編輯」。",
+ "Editing the Kifu": "編輯棋譜",
+ "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "大部分操作都在樹上完成。由你決定；文字可以讓 agent 先寫、你再查核。",
+ "Result.": "結果。",
+ "Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.": "點一手，旁邊的小按鈕設定結果：✓ 成立、✗ 死路、? 沒有結論、○ 進行中。選死路時會問原因和一句話說明。",
+ "Place.": "位置。",
+ "Drag a move to place it. Drop it onto another move to make it follow that move.": "拖曳一手可以移動位置；拖到另一手上放開，就改成接在那一手後面。",
+ "Arrows and new moves.": "箭頭與新的一手。",
+ "Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.": "把這一手下方的 + 拖到另一手上，就畫一條箭頭（線索、更正、支持）；拖到空白處，就在那裡接著走一手。點箭頭可以改種類或刪除。",
+ "The form on the right.": "右側表單。",
+ "On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click \"Ask the agent to fill this in\". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.": "最上面是只有你能決定的：標題、結果、原因、標記。說明文字可以讓 agent 補：按「請 agent 補齊這一手」。agent 寫了、你還沒看過的會標成橘色。其餘在「進階」裡。",
+ "Every change is saved at once.": "每次修改都立刻存檔。",
+ "It is written to kifu.json and listed under the move, with who made it.": "寫進 kifu.json，並列在這一手下方，註明是誰改的。"
 },
 "zh-Hans": {
  "_name": "简体中文",
@@ -2382,9 +2440,52 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move no longer exists": "这一手已经不存在了",
  "(move not found)": "（找不到这一手）",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（来自 kifu.json），包括走不通的路。拖动节点可以安排位置；点标题可以阅读。",
- "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "画箭头：把选中那一手下方的 + 拖到另一手上；点箭头可以改类型或删除。",
  "Drag onto another move to draw an arrow": "拖到另一手上画箭头",
- "That arrow is already there.": "这条箭头已经有了。"
+ "That arrow is already there.": "这条箭头已经有了。",
+ "How to edit on the tree": "在树上怎么编辑",
+ "Fill in this move": "补齐这一手",
+ "No conclusion": "没有结论",
+ "Written by the agent, not looked at yet": "agent 写的、你还没看过",
+ "Looked at it": "看过了",
+ "You decide": "你决定",
+ "Written part": "说明文字",
+ "{n} of {t} filled in": "已填 {n}／{t} 项",
+ "{n} written by the agent, not looked at yet": "{n} 项 agent 写的、你还没看过",
+ "Ask the agent to fill this in": "请 agent 补齐这一手",
+ "Sends a comment on this move and asks the agent": "在这一手留言并请 agent 处理",
+ "Looked at all of it": "全部看过了",
+ "Advanced": "高级",
+ "kind, dates, arrows, data chain, source": "种类、日期、箭头、数据链、出处",
+ "No arrows yet. Drag the + under the move onto another move to draw one.": "还没有箭头。把这一手下方的 + 拖到另一手上就能画。",
+ "looked at, kept": "看过，未修改",
+ "Follow {id} (move under it)": "接在 {id} 后面（移到它底下）",
+ "Only place it here": "只放在这里",
+ "Add the next move here": "在这里接着走一手",
+ "Reading the Kifu": "怎么看棋谱",
+ "The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.": "棋谱是研究的记录：每一次尝试是一手，每一手接在它所依据的那一手后面，最左边是研究问题。",
+ "Shapes.": "形状。",
+ "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "形状代表这一手的结局：实心点＝成立、打叉的圆＝死路、菱形＝更正前面的某一手、空心圆＝还没解决。树上方的图例列出全部形状。",
+ "Arrows.": "箭头。",
+ "Dotted and dashed arrows between moves: a clue for, corrects, supports.": "手与手之间的点线、虚线箭头：线索指向、更正、支持。",
+ "Details.": "细节。",
+ "Click a move to see why it was made, what came out, and the files and steps its numbers come from.": "点一手，右侧会显示为什么走这一手、结果是什么，以及数字来自哪些文件和计算步骤。",
+ "Highlight.": "突出显示。",
+ "Show only the main path, the dead ends, the moves you started, or the checks that do not match.": "可以只看主路径、死路、您触发的手，或核对不符的地方。",
+ "Comment.": "留言。",
+ "Under a move, write a comment and ask the agent, the same as under a block of the report.": "在一手下方留言并请 agent 修改，跟报告的区块一样。",
+ "To change the record, use Kifu edit at the top.": "要修改棋谱，请点上方的“棋谱编辑”。",
+ "Editing the Kifu": "编辑棋谱",
+ "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "大部分操作都在树上完成。由你决定；文字可以让 agent 先写、你再核查。",
+ "Result.": "结果。",
+ "Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.": "点一手，旁边的小按钮设定结果：✓ 成立、✗ 死路、? 没有结论、○ 进行中。选死路时会问原因和一句话说明。",
+ "Place.": "位置。",
+ "Drag a move to place it. Drop it onto another move to make it follow that move.": "拖动一手可以移动位置；拖到另一手上放开，就改成接在那一手后面。",
+ "Arrows and new moves.": "箭头与新的一手。",
+ "Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.": "把这一手下方的 + 拖到另一手上，就画一条箭头（线索、更正、支持）；拖到空白处，就在那里接着走一手。点箭头可以改类型或删除。",
+ "The form on the right.": "右侧表单。",
+ "On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click \"Ask the agent to fill this in\". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.": "最上面是只有你能决定的：标题、结果、原因、标记。说明文字可以让 agent 补：点“请 agent 补齐这一手”。agent 写了、你还没看过的会标成橙色。其余在“高级”里。",
+ "Every change is saved at once.": "每次修改都立刻保存。",
+ "It is written to kifu.json and listed under the move, with who made it.": "写进 kifu.json，并列在这一手下方，注明是谁改的。"
 },
 "ja": {
  "_name": "日本語",
@@ -3256,9 +3357,52 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move no longer exists": "この手はもうありません",
  "(move not found)": "（該当する手が見つかりません）",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json に記録された研究のすべての手（行き止まりも含む）。ノードをドラッグして配置し、タイトルをクリックして読めます。",
- "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "矢印を引くには、選んだ手の下の + を別の手までドラッグします。矢印をクリックすると種類の変更や削除ができます。",
  "Drag onto another move to draw an arrow": "別の手までドラッグして矢印を引く",
- "That arrow is already there.": "この矢印はすでにあります。"
+ "That arrow is already there.": "この矢印はすでにあります。",
+ "How to edit on the tree": "ツリー上での編集方法",
+ "Fill in this move": "この手を補う",
+ "No conclusion": "結論なし",
+ "Written by the agent, not looked at yet": "エージェントが書いた・未確認",
+ "Looked at it": "確認した",
+ "You decide": "あなたが決める",
+ "Written part": "説明文",
+ "{n} of {t} filled in": "{t} 項目中 {n} 項目入力済み",
+ "{n} written by the agent, not looked at yet": "エージェントが書いた未確認の項目 {n}",
+ "Ask the agent to fill this in": "エージェントに補ってもらう",
+ "Sends a comment on this move and asks the agent": "この手にコメントしてエージェントに依頼します",
+ "Looked at all of it": "すべて確認した",
+ "Advanced": "詳細設定",
+ "kind, dates, arrows, data chain, source": "種類・日付・矢印・データの流れ・出典",
+ "No arrows yet. Drag the + under the move onto another move to draw one.": "矢印はまだありません。手の下の + を別の手までドラッグすると引けます。",
+ "looked at, kept": "確認、変更なし",
+ "Follow {id} (move under it)": "{id} の後に続ける（その下へ移動）",
+ "Only place it here": "ここに置くだけ",
+ "Add the next move here": "ここに次の手を追加",
+ "Reading the Kifu": "棋譜の見方",
+ "The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.": "棋譜は研究の記録です。試みの一つひとつが一手で、各手はその根拠となった手の後に続きます。左端が研究の問いです。",
+ "Shapes.": "形。",
+ "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "形はその手の結末を表します。塗りつぶしの点＝成立、×印の円＝行き止まり、ひし形＝以前の手の訂正、白抜きの円＝未解決。ツリー上の凡例に全種類があります。",
+ "Arrows.": "矢印。",
+ "Dotted and dashed arrows between moves: a clue for, corrects, supports.": "手と手の間の点線・破線の矢印：手がかり、訂正、支持。",
+ "Details.": "詳細。",
+ "Click a move to see why it was made, what came out, and the files and steps its numbers come from.": "手をクリックすると、なぜその手を指したか、結果、数字の元になったファイルと計算ステップが表示されます。",
+ "Highlight.": "強調。",
+ "Show only the main path, the dead ends, the moves you started, or the checks that do not match.": "本筋、行き止まり、あなたが始めた手、照合が合わない箇所だけを表示できます。",
+ "Comment.": "コメント。",
+ "Under a move, write a comment and ask the agent, the same as under a block of the report.": "手の下にコメントを書いてエージェントに依頼できます。レポートのブロックと同じです。",
+ "To change the record, use Kifu edit at the top.": "棋譜を変更するには、上の「棋譜編集」を使ってください。",
+ "Editing the Kifu": "棋譜の編集",
+ "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "ほとんどの操作はツリー上で行います。決めるのはあなた、文章はエージェントが下書きしてあなたが確認できます。",
+ "Result.": "結果。",
+ "Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.": "手をクリックすると、横の小さなボタンで結果を設定できます：✓ 成立、✗ 行き止まり、? 結論なし、○ 進行中。行き止まりでは原因と一文の理由を尋ねます。",
+ "Place.": "配置。",
+ "Drag a move to place it. Drop it onto another move to make it follow that move.": "手をドラッグして配置します。別の手の上で離すと、その手の後に続くようになります。",
+ "Arrows and new moves.": "矢印と新しい手。",
+ "Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.": "手の下の + を別の手までドラッグすると矢印（手がかり・訂正・支持）を引きます。何もない所までドラッグすると、そこに次の手を追加します。矢印をクリックすると種類の変更や削除ができます。",
+ "The form on the right.": "右側のフォーム。",
+ "On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click \"Ask the agent to fill this in\". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.": "一番上はあなたにしか決められないこと：題名、結果、原因、印。説明文はエージェントに補ってもらえます：「エージェントに補ってもらう」を押してください。エージェントが書いて未確認のものはオレンジで示されます。その他は「詳細設定」にあります。",
+ "Every change is saved at once.": "変更はすぐに保存されます。",
+ "It is written to kifu.json and listed under the move, with who made it.": "kifu.json に書き込まれ、誰が変えたかとともに手の下に一覧されます。"
 },
 "ko": {
  "_name": "한국어",
@@ -4130,9 +4274,52 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move no longer exists": "이 수는 더 이상 존재하지 않습니다",
  "(move not found)": "(수를 찾을 수 없음)",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json에 기록된 연구의 모든 수(막다른 길 포함). 노드를 드래그해 배치하고, 제목을 클릭해 읽을 수 있습니다.",
- "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "화살표를 그리려면 선택한 수 아래의 +를 다른 수로 끌어 놓으세요. 화살표를 클릭하면 종류를 바꾸거나 삭제할 수 있습니다.",
  "Drag onto another move to draw an arrow": "다른 수로 끌어 화살표 그리기",
- "That arrow is already there.": "이 화살표는 이미 있습니다."
+ "That arrow is already there.": "이 화살표는 이미 있습니다.",
+ "How to edit on the tree": "트리에서 편집하는 방법",
+ "Fill in this move": "이 수 채우기",
+ "No conclusion": "결론 없음",
+ "Written by the agent, not looked at yet": "에이전트가 씀, 아직 확인 안 함",
+ "Looked at it": "확인함",
+ "You decide": "내가 결정",
+ "Written part": "설명 글",
+ "{n} of {t} filled in": "{t}개 중 {n}개 입력됨",
+ "{n} written by the agent, not looked at yet": "에이전트가 쓰고 아직 확인하지 않은 항목 {n}개",
+ "Ask the agent to fill this in": "에이전트에게 채워 달라고 하기",
+ "Sends a comment on this move and asks the agent": "이 수에 댓글을 달고 에이전트에게 요청합니다",
+ "Looked at all of it": "모두 확인함",
+ "Advanced": "고급",
+ "kind, dates, arrows, data chain, source": "종류, 날짜, 화살표, 데이터 흐름, 출처",
+ "No arrows yet. Drag the + under the move onto another move to draw one.": "아직 화살표가 없습니다. 수 아래의 +를 다른 수로 끌어 놓으면 그릴 수 있습니다.",
+ "looked at, kept": "확인, 변경 없음",
+ "Follow {id} (move under it)": "{id} 다음으로 잇기 (그 아래로 이동)",
+ "Only place it here": "여기에 두기만",
+ "Add the next move here": "여기에 다음 수 추가",
+ "Reading the Kifu": "기보 읽는 법",
+ "The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.": "기보는 연구의 기록입니다. 시도 하나하나가 한 수이고, 각 수는 근거가 된 수 뒤에 이어집니다. 맨 왼쪽이 연구 질문입니다.",
+ "Shapes.": "모양.",
+ "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "모양은 그 수가 어떻게 끝났는지를 나타냅니다. 채운 점＝성립, X 표시 원＝막다른 길, 마름모＝이전 수를 바로잡음, 빈 원＝아직 해결 안 됨. 트리 위 범례에 모든 모양이 있습니다.",
+ "Arrows.": "화살표.",
+ "Dotted and dashed arrows between moves: a clue for, corrects, supports.": "수와 수 사이의 점선·파선 화살표: 단서, 바로잡음, 뒷받침.",
+ "Details.": "자세히.",
+ "Click a move to see why it was made, what came out, and the files and steps its numbers come from.": "수를 클릭하면 왜 그 수를 두었는지, 결과, 숫자가 나온 파일과 계산 단계가 보입니다.",
+ "Highlight.": "강조.",
+ "Show only the main path, the dead ends, the moves you started, or the checks that do not match.": "주요 경로, 막다른 길, 내가 시작한 수, 대조가 맞지 않는 곳만 볼 수 있습니다.",
+ "Comment.": "댓글.",
+ "Under a move, write a comment and ask the agent, the same as under a block of the report.": "수 아래에 댓글을 달고 에이전트에게 요청할 수 있습니다. 보고서 블록과 같습니다.",
+ "To change the record, use Kifu edit at the top.": "기보를 바꾸려면 위의 「기보 편집」을 사용하세요.",
+ "Editing the Kifu": "기보 편집",
+ "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "대부분은 트리에서 합니다. 결정은 내가 하고, 글은 에이전트가 먼저 쓰고 내가 확인할 수 있습니다.",
+ "Result.": "결과.",
+ "Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.": "수를 클릭하면 옆의 작은 버튼으로 결과를 정합니다: ✓ 성립, ✗ 막다른 길, ? 결론 없음, ○ 진행 중. 막다른 길은 원인과 한 문장 이유를 묻습니다.",
+ "Place.": "위치.",
+ "Drag a move to place it. Drop it onto another move to make it follow that move.": "수를 끌어서 배치합니다. 다른 수 위에 놓으면 그 수 다음으로 이어집니다.",
+ "Arrows and new moves.": "화살표와 새 수.",
+ "Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.": "수 아래의 +를 다른 수로 끌면 화살표(단서, 바로잡음, 뒷받침)를 그리고, 빈 곳으로 끌면 거기에 다음 수를 추가합니다. 화살표를 클릭하면 종류를 바꾸거나 삭제할 수 있습니다.",
+ "The form on the right.": "오른쪽 양식.",
+ "On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click \"Ask the agent to fill this in\". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.": "맨 위는 나만 정할 수 있는 것: 제목, 결과, 원인, 표시. 설명 글은 에이전트가 채울 수 있습니다: 「에이전트에게 채워 달라고 하기」를 누르세요. 에이전트가 쓰고 아직 확인하지 않은 것은 주황색으로 표시됩니다. 나머지는 「고급」에 있습니다.",
+ "Every change is saved at once.": "모든 변경은 바로 저장됩니다.",
+ "It is written to kifu.json and listed under the move, with who made it.": "kifu.json에 기록되고, 누가 바꿨는지와 함께 수 아래에 나열됩니다."
 },
 "es": {
  "_name": "Español",
@@ -5004,9 +5191,52 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move no longer exists": "Este paso ya no existe",
  "(move not found)": "(paso no encontrado)",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "Cada paso de la investigación según kifu.json, incluidos los callejones sin salida. Arrastra un nodo para colocarlo; haz clic en un título para leerlo.",
- "To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.": "Para trazar una flecha, arrastre el + bajo la jugada seleccionada hasta otra jugada; haga clic en una flecha para cambiarla o eliminarla.",
  "Drag onto another move to draw an arrow": "Arrastre hasta otra jugada para trazar una flecha",
- "That arrow is already there.": "Esa flecha ya existe."
+ "That arrow is already there.": "Esa flecha ya existe.",
+ "How to edit on the tree": "Cómo editar en el árbol",
+ "Fill in this move": "Completar esta jugada",
+ "No conclusion": "Sin conclusión",
+ "Written by the agent, not looked at yet": "Escrito por el agente, aún sin revisar",
+ "Looked at it": "Revisado",
+ "You decide": "Usted decide",
+ "Written part": "Parte escrita",
+ "{n} of {t} filled in": "{n} de {t} completados",
+ "{n} written by the agent, not looked at yet": "{n} escritos por el agente, aún sin revisar",
+ "Ask the agent to fill this in": "Pedir al agente que lo complete",
+ "Sends a comment on this move and asks the agent": "Envía un comentario en esta jugada y se lo pide al agente",
+ "Looked at all of it": "Revisado todo",
+ "Advanced": "Avanzado",
+ "kind, dates, arrows, data chain, source": "tipo, fechas, flechas, cadena de datos, fuente",
+ "No arrows yet. Drag the + under the move onto another move to draw one.": "Aún no hay flechas. Arrastre el + bajo la jugada hasta otra jugada para trazar una.",
+ "looked at, kept": "revisado, sin cambios",
+ "Follow {id} (move under it)": "Seguir a {id} (moverla debajo)",
+ "Only place it here": "Solo colocarla aquí",
+ "Add the next move here": "Añadir aquí la siguiente jugada",
+ "Reading the Kifu": "Cómo leer el Kifu",
+ "The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.": "El Kifu es el registro de la investigación: cada intento es una jugada, y cada jugada sigue a aquella en la que se basó, desde la pregunta a la izquierda.",
+ "Shapes.": "Formas.",
+ "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "La forma indica cómo terminó una jugada: un punto relleno se sostiene, un círculo tachado es un callejón sin salida, un rombo corrige una jugada anterior, un círculo vacío aún no está resuelto. La leyenda sobre el árbol las muestra todas.",
+ "Arrows.": "Flechas.",
+ "Dotted and dashed arrows between moves: a clue for, corrects, supports.": "Flechas punteadas y discontinuas entre jugadas: pista para, corrige, respalda.",
+ "Details.": "Detalles.",
+ "Click a move to see why it was made, what came out, and the files and steps its numbers come from.": "Haga clic en una jugada para ver por qué se hizo, qué resultó y de qué archivos y pasos salen sus números.",
+ "Highlight.": "Resaltar.",
+ "Show only the main path, the dead ends, the moves you started, or the checks that do not match.": "Muestre solo el camino principal, los callejones sin salida, las jugadas que usted inició o las comprobaciones que no coinciden.",
+ "Comment.": "Comentar.",
+ "Under a move, write a comment and ask the agent, the same as under a block of the report.": "Bajo una jugada, escriba un comentario y pídaselo al agente, igual que bajo un bloque del informe.",
+ "To change the record, use Kifu edit at the top.": "Para cambiar el registro, use Editar Kifu arriba.",
+ "Editing the Kifu": "Editar el Kifu",
+ "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "Casi todo se hace en el árbol. Usted decide; el agente puede escribir el texto para que usted lo revise.",
+ "Result.": "Resultado.",
+ "Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.": "Haga clic en una jugada. Los botones pequeños a su lado fijan el resultado: ✓ se sostiene, ✗ callejón sin salida, ? sin conclusión, ○ activa. Un callejón sin salida pide su causa y una frase.",
+ "Place.": "Colocar.",
+ "Drag a move to place it. Drop it onto another move to make it follow that move.": "Arrastre una jugada para colocarla. Suéltela sobre otra jugada para que siga a esa jugada.",
+ "Arrows and new moves.": "Flechas y jugadas nuevas.",
+ "Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.": "Arrastre el + bajo la jugada hasta otra jugada para trazar una flecha (pista, corrige, respalda); hasta un espacio vacío para añadir allí la siguiente jugada. Haga clic en una flecha para cambiarla o eliminarla.",
+ "The form on the right.": "El formulario de la derecha.",
+ "On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click \"Ask the agent to fill this in\". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.": "Arriba, lo que solo usted decide: título, resultado, causa, marca. La parte escrita la puede completar el agente: pulse «Pedir al agente que lo complete». Lo que escribió el agente y usted aún no revisó aparece en naranja. El resto está en Avanzado.",
+ "Every change is saved at once.": "Cada cambio se guarda al instante.",
+ "It is written to kifu.json and listed under the move, with who made it.": "Se escribe en kifu.json y se lista bajo la jugada, con quién lo hizo."
 }
 }
 </script>
@@ -5575,12 +5805,11 @@ function renderKifu(host,K){
     oninput:e=>{V.q=e.target.value;applyKifuFilter(host,K,F,P)},onkeydown:e=>{if(e.key==='Enter'){const f=all.find(x=>kifuHit(x,V.q.trim().toLowerCase()));if(f)selectMove(f.id,true)}}});
   const zb=(t,label,fn)=>h('button',{type:'button',text:t,'aria-label':label,onclick:fn});
   const editing=canEditKifu()&&V.edit;
-  if(editing){const sel=V.sel; // view or edit is chosen by the buttons at the top (Kifu view, Kifu edit)
+  if(editing){// view or edit is chosen by the buttons at the top (Kifu view, Kifu edit)
     host.append(h('div',{class:'kbar kedit'},[
       h('button',{type:'button',class:'btn small primary',text:'+ '+tr('Next move'),title:tr('Add a move after the selected one'),onclick:()=>addMove(V.sel)}),
-      K.byId.get(sel)&&K.byId.get(sel).m.status!=='done'?h('button',{type:'button',class:'btn small',text:tr('Close this move'),onclick:()=>closeMoveDialog(V.sel)}):null,
       h('span',{class:'kln',text:tr('Changes are saved to {file} at once and recorded.',{file:KIFU_FILE})}),
-      V.layout==='list'?null:h('span',{class:'kln',text:tr('To draw an arrow, drag the + under the selected move onto another move; click an arrow to change or delete it.')})]))}
+      V.layout==='list'?null:h('button',{type:'button',class:'linkbtn',text:tr('How to edit on the tree'),onclick:kifuEditHelp})]))}
   host.append(h('div',{class:'kbar'},[seg(tr('Layout'),KIFU_LAYOUTS,V.layout,v=>{V.layout=v;V.scroll=null}),seg(tr('Highlight'),KIFU_MODES,V.mode,v=>V.mode=v),
     V.layout==='list'||editing?null:h('label',{class:'kchkb'},[h('input',{type:'checkbox',checked:V.xl?'':null,onchange:e=>{V.xl=e.target.checked;render()}}),tr('Cross links')]),
     h('label',{class:'ksearch'},[q,h('span',{class:'kqn'})]),
@@ -5647,7 +5876,7 @@ function kifuSVG(K,F,P,V){
     const g=el('g',{class:'kxw'},xg);el('path',{d,class:'xl '+k,'marker-end':`url(#kah-${k})`},g);el('path',{d,class:'xhit'},g);
     el('title',{},g).textContent=x.id+' '+textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?': '+l.note:'');
     if(edit)g.addEventListener('click',e=>arrowMenu(e.clientX,e.clientY,x.id,l))}));
-  K.list.forEach(x=>{const p=pos.get(x.id),f=F.get(x.id),m=x.m,leafLbl=!x.kids.length||V.layout==='time';
+  [...K.list].sort((a,b)=>(a.id===V.sel)-(b.id===V.sel)).forEach(x=>{const p=pos.get(x.id),f=F.get(x.id),m=x.m,leafLbl=!x.kids.length||V.layout==='time'; // the selected move is drawn last, on top
     const g=el('g',{class:`knode sh-${f.shape}`+(P.on.has(x.id)?' onpath':'')+(f.user?' tr-user':'')+(f.mismatch?' mis':'')+(f.chain.level?'':' noch')+(x.id===V.sel?' sel':''),
       transform:`translate(${p.x},${p.y})`,tabindex:0,role:'button','data-id':x.id,'aria-label':tr(SHAPE_TEXT[f.shape])+': '+(m.title||x.id)},svg);
     el('title',{},g).textContent=(m.title||x.id)+(m.when?' ('+m.when+')':'');
@@ -5660,7 +5889,7 @@ function kifuSVG(K,F,P,V){
     g.addEventListener('click',()=>{if(g.dataset.justDragged){delete g.dataset.justDragged;return}selectMove(x.id,false)});
     g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectMove(x.id,false)}});
     if(V.layout==='tree'&&edit)bindNodeDrag(g,x.id,svg,p);
-    if(edit)bindArrowHandle(g,x.id,svg,p)});
+    if(edit){bindArrowHandle(g,x.id,svg,p,V.layout==='tree');quickButtons(g,x.id,m)}});
   return svg}
 function svgPoint(svg,clientX,clientY){const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
 function bindNodeDrag(g,id,svg,start0){ // drag a move to a place of its own; a small move is still a click (selectMove)
@@ -5676,15 +5905,19 @@ function bindNodeDrag(g,id,svg,start0){ // drag a move to a place of its own; a 
     g.setAttribute('transform',`translate(${down.nx},${down.ny})`)});
   const end=e=>{if(!down)return;g.classList.remove('dragging');try{g.releasePointerCapture(e.pointerId)}catch(x){}
     if(down.moved){g.dataset.justDragged='1';const nx=Math.round(down.nx),ny=Math.round(down.ny);
-      kifuWrite(d=>{const m=d.moves[id];if(!m)return false;const before=m.pos?{...m.pos}:null;const after={x:nx,y:ny};
-        if(before&&before.x===after.x&&before.y===after.y)return false;m.pos=after;kifuChange(d,id,'pos',before,after)})}
+      const place=()=>kifuWrite(d=>{const m=d.moves[id];if(!m)return false;const before=m.pos?{...m.pos}:null;const after={x:nx,y:ny};
+        if(before&&before.x===after.x&&before.y===after.y)return false;m.pos=after;kifuChange(d,id,'pos',before,after)});
+      const t=moveUnder(e,id),to=t&&t.dataset.id;
+      if(to&&!isBelow(to,id))popMenu(e.clientX,e.clientY,id+' → '+to,[
+        [tr('Follow {id} (move under it)',{id:to}),()=>followMove(id,to)],[tr('Only place it here'),place]],render);
+      else place()}
     down=null};
   g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
 }
 /* Arrows between moves (links), drawn on the tree: the selected move shows a + below it; drag it onto another move and choose
    what the arrow says. The arrow belongs to the move it starts from (m.links). Clicking an arrow changes or deletes it. */
 const ARROW_TYPES=['clue','corrects','supports'];
-function bindArrowHandle(g,id,svg,p){
+function bindArrowHandle(g,id,svg,p,placeable){
   const hd=el('g',{class:'khandle'},g);el('circle',{cx:0,cy:21,r:6.5},hd);el('path',{d:'M-3.5,21H3.5M0,17.5V24.5'},hd);
   el('title',{},hd).textContent=tr('Drag onto another move to draw an arrow');
   let line=null;
@@ -5694,23 +5927,43 @@ function bindArrowHandle(g,id,svg,p){
     $$('.knode.kdrop',svg).forEach(n=>n.classList.remove('kdrop'));const t=moveUnder(e,id);if(t)t.classList.add('kdrop')});
   const end=e=>{if(!line)return;line.remove();line=null;try{hd.releasePointerCapture(e.pointerId)}catch(x){}
     $$('.knode.kdrop',svg).forEach(n=>n.classList.remove('kdrop'));
-    const t=e.type==='pointerup'&&moveUnder(e,id);if(t)arrowMenu(e.clientX,e.clientY,id,null,t.dataset.id)};
+    if(e.type!=='pointerup')return;const t=moveUnder(e,id);if(t)return arrowMenu(e.clientX,e.clientY,id,null,t.dataset.id);
+    const b=svgPoint(svg,e.clientX,e.clientY);if(Math.hypot(b.x-p.x,b.y-p.y)<30||moveUnder(e,null))return;
+    popMenu(e.clientX,e.clientY,id+' → …',[[tr('Add the next move here'),()=>addMove(id,placeable?{x:Math.round(b.x),y:Math.round(b.y)}:null)]])};
   hd.addEventListener('pointerup',end);hd.addEventListener('pointercancel',end);
   hd.addEventListener('click',e=>e.stopPropagation())}
-function moveUnder(e,not){const n=document.elementFromPoint(e.clientX,e.clientY),g=n&&n.closest('#treehost .knode');return g&&g.dataset.id!==not?g:null}
+function isBelow(a,b){const K=kifuModel();for(let x=K.byId.get(a);x;x=x.parent&&K.byId.get(x.parent))if(x.id===b)return true;return false} // a is b or under it
+function followMove(id,to){ // the move now follows another one; its place by hand goes, the tree places it
+  return kifuWrite(d=>{const m=d.moves[id];if(!m||!d.moves[to])return false;
+    for(let p=to;p;p=d.moves[p]&&d.moves[p].parent)if(p===id)return false;
+    if(m.parent!==to){kifuChange(d,id,'parent',m.parent??null,to);m.parent=to}
+    if(m.pos){kifuChange(d,id,'pos',{...m.pos},null);delete m.pos}})}
+const QUICK=[['success','✓','Holds'],['failure','✗','Dead end'],['inconclusive','?','No conclusion'],['active','○','Active']];
+function quickButtons(g,id,m){ // the result buttons beside the selected move
+  const q=el('g',{class:'kquick'},g),st=moveState(m);
+  QUICK.forEach(([v,sym,t],i)=>{const b=el('g',{class:'kq kq-'+v+(st===v?' on':''),transform:`translate(${20+i*17},21)`,role:'button','aria-label':v==='active'?trc('kifu',t):tr(t)},q);
+    el('circle',{r:7.5},b);el('text',{y:4,'text-anchor':'middle'},b).textContent=sym;el('title',{},b).textContent=v==='active'?trc('kifu',t):tr(t);
+    b.addEventListener('pointerdown',e=>e.stopPropagation());
+    b.addEventListener('click',e=>{e.stopPropagation();if(st!==v||v==='failure'||v==='inconclusive')setMoveState(id,v)})})}
+function moveUnder(e,not){ // the move under the pointer, looking through the one being dragged
+  for(const n of document.elementsFromPoint(e.clientX,e.clientY)){const g=n.closest&&n.closest('#treehost .knode');if(g&&g.dataset.id!==not)return g}return null}
 function arrowMenu(cx,cy,from,link,to){ // a new arrow (link null, to given) or an existing one (link)
-  closeArrowMenu();to=link?link.to:to;
-  const pick=type=>{closeArrowMenu();setArrow(from,link,type,to)};
-  const m=h('div',{id:'kamenu',role:'menu'},[h('div',{class:'kamt',text:from+' → '+to}),
-    ...ARROW_TYPES.map(k=>h('button',{type:'button',role:'menuitem',class:'kam-'+k+(link&&link.type===k?' on':''),text:textOf(LINK_TEXT,k),onclick:()=>pick(k)})),
-    link?h('button',{type:'button',role:'menuitem',class:'kamdel',text:tr('Delete'),onclick:()=>pick(null)}):null,
-    h('button',{type:'button',role:'menuitem',class:'kamx',text:tr('Cancel'),onclick:closeArrowMenu})]);
+  to=link?link.to:to;
+  popMenu(cx,cy,from+' → '+to,[...ARROW_TYPES.map(k=>[textOf(LINK_TEXT,k),()=>setArrow(from,link,k,to),'kam-'+k+(link&&link.type===k?' on':'')]),
+    link?[tr('Delete'),()=>setArrow(from,link,null,to),'kamdel']:null])}
+function popMenu(cx,cy,title,items,onCancel){ // a small menu at the pointer: [text, action, class]; Cancel, Escape or a click outside closes it
+  closeArrowMenu();closeArrowMenu.cancel=onCancel||null;
+  const run=fn=>{closeArrowMenu.cancel=null;closeArrowMenu();fn()};
+  const m=h('div',{id:'kamenu',role:'menu'},[h('div',{class:'kamt',text:title}),
+    ...items.filter(Boolean).map(([t,fn,cls])=>h('button',{type:'button',role:'menuitem',class:cls||null,text:t,onclick:()=>run(fn)})),
+    h('button',{type:'button',role:'menuitem',class:'kamx',text:tr('Cancel'),onclick:()=>closeArrowMenu()})]);
   document.body.append(m);
   const r=m.getBoundingClientRect();m.style.left=Math.max(8,Math.min(cx+6,innerWidth-r.width-8))+'px';m.style.top=Math.max(8,Math.min(cy+6,innerHeight-r.height-8))+'px';
   m.querySelector('button').focus();
   m.addEventListener('keydown',e=>{if(e.key==='Escape')closeArrowMenu()});
   setTimeout(()=>document.addEventListener('pointerdown',closeArrowMenu.out=e=>{if(!m.contains(e.target))closeArrowMenu()}),0)}
-function closeArrowMenu(){const m=$('#kamenu');if(m)m.remove();if(closeArrowMenu.out){document.removeEventListener('pointerdown',closeArrowMenu.out);closeArrowMenu.out=null}}
+function closeArrowMenu(){const m=$('#kamenu');if(m)m.remove();if(closeArrowMenu.out){document.removeEventListener('pointerdown',closeArrowMenu.out);closeArrowMenu.out=null}
+  const c=closeArrowMenu.cancel;closeArrowMenu.cancel=null;if(m&&c)c()}
 function setArrow(from,link,type,to){ // add (link null), change the type of, or delete (type null) one arrow; read fresh, so the arrow is found again by type and target
   to=link?link.to:to;
   return kifuWrite(d=>{const m=d.moves[from];if(!m||!d.moves[to]||from===to)return false;
@@ -5735,7 +5988,7 @@ function applyKifuFilter(host,K,F,P){ // highlight the moves of the mode and the
 function selectMove(id,scroll){
   const V=kifuView(),K=kifuModel(),x=K.byId.get(id);if(!x)return;V.sel=id;
   $$('#treehost .knode.sel,#treehost .kmove.sel').forEach(g=>g.classList.remove('sel'));
-  const g=$(`#treehost [data-id="${CSS.escape(id)}"],#treehost [data-move="${CSS.escape(id)}"]`);if(g)g.classList.add('sel');
+  const g=$(`#treehost [data-id="${CSS.escape(id)}"],#treehost [data-move="${CSS.escape(id)}"]`);if(g){g.classList.add('sel');if(g.matches('.knode'))g.parentNode.append(g)} // on top, so its buttons are not covered
   const panel=$('#treehost .kpanel');if(panel){const F=new Map(K.list.map(y=>[y.id,kifuFacts(y)]));panel.replaceChildren(...movePanel(x,K,F));panel.scrollTop=0}
   if(scroll&&g){const stage=$('#treehost .kstage'),b=g.getBoundingClientRect(),sb=stage.getBoundingClientRect();
     if(V.layout==='list')g.scrollIntoView({block:'center',behavior:'smooth'});
@@ -5792,19 +6045,19 @@ function moveProblems(m){ // what kifu check would call an error, said in plain 
   if((m.outcome==='failure'||m.outcome==='inconclusive')&&!m.cause)p.push(tr('Choose a cause: a wrong idea and data that cannot be trusted are different dead ends.'));
   return p}
 function nextMoveId(d,group){const pre=typeof group==='string'&&/^[A-Za-z]{1,4}$/.test(group)?group:'M';let n=1;while(d.moves[pre+n])n++;return pre+n}
-async function addMove(parentId){ // "Next move": a new active move after the selected one
+async function addMove(parentId,pos){ // "Next move": a new active move after the selected one (at pos on the tree diagram, if given)
   const today=new Date();
   const id=await kifuWrite(d=>{const p=parentId&&d.moves[parentId];
     const no=Math.max(0,...Object.values(d.moves).map(m=>m&&Number.isInteger(m.no)?m.no:0))+1,id=nextMoveId(d,p&&p.group);
     const m={id,no,parent:p?parentId:null,title:tr('New move'),kind:p?'attempt':'question',status:'active',trigger:{kind:'user'},
       when:`${today.getMonth()+1}/${today.getDate()}`,at:today.toISOString().slice(0,10),by:'user',startedAt:now(),evidence:{steps:[],checks:[]}};
-    if(p&&p.group)m.group=p.group;
+    if(p&&p.group)m.group=p.group;if(pos)m.pos=pos;
     d.moves[id]=m;kifuChange(d,id,'add',null,m.title);return id});
   if(!id)return;const V=kifuView();V.sel=id;V.edit=true;render();
   const t=$('#treehost .kpanel input[data-field="title"]');if(t){t.focus();t.select()}}
-function closeMoveDialog(id){ // "Close this move": the result, and for a dead end its cause and a sentence why
+function closeMoveDialog(id,preset){ // "Close this move": the result, and for a dead end its cause and a sentence why
   const K=kifuModel(),x=K.byId.get(id);if(!x)return;const m=x.m;
-  const oc=h('select',{},Object.entries(OUTCOME_TEXT).map(([v,t])=>h('option',{value:v,text:tr(t)})));oc.value=m.outcome||'success';
+  const oc=h('select',{},Object.entries(OUTCOME_TEXT).map(([v,t])=>h('option',{value:v,text:tr(t)})));oc.value=preset||m.outcome||'success';
   const ca=h('select',{},[h('option',{value:'',text:'—'}),...Object.entries(CAUSE_TEXT).map(([v,t])=>h('option',{value:v,text:tr(t)}))]);ca.value=m.cause||'';
   const re=h('textarea',{rows:3,text:m.reason||''}),msg=h('p',{class:'kwarn'});
   const sync=()=>{const bad=oc.value!=='success';ca.disabled=!bad;re.placeholder=bad?tr('One sentence: why it ended'):tr('Optional')};oc.onchange=sync;sync();
@@ -5848,8 +6101,37 @@ async function fileRef(path){ // a file reference with its fingerprint, as steps
   const r=S.server?(await serverFingerprints([{path}]))[0]:await localFingerprint({path});
   if(!r||r.state==='missing'||r.state==='outside')throw new Error(tr('{file} is missing',{file:path}));
   return{path:normPath(path),sha256:r.sha256,size:r.size,modified:r.modified}}
+/* The form of a move has three layers. On top, what only you decide: the title, the result, the cause of a dead end, a mark.
+   Then the written part, which an agent can fill in for you to check: why, result, meaning, population, no data. The rest
+   (kind, dates, links, data chain, source) is under Advanced, closed. The tree does the rest: drag a move to place it or onto
+   another move to follow it, drag its + to draw an arrow or to add the next move, and the small buttons set the result.
+   A written field is marked "written by the agent, not looked at yet" when its last change is by the agent, or when it has
+   no change at all and the move was not made by you. Looking at it without changing it is recorded as a change whose
+   before and after are the same. */
+const MOVE_STATES={planned:'Planned',active:'Active',success:'Holds',failure:'Dead end',inconclusive:'No conclusion'};
+const moveState=m=>m.status==='done'?(m.outcome||'success'):m.status==='planned'?'planned':m.status==='paused'?'paused':'active';
+const WRITTEN=[['why','Why this move',2,'The hypothesis, what it rests on, the other options'],['result.text','Result',3],['note','What it means',2],
+  ['population','Population',1,'Which samples, window and filters the numbers refer to'],
+  ['evidence.noData','No data, because',2,'For example: only discussed in a meeting; the next round has not run yet']];
+function fieldChanges(id,field){return Object.values((S.kifu&&S.kifu.data&&S.kifu.data.changes)||{}).filter(c=>c&&c.move===id&&c.field===field)
+  .sort((a,b)=>(a.at||'')<(b.at||'')?-1:1)}
+function notLookedAt(id,m,field){const v=getPath(m,field);if(v==null||v==='')return false;
+  const cs=fieldChanges(id,field),last=cs[cs.length-1];return last?last.by!=='user':m.by!=='user'}
+function lookedAt(id,fields){ // "Looked at": a change with the same value before and after, by you
+  return kifuWrite(d=>{const m=d.moves[id];if(!m)return false;let n=0;
+    fields.forEach(f=>{const v=getPath(m,f);if(v==null||v==='')return;kifuChange(d,id,f,v,v);n++});return n?n:false})}
+function setMoveFields(id,vals){ // several fields of one move in one write, each recorded
+  return kifuWrite(d=>{const m=d.moves[id];if(!m)return false;let n=0;
+    for(const[f,v]of Object.entries(vals)){const b=getPath(m,f);if(JSON.stringify(b??null)===JSON.stringify(v??null))continue;setMoveField(m,f,v);kifuChange(d,id,f,b,v);n++}
+    return n?n:false})}
+function setMoveState(id,st){ // the result buttons: a dead end or no conclusion asks for its cause and a sentence why
+  if(st==='failure'||st==='inconclusive')return closeMoveDialog(id,st);
+  if(st==='success')return setMoveFields(id,{status:'done',outcome:'success',cause:null,causeConfirmed:null,closedAt:kifuModel().byId.get(id)?.m.closedAt||now()});
+  return setMoveFields(id,{status:st,outcome:null,closedAt:null})}
+function askToFillIn(id){ // "Ask the agent to fill this in": a comment on the move with that tag, then wake the agent
+  const d=draftOf('move:'+id),t=tagId('Fill in this move');if(!d.tags.includes(t))d.tags=[...d.tags,t];return submitAndAskMove(id)}
 function moveEditor(x,K,F){ // the selected move as a form
-  const m=x.m,id=x.id,f=F.get(id),out=[],V=kifuView();
+  const m=x.m,id=x.id,f=F.get(id),out=[],V=kifuView(),open=V.open||(V.open={});
   const opt=(map,ctx)=>Object.entries(map).map(([v,t])=>h('option',{value:v,text:ctx?trc(ctx,t):tr(t)}));
   const sel=(field,options,blank)=>{const s=h('select',{'data-field':field,onchange:e=>editMove(id,field,e.target.value||null)},[blank?h('option',{value:'',text:'—'}):null,...options]);
     s.value=getPath(m,field)??'';return s};
@@ -5857,6 +6139,13 @@ function moveEditor(x,K,F){ // the selected move as a form
   const area=(field,rows,ph)=>h('textarea',{rows:rows||3,'data-field':field,text:plainText(getPath(m,field)),placeholder:ph||null,onchange:e=>editMove(id,field,e.target.value)});
   const fld=(label,...nodes)=>h('label',{class:'kf'},[h('span',{text:label}),...nodes]);
   const sec=(title,...nodes)=>h('fieldset',{class:'kfs'},[h('legend',{text:title}),...nodes]);
+  const fold=(key,summary,nodes)=>{const d=h('details',{class:'kfold',open:open[key]?'':null},[h('summary',{},summary),...nodes]);
+    d.addEventListener('toggle',()=>{open[key]=d.open});return d};
+  const wfld=(field,label,rows,ph)=>{const nl=notLookedAt(id,m,field); // a written field, marked when the agent wrote it and you have not looked
+    return h('div',{class:'kf'+(nl?' knl':'')},[h('span',{class:'kfh'},[h('span',{text:tr(label)}),
+      nl?h('span',{class:'kbadge',text:tr('Written by the agent, not looked at yet')}):null,
+      nl?h('button',{type:'button',class:'linkbtn',text:tr('Looked at it'),onclick:()=>lookedAt(id,[field])}):null]),
+      rows>1?area(field,rows,ph&&tr(ph)):inp(field,'text',ph&&tr(ph))])};
   out.push(h('div',{class:'kpmeta'},[h('span',{class:'kchip sh-'+f.shape},[shapeIcon(f.shape),tr(SHAPE_TEXT[f.shape])]),h('span',{class:'kid',text:moveNo(m)+' '+id})]));
   const probs=moveProblems(m);if(probs.length)out.push(h('ul',{class:'kprob'},probs.map(p=>h('li',{text:p}))));
   const form=h('div',{class:'kform'});out.push(form);
@@ -5864,72 +6153,69 @@ function moveEditor(x,K,F){ // the selected move as a form
     form.append(sec(tr('The whole record'),
       fld(tr('Research question'),h('textarea',{rows:2,text:meta.question||'',placeholder:tr('What does this research ask?'),onchange:e=>editMeta('question',e.target.value,id)})),
       fld(tr('Background'),h('textarea',{rows:2,text:meta.context||'',onchange:e=>editMeta('context',e.target.value,id)}))))}
-  form.append(fld(tr('Title'),inp('title')),
-    h('div',{class:'kf2'},[fld(tr('Kind'),sel('kind',opt(KIND_TEXT))),fld(tr('Status'),sel('status',opt(MOVE_STATUS_TEXT,'kifu')))]),
-    h('div',{class:'kf2'},[fld(tr('Result'),sel('outcome',opt(OUTCOME_TEXT),true)),
-      fld(tr('Cause'),sel('cause',opt(CAUSE_TEXT),true),h('span',{class:'kcb'},[h('input',{type:'checkbox',checked:m.causeConfirmed===false?null:m.cause?'':null,disabled:m.cause?null:'',
-        onchange:e=>editMove(id,'causeConfirmed',e.target.checked)}),tr('Confirmed')]))]),
-    fld(tr('Why it ended'),area('reason',2)),
-    fld(tr('Why this move'),area('why',2,tr('The hypothesis, what it rests on, the other options'))),
-    fld(tr('Result'),area('result.text',3)),
-    fld(tr('What it means'),area('note',2)),
-    fld(tr('Population'),inp('population','text',tr('Which samples, window and filters the numbers refer to'))));
-  // where it sits
-  const below=new Set();const mark=y=>{below.add(y.id);y.kids.forEach(mark)};mark(x);
-  const groups=[...new Set(K.list.map(y=>y.m.group).filter(g=>typeof g==='string'))].sort();
-  const gl=h('datalist',{id:'kgroups'},groups.map(g=>h('option',{value:g})));
-  form.append(sec(tr('Place in the record'),
-    fld(tr('Follows'),sel('parent',K.list.filter(y=>!below.has(y.id)).map(y=>h('option',{value:y.id,text:moveNo(y.m)+' '+y.id+' '+(y.m.title||'')})),true)),
-    h('div',{class:'kf2'},[fld(tr('Group'),(()=>{const i=inp('group');i.setAttribute('list','kgroups');return i})(),gl),
-      fld(tr('When'),inp('when','text','8/24')),fld(tr('Date'),inp('at','date'))]),
-    h('div',{class:'kf2'},[fld(tr('Started by'),sel('trigger.kind',opt(TRIGGER_TEXT),true)),fld(tr('Who'),inp('trigger.who'))]),
-    m.pos?h('p',{class:'kln'},[tr('Placed by hand on the tree diagram.')+' ',h('button',{type:'button',class:'linkbtn',text:tr('Reset position'),onclick:()=>resetMovePos(id)})]):
-      h('p',{class:'kln',text:tr('Drag this move on the tree diagram to place it by hand.')})));
-  // review marks
-  const markSel=(field,map,noteKey)=>{const s=h('select',{onchange:e=>{const v=e.target.value,cur=m[field]&&typeof m[field]==='object'?m[field]:{};
+  // 1. what only you decide
+  const st=moveState(m),bad=st==='failure'||st==='inconclusive'||st==='paused';
+  const markSel=(field,map)=>{const s=h('select',{onchange:e=>{const v=e.target.value,cur=m[field]&&typeof m[field]==='object'?m[field]:{};
       editMove(id,field,v?{...cur,kind:v}:null)}},[h('option',{value:'',text:'—'}),...opt(map)]);s.value=(m[field]&&m[field].kind)||'';return s};
   const markNote=(field,noteKey)=>h('input',{type:'text',value:(m[field]&&m[field][noteKey])||'',disabled:m[field]&&m[field].kind?null:'',
     onchange:e=>editMove(id,field+'.'+noteKey,e.target.value)});
-  form.append(sec(tr('Review'),h('div',{class:'kf2'},[fld(tr('Mark'),markSel('mark',MARK_TEXT)),fld(tr('Note'),markNote('mark','note'))]),
-    h('div',{class:'kf2'},[fld(tr('Milestone'),markSel('milestone',MILESTONE_TEXT)),fld(tr('Note'),markNote('milestone','reason'))])));
-  // links to other moves
+  form.append(sec(tr('You decide'),fld(tr('Title'),inp('title')),
+    h('div',{class:'kf'},[h('span',{text:tr('Result')}),h('div',{class:'kseg kstate',role:'group','aria-label':tr('Result')},Object.entries(MOVE_STATES).map(([v,t])=>
+      h('button',{type:'button',class:'st-'+v,'aria-pressed':String(st===v),text:v==='planned'||v==='active'?trc('kifu',t):tr(t),onclick:()=>{if(st!==v||v==='failure'||v==='inconclusive')setMoveState(id,v)}}))),
+      st==='paused'?h('span',{class:'kln',text:trc('kifu','Paused')}):null]),
+    bad?h('div',{class:'kf2'},[fld(tr('Cause'),sel('cause',opt(CAUSE_TEXT),true),h('span',{class:'kcb'},[h('input',{type:'checkbox',checked:m.causeConfirmed===false?null:m.cause?'':null,disabled:m.cause?null:'',
+        onchange:e=>editMove(id,'causeConfirmed',e.target.checked)}),tr('Confirmed')]))]):null,
+    bad?wfld('reason','Why it ended',2):null,
+    h('div',{class:'kf2'},[fld(tr('Mark'),markSel('mark',MARK_TEXT)),fld(tr('Note'),markNote('mark','note'))])));
+  // 2. the written part: the agent can fill it in, you check it
+  const written=WRITTEN.filter(([fl])=>fl!=='evidence.noData'||!f.chain.level||f.chain.level==='none'||m.evidence&&m.evidence.noData);
+  const nl=[...written.map(w=>w[0]),'reason'].filter(fl=>notLookedAt(id,m,fl)),filled=written.filter(([fl])=>{const v=getPath(m,fl);return v!=null&&v!==''}).length;
+  form.append(fold('written',[h('span',{text:tr('Written part')+' '}),h('span',{class:'kln',text:tr('{n} of {t} filled in',{n:filled,t:written.length})}),
+      nl.length?h('span',{class:'kbadge',text:tr('{n} written by the agent, not looked at yet',{n:nl.length})}):null],
+    [h('div',{class:'kacts'},[h('button',{type:'button',class:'btn small',text:tr('Ask the agent to fill this in'),title:tr('Sends a comment on this move and asks the agent'),onclick:()=>askToFillIn(id)}),
+      nl.length?h('button',{type:'button',class:'btn small',text:tr('Looked at all of it'),onclick:()=>lookedAt(id,nl)}):null]),
+      ...written.map(w=>wfld(...w))]));
+  // 3. Advanced
+  const groups=[...new Set(K.list.map(y=>y.m.group).filter(g=>typeof g==='string'))].sort();
+  const gl=h('datalist',{id:'kgroups'},groups.map(g=>h('option',{value:g})));
   const links=Array.isArray(m.links)?m.links:[];
-  const lt=h('select',{},opt(LINK_TEXT)),lto=h('select',{},K.list.filter(y=>y.id!==id).map(y=>h('option',{value:y.id,text:y.id+' '+(y.m.title||'')}))),ln=h('input',{type:'text',placeholder:tr('Note')});
-  form.append(sec(tr('Links'),...links.map((l,i)=>h('div',{class:'krowe'},[h('span',{text:textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?' ('+l.note+')':'')}),
-      h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'links',links.filter((_,j)=>j!==i))})])),
-    h('div',{class:'kadd'},[lt,lto,ln,h('button',{type:'button',class:'btn small',text:tr('Add'),onclick:()=>{
-      const l={type:lt.value,to:lto.value};if(ln.value.trim())l.note=ln.value.trim();editMove(id,'links',[...links,l])}})])));
-  // the data chain
   const ev=m.evidence&&typeof m.evidence==='object'?m.evidence:{},steps=Array.isArray(ev.steps)?ev.steps:[],files=Array.isArray(ev.files)?ev.files:[];
   const ss=h('select',{},[...S.steps.keys()].filter(k=>!steps.includes(k)).sort().map(k=>h('option',{value:k,text:k})));
   const fp=h('input',{type:'text',list:'kfiles',placeholder:tr('Path, for example ../report.html')}),fl=h('datalist',{id:'kfiles'});
   kifuFilePicks().then(L=>fl.replaceChildren(...L.map(p=>h('option',{value:p}))));
   const fr=h('select',{},opt(ROLE_TEXT)),fn=h('input',{type:'text',placeholder:tr('Where in the file')}),fmsg=h('span',{class:'kwarn'});
-  form.append(sec(tr('Data chain'),
-    h('p',{class:'kln',text:tr('Steps that recompute this move, files its numbers come from, or why there is no data.')}),
-    ...steps.map(sid=>h('div',{class:'krowe'},[h('span',{class:'mono',text:tr('Step')+' '+sid}),
-      h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'evidence.steps',steps.filter(s=>s!==sid))})])),
-    ss.options.length?h('div',{class:'kadd'},[ss,h('button',{type:'button',class:'btn small',text:tr('Add step'),onclick:()=>editMove(id,'evidence.steps',[...steps,ss.value])})]):null,
-    ...files.map((r,i)=>h('div',{class:'krowe'},[h('span',{class:'krole',text:textOf(ROLE_TEXT,r.role||'other')}),h('span',{class:'mono',text:r.path}),
-      h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'evidence.files',files.filter((_,j)=>j!==i))})])),
-    h('div',{class:'kadd'},[fp,fl,fr,fn,h('button',{type:'button',class:'btn small',text:tr('Add file'),onclick:async()=>{
-      const p=fp.value.trim();if(!p)return;fmsg.textContent='';
-      try{const ref={...await fileRef(p),role:fr.value};if(fn.value.trim())ref.note=fn.value.trim();
-        await editMove(id,'evidence.files',[...files.filter(o=>normPath(o.path)!==normPath(p)),ref])}
-      catch(e){fmsg.textContent=e.message||String(e)}}}),fmsg]),
-    fld(tr('No data, because'),area('evidence.noData',2,tr('For example: only discussed in a meeting; the next round has not run yet')))));
-  // the source report
-  form.append(sec(tr('Source'),h('div',{class:'kf2'},[fld(tr('Title'),inp('source.title')),fld(tr('Section'),inp('source.section'))]),
-    fld(tr('File'),(()=>{const i=inp('source.file');i.setAttribute('list','kfiles');return i})()),fld(tr('Link'),inp('source.url','url'))));
+  form.append(fold('advanced',[h('span',{text:tr('Advanced')+' '}),h('span',{class:'kln',text:tr('kind, dates, arrows, data chain, source')})],[
+    h('div',{class:'kf2'},[fld(tr('Kind'),sel('kind',opt(KIND_TEXT))),fld(tr('Status'),sel('status',opt(MOVE_STATUS_TEXT,'kifu')))]),
+    h('div',{class:'kf2'},[fld(tr('Group'),(()=>{const i=inp('group');i.setAttribute('list','kgroups');return i})(),gl),
+      fld(tr('When'),inp('when','text','8/24')),fld(tr('Date'),inp('at','date'))]),
+    h('div',{class:'kf2'},[fld(tr('Started by'),sel('trigger.kind',opt(TRIGGER_TEXT),true)),fld(tr('Who'),inp('trigger.who'))]),
+    h('div',{class:'kf2'},[fld(tr('Milestone'),markSel('milestone',MILESTONE_TEXT)),fld(tr('Note'),markNote('milestone','reason'))]),
+    m.pos?h('p',{class:'kln'},[tr('Placed by hand on the tree diagram.')+' ',h('button',{type:'button',class:'linkbtn',text:tr('Reset position'),onclick:()=>resetMovePos(id)})]):null,
+    sec(tr('Links'),links.length?null:h('p',{class:'kln',text:tr('No arrows yet. Drag the + under the move onto another move to draw one.')}),
+      ...links.map((l,i)=>h('div',{class:'krowe'},[h('span',{text:textOf(LINK_TEXT,l.type)+' '+l.to+(l.note?' ('+l.note+')':'')}),
+        h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'links',links.filter((_,j)=>j!==i))})]))),
+    sec(tr('Data chain'),
+      h('p',{class:'kln',text:tr('Steps that recompute this move, files its numbers come from, or why there is no data.')}),
+      ...steps.map(sid=>h('div',{class:'krowe'},[h('span',{class:'mono',text:tr('Step')+' '+sid}),
+        h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'evidence.steps',steps.filter(s=>s!==sid))})])),
+      ss.options.length?h('div',{class:'kadd'},[ss,h('button',{type:'button',class:'btn small',text:tr('Add step'),onclick:()=>editMove(id,'evidence.steps',[...steps,ss.value])})]):null,
+      ...files.map((r,i)=>h('div',{class:'krowe'},[h('span',{class:'krole',text:textOf(ROLE_TEXT,r.role||'other')}),h('span',{class:'mono',text:r.path}),
+        h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>editMove(id,'evidence.files',files.filter((_,j)=>j!==i))})])),
+      h('div',{class:'kadd'},[fp,fl,fr,fn,h('button',{type:'button',class:'btn small',text:tr('Add file'),onclick:async()=>{
+        const p=fp.value.trim();if(!p)return;fmsg.textContent='';
+        try{const ref={...await fileRef(p),role:fr.value};if(fn.value.trim())ref.note=fn.value.trim();
+          await editMove(id,'evidence.files',[...files.filter(o=>normPath(o.path)!==normPath(p)),ref])}
+        catch(e){fmsg.textContent=e.message||String(e)}}}),fmsg])),
+    sec(tr('Source'),h('div',{class:'kf2'},[fld(tr('Title'),inp('source.title')),fld(tr('Section'),inp('source.section'))]),
+      fld(tr('File'),(()=>{const i=inp('source.file');i.setAttribute('list','kfiles');return i})()),fld(tr('Link'),inp('source.url','url')))]));
   // actions and the change log of this move
   const acts=[h('button',{type:'button',class:'btn small',text:tr('Next move'),onclick:()=>addMove(id)})];
-  if(m.status!=='done')acts.push(h('button',{type:'button',class:'btn small',text:tr('Close this move'),onclick:()=>closeMoveDialog(id)}));
   if(deletable(x,K))acts.push(h('button',{type:'button',class:'btn small',text:tr('Delete'),onclick:()=>deleteMove(id)}));
   out.push(h('div',{class:'kacts'},acts));
   const ch=Object.values((S.kifu&&S.kifu.data&&S.kifu.data.changes)||{}).filter(c=>c&&c.move===id).sort((a,b)=>(a.at||'')<(b.at||'')?1:-1);
   if(ch.length)out.push(h('details',{class:'klog'},[h('summary',{text:tr('Changes to this move ({n})',{n:ch.length})}),
     h('ul',{},ch.slice(0,30).map(c=>h('li',{},[h('span',{class:'kdate',text:shortTime(c.at)+' '+(c.by==='claude'?tr('by the agent'):tr('by you'))+' '}),
-      h('b',{text:c.field}),h('span',{text:': '+(c.before==null?'—':plainText(c.before)).slice(0,60)+' → '+(c.after==null?'—':plainText(c.after)).slice(0,60)})])))]));
+      h('b',{text:c.field}),h('span',{text:': '+(JSON.stringify(c.before)===JSON.stringify(c.after)&&c.before!=null?tr('looked at, kept'):(c.before==null?'—':plainText(c.before)).slice(0,60)+' → '+(c.after==null?'—':plainText(c.after)).slice(0,60))})])))]));
   out.push(moveComments(id)||'',moveCommentBox(id));
   return out;
 }
@@ -6404,7 +6690,7 @@ const PRESETS={
   chart:['Change chart type','Change axes','Use log scale','Add error bars','Add trend line','Highlight key points','Change colours'],
   table:['Add units','Change sort','Add/remove columns','Highlight key points'],
   image:['Crop','Add labels','Replace image','Add caption'],
-  move:['Recompute this','Needs a clearer reason','Add to the report','Reopen this']};
+  move:['Fill in this move','Recompute this','Needs a clearer reason','Add to the report','Reopen this']};
 const tagId=label=>label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const TAG_LABEL=new Map(Object.values(PRESETS).flat().map(l=>[tagId(l),l]));
 [['add-data-files','Add these files to the chart'],['replace-data-files','Replace the data with these files']].forEach(([id,l])=>TAG_LABEL.set(id,l)); // requests made from Folder > Data
@@ -7089,7 +7375,8 @@ function setMode(btn){leaveField();
   if(m==='tree')kifuView().edit=btn==='kifu-edit'&&canEditKifu();
   $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===currentModeButton())));
   document.body.classList.toggle('nopanel',m!=='edit'&&!S.panelInView);
-  $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render()}
+  $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render();
+  if(btn==='kifu-edit'&&canEditKifu())onceOnly('duetkifu-edit-help',kifuEditHelp)}
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
 $('#togglePanel').addEventListener('click',()=>{const hid=document.body.classList.toggle('nopanel');if(S.mode!=='edit')S.panelInView=!hid;render()});
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.tab=b.dataset.tab;if(S.mode!=='edit'&&document.body.classList.contains('nopanel')){document.body.classList.remove('nopanel');S.panelInView=true}renderPanel()}});
@@ -8095,6 +8382,7 @@ function openAgentPrompt(){
 /* ---------- Welcome and help ---------- */
 const REPO_URL='https://github.com/Ashur5457/duetsheet';
 function openHelp(){
+  if(S.mode==='tree')return canEditKifu()&&kifuView().edit?kifuEditHelp():kifuViewHelp();
   const step=(t,d)=>h('li',{},[h('strong',{text:t}),' '+d]);
   const link=(path,t)=>h('a',{href:REPO_URL+path,target:'_blank',rel:'noopener',text:t});
   openModal(tr('Welcome to Duetsheet'),[h('div',{class:'langbox'},[
@@ -8108,6 +8396,26 @@ function openHelp(){
     h('p',{},[link('/blob/main/docs/tutorial.md',tr('Tutorial with screenshots')),' · ',link('/blob/main/AGENTS.md',tr('AGENTS.md (for agents)'))]),
     h('div',{class:'crow'},[h('span',{class:'sp'}),h('button',{type:'button',class:'btn small primary',text:tr('Got it'),onclick:closeModal})])])]);
 }
+function onceOnly(key,fn){try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1')}catch(e){return}fn()}
+function helpModal(title,intro,steps,foot){ // numbered steps: [bold start, the rest]
+  openModal(title,[h('div',{class:'langbox'},[intro?h('p',{text:intro}):null,
+    h('ol',{},steps.map(([t,d])=>h('li',{},[h('strong',{text:t}),' '+d]))),foot||null,
+    h('div',{class:'crow'},[h('span',{class:'sp'}),h('button',{type:'button',class:'btn small primary',text:tr('Got it'),onclick:closeModal})])])])}
+function kifuViewHelp(){
+  helpModal(tr('Reading the Kifu'),tr('The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.'),[
+    [tr('Shapes.'),tr('The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.')],
+    [tr('Arrows.'),tr('Dotted and dashed arrows between moves: a clue for, corrects, supports.')],
+    [tr('Details.'),tr('Click a move to see why it was made, what came out, and the files and steps its numbers come from.')],
+    [tr('Highlight.'),tr('Show only the main path, the dead ends, the moves you started, or the checks that do not match.')],
+    [tr('Comment.'),tr('Under a move, write a comment and ask the agent, the same as under a block of the report.')]],
+    canEditKifu()?h('p',{class:'kln',text:tr('To change the record, use Kifu edit at the top.')}):null)}
+function kifuEditHelp(){
+  helpModal(tr('Editing the Kifu'),tr('Most of it is done on the tree. You decide; the agent can write the text for you to check.'),[
+    [tr('Result.'),tr('Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.')],
+    [tr('Place.'),tr('Drag a move to place it. Drop it onto another move to make it follow that move.')],
+    [tr('Arrows and new moves.'),tr('Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.')],
+    [tr('The form on the right.'),tr('On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click "Ask the agent to fill this in". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.')],
+    [tr('Every change is saved at once.'),tr('It is written to kifu.json and listed under the move, with who made it.')]])}
 function welcomeOnce(){try{if(localStorage.getItem('duetsheet-welcomed'))return;localStorage.setItem('duetsheet-welcomed','1')}catch(e){return}openHelp()}
 $('#helpBtn').addEventListener('click',openHelp);
 
