@@ -6517,23 +6517,25 @@ function moveFigures(m){
   [...figs,...tabs].forEach(r=>box.append(fileFigure(r,true,m.id)));
   return box}
 function fileFigure(r,cap,moveId){ // one figure (image) or table (CSV) of the folder, with its caption when cap; in Kifu view, draw on it to ask
-  if(IMG_FILE.test(r.path)){const img=h('img',{alt:r.note||baseName(r.path)});
+  if(IMG_FILE.test(r.path)){const img=h('img',{alt:r.note||baseName(r.path),draggable:'false'}); // not dragged away, so it can be drawn on
     const fig=h('figure',{class:'kfig'},[h('button',{type:'button',class:'kfigb',title:tr('Enlarge'),onclick:()=>openModal(baseName(r.path),[h('div',{class:'kbig'},[img.cloneNode(),
       h('p',{class:'kln',text:r.note||''}),h('div',{class:'mono kln',text:r.path})])])},[img]),cap&&r.note?h('figcaption',{text:r.note}):null]);
     if(!S.folder)return h('p',{class:'kln',text:tr('Open the project folder to see them.')});
     if(moveId)bindFigureLasso(fig.firstChild,img,moveId,r.path);
     folderURL(r).then(u=>{if(u)img.src=u;else fig.replaceWith(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}))});return fig}
-function bindFigureLasso(btn,img,moveId,file){ // drag on a move's figure: a free-hand region to ask the agent about; a click still enlarges it
+function bindFigureLasso(btn,img,moveId,file){ // drag on a move's figure: a free-hand region to ask about (Kifu view) or to comment on (Kifu edit); a click still enlarges it
   const ov=el('svg',{class:'kfov',viewBox:'0 0 1000 1000',preserveAspectRatio:'none'},null);btn.append(ov);let d=null,moved=false;
   const loc=e=>{const r=img.getBoundingClientRect();return[clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
   const draw=pts=>{ov.replaceChildren();if(pts.length>1)el('path',{d:'M'+pts.map(q=>(q[0]*1000).toFixed(1)+','+(q[1]*1000).toFixed(1)).join(' L')+(d?'':' Z')},ov)};
-  btn.addEventListener('pointerdown',e=>{if(e.button!==0||editingMode()||S.readonly)return;
+  btn.addEventListener('pointerdown',e=>{if(e.button!==0||S.readonly)return;e.preventDefault();
     Object.assign(ov.style,{left:img.offsetLeft+'px',top:img.offsetTop+'px',width:img.offsetWidth+'px',height:img.offsetHeight+'px'});
     d={pts:[loc(e)],x:e.clientX,y:e.clientY,id:e.pointerId};moved=false});
   btn.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;
     if(!moved){if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<6)return;moved=true;try{btn.setPointerCapture(e.pointerId)}catch(x){}}
     e.preventDefault();d.pts.push(loc(e));draw(d.pts)});
-  const end=e=>{if(!d||e.pointerId!==d.id)return;const pts=d.pts;d=null;if(!moved)return;draw(pts);
+  const end=e=>{if(!d||e.pointerId!==d.id)return;const pts=d.pts;d=null;if(!moved)return;
+    if(e.type==='pointercancel'){ov.replaceChildren();moved=false;return}
+    draw(pts);
     if(pts.length<8||polyArea(pts.map(q=>[q[0]*1000,q[1]*1000]))<2500){ov.replaceChildren();toast(tr('Lasso too small. Draw a larger closed shape'));return}
     const key='move:'+moveId;draftOf(key).target={kind:'move',moveId,file,region:{kind:'lasso',space:'image',polygon:decimate(pts,200).map(q=>[r3(q[0]),r3(q[1])])}};
     openQuick(key,e.clientX,e.clientY)};
@@ -6555,7 +6557,7 @@ function moveFiguresEdit(id,m){ // Kifu edit: the figures and tables of a move, 
   slots.forEach(i=>{const r=files[i];
     list.append(h('div',{class:'kfe','data-i':String(i)},[h('div',{class:'kfeh'},[h('span',{class:'kfgrip',text:'\u283f',title:tr('Drag to reorder')}),
         h('span',{class:'mono kln',text:r.path,title:r.path}),h('button',{type:'button',class:'linkbtn',text:tr('Remove'),onclick:()=>save(files.filter((_,j)=>j!==i))})]),
-      fileFigure(r,false),
+      fileFigure(r,false,id),
       h('input',{type:'text',value:r.note||'',placeholder:tr('Caption'),'aria-label':tr('Caption'),onchange:e=>{const L=files.map(o=>({...o})),v=e.target.value.trim();
         if(v)L[i].note=v;else delete L[i].note;save(L)}})]))});
   if(window.Sortable&&slots.length>1)Sortable.create(list,{handle:'.kfgrip',animation:150,onEnd:()=>{const order=[...list.children].map(n=>+n.dataset.i);
