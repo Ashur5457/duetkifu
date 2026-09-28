@@ -213,14 +213,15 @@ main{min-width:0}
 .klegend{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--muted);align-items:center}
 .klegend>span{display:inline-flex;align-items:center;gap:6px}
 .kyou{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c5)}
-.kmain{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
-.kmain.kright{grid-template-columns:minmax(0,1fr) 10px var(--kpw,380px);column-gap:3px}
-.kmain.kright.mvfold{grid-template-columns:minmax(0,1fr)}.kmain.kright.mvfold>.kgrip{display:none}
-.kmain.kright .kb-move{position:sticky;top:12px}
-.kstage{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:auto;height:min(76vh,860px)}
-.kmain:not(.kright) .kstage{height:min(66vh,760px)}
+.krow2{display:grid;grid-template-columns:minmax(0,1fr) 10px var(--kw2,minmax(0,1fr));column-gap:3px;align-items:start;margin:0 0 10px}
+.kstage{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:auto;height:min(66vh,760px)}
+.krow2 .kstage{height:min(76vh,860px)}
 /* blocks of the Kifu view: a header row that folds the block, and grips that resize it (kept in this browser) */
-.kblk{min-width:0;margin:0 0 10px}.kmain .kblk{margin:0}
+.kblk{min-width:0;margin:0 0 10px}.krow2>.kblk{margin:0}
+.kdrag{cursor:grab;touch-action:none;padding:2px 3px;border-radius:4px;color:var(--muted);font-size:14px;line-height:1;user-select:none}
+.kdrag:hover{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.kblk.kmoving{opacity:.45}
+.kdrop{position:fixed;z-index:60;background:var(--accent);border-radius:2px;pointer-events:none;display:none}
 .kbh{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;min-height:28px;margin:0 0 4px;font-size:12.5px;color:var(--muted)}
 .kblk.folded .kbh{margin:0;padding:3px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
 .kfold{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:2px 0;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
@@ -239,9 +240,9 @@ body.kresizing{user-select:none;-webkit-user-select:none}
 .kstage svg{display:block}
 .kpanel{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;
   overflow:auto;font-size:14px}
-.kmain.kright .kpanel{max-height:calc(100vh - 60px)}
-@media (max-width:980px){.kmain,.kmain.kright{grid-template-columns:minmax(0,1fr)}.kmain>.kgrip{display:none}.kstage{height:62vh}
-  .kmain.kright .kb-move{position:static}.kmain.kright .kpanel{max-height:none}.kzoom{margin-left:0}}
+.krow2 .kpanel{max-height:calc(100vh - 60px)}
+@media (max-width:980px){.krow2{grid-template-columns:minmax(0,1fr)}.krow2>.kgrip{display:none}.kstage,.krow2 .kstage{height:62vh}
+  .krow2 .kpanel{max-height:none}.kzoom{margin-left:0}}
 /* the tree */
 .f-ink{fill:var(--ink)}.f-ok{fill:var(--ok)}.f-path{fill:var(--accent)}.f-fix{fill:var(--c2)}
 .s-dead{fill:var(--paper);stroke:var(--c0);stroke-width:1.6;stroke-linecap:round}
@@ -1436,10 +1437,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move": "這一步",
  "Collapse": "收合成一排",
  "Expand": "展開",
- "Put it below the tree": "移到樹狀圖下方",
- "Put it beside the tree": "移到樹狀圖右側",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Drag to move this block": "拖曳可移動這個區塊",
+ "At most two blocks side by side.": "同一列最多並排兩個區塊。",
  "Fit": "全覽",
  "Follows": "延伸自",
  "Highlight": "顯示模式",
@@ -2335,10 +2336,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move": "这一步",
  "Collapse": "收起成一行",
  "Expand": "展开",
- "Put it below the tree": "移到树状图下方",
- "Put it beside the tree": "移到树状图右侧",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Drag to move this block": "拖动可移动这个区块",
+ "At most two blocks side by side.": "同一行最多并排两个区块。",
  "Fit": "全览",
  "Follows": "延伸自",
  "Highlight": "显示模式",
@@ -3234,10 +3235,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move": "この手",
  "Collapse": "1行にたたむ",
  "Expand": "展開する",
- "Put it below the tree": "ツリーの下に置く",
- "Put it beside the tree": "ツリーの右に置く",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Drag to move this block": "ドラッグでこのブロックを移動",
+ "At most two blocks side by side.": "横に並べられるのは2つまでです。",
  "Fit": "全体表示",
  "Follows": "前の手",
  "Highlight": "強調表示",
@@ -4133,10 +4134,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move": "이 수",
  "Collapse": "한 줄로 접기",
  "Expand": "펼치기",
- "Put it below the tree": "트리 아래에 두기",
- "Put it beside the tree": "트리 오른쪽에 두기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Drag to move this block": "드래그하여 이 블록 이동",
+ "At most two blocks side by side.": "한 줄에 최대 두 블록까지 나란히 둘 수 있습니다.",
  "Fit": "전체 보기",
  "Follows": "이어받은 수",
  "Highlight": "강조",
@@ -5032,10 +5033,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "This move": "Esta jugada",
  "Collapse": "Contraer a una fila",
  "Expand": "Expandir",
- "Put it below the tree": "Ponerlo debajo del árbol",
- "Put it beside the tree": "Ponerlo junto al árbol",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Drag to move this block": "Arrastra para mover este bloque",
+ "At most two blocks side by side.": "Como máximo dos bloques uno al lado del otro.",
  "Fit": "Ajustar",
  "Follows": "Sigue a",
  "Highlight": "Resaltar",
@@ -5734,7 +5735,7 @@ function renderKifu(host,K){
       h('span',{class:'kpl',text:tr('not recorded')+' '+all.filter(x=>!F.get(x.id).chain.level).length})]),
     cs.length?h('span',{class:'kpill'},[tr('{n} checks against recomputed numbers',{n:cs.length})+': ',
       ...MATCHES.map(k=>{const n=cs.filter(c=>c.match===k).length;return n?h('span',{class:'kc m-'+k,text:MATCH_SIGN[k]+' '+n,title:tr(MATCH_TEXT[k])}):null})]):null]));
-  host.append(kblock('intro',tr('Question and counts'),intro,{sub:meta.question}));
+  const B={intro:kblock('intro',tr('Question and counts'),intro,{sub:meta.question})};
   const top=[];
   // layout, what to highlight, search, zoom
   const seg=(label,map,cur,set)=>h('div',{class:'kseg',role:'group','aria-label':label},Object.entries(map).map(([v,t])=>
@@ -5755,47 +5756,79 @@ function renderKifu(host,K){
       h('button',{type:'button',class:'wide',text:tr('Fit'),onclick:()=>zoomKifu('fit')})]),
     kifuLegend()]));
   const stage=h('div',{class:'kstage'+(V.layout==='list'?' klist':'')}),panel=h('aside',{class:'kpanel','aria-live':'polite'});
-  // the tree and the selected move: the move below the tree or beside it; each block folds to one row and can be resized
-  const right=KUI.dock==='right',main=h('div',{class:'kmain'+(right?' kright':'')+(KUI.fold.move?' mvfold':'')});
+  // the blocks: each folds to one row, can be resized, and dragged by its handle to another place (kept in this browser)
   if(KUI.stageH)stage.style.height=KUI.stageH+'px';
-  if(KUI.panelH&&!right)panel.style.height=KUI.panelH+'px';
-  if(KUI.panelW)main.style.setProperty('--kpw',KUI.panelW+'px');
+  if(KUI.panelH)panel.style.height=KUI.panelH+'px';
   const hgt=el=>()=>el.getBoundingClientRect().height;
-  const treeBlk=kblock('tree',tr(KIFU_LAYOUTS[V.layout]),[...top,stage,
+  B.tree=kblock('tree',tr(KIFU_LAYOUTS[V.layout]),[...top,stage,
     kgrip('y',hgt(stage),v=>{KUI.stageH=v;stage.style.height=v+'px'},160,()=>innerHeight*3,()=>{KUI.stageH=0;stage.style.height=''})],
     {tools:[h('button',{type:'button',class:'linkbtn',text:tr('Reset layout'),onclick:resetKifuLayout})]});
-  const moveBlk=kblock('move',tr('This move'),[panel,right?null:
+  B.move=kblock('move',tr('This move'),[panel,
     kgrip('y',hgt(panel),v=>{KUI.panelH=v;panel.style.height=v+'px'},120,()=>innerHeight*3,()=>{KUI.panelH=0;panel.style.height=''})],
-    {sub:moveTitle(K.byId.get(V.sel)),
-     tools:[h('button',{type:'button',class:'linkbtn',text:tr(right?'Put it below the tree':'Put it beside the tree'),onclick:()=>{KUI.dock=right?'below':'right';saveKui();render()}})]});
-  main.append(...[treeBlk,right?kgrip('x',()=>moveBlk.getBoundingClientRect().width,v=>{KUI.panelW=v;main.style.setProperty('--kpw',v+'px')},
-    260,()=>main.getBoundingClientRect().width-300,()=>{KUI.panelW=0;main.style.removeProperty('--kpw')},-1):null,moveBlk].filter(Boolean));
-  host.append(main);
+    {sub:moveTitle(K.byId.get(V.sel))});
   if(V.layout==='list')stage.append(...all.map(x=>moveCard(x,K,F.get(x.id))));
   else{stage.append(kifuSVG(K,F,P,V));
     stage.addEventListener('scroll',()=>{V.scroll=[stage.scrollLeft,stage.scrollTop]});
     requestAnimationFrame(()=>{zoomKifu(V.z||(stage.clientWidth<700?.8:.9));if(V.scroll){stage.scrollLeft=V.scroll[0];stage.scrollTop=V.scroll[1]}})}
   applyKifuFilter(host,K,F,P);
   panel.append(...movePanel(K.byId.get(V.sel),K,F));
-  if(P.line.length>1)host.append(kblock('path',tr('The main path, from the question to the conclusion'),[h('div',{class:'kpath'},[
+  if(P.line.length>1)B.path=kblock('path',tr('The main path, from the question to the conclusion'),[h('div',{class:'kpath'},[
     h('ol',{},P.line.map(x=>h('li',{},[h('div',{},[h('button',{type:'button',class:'linkbtn kgo',text:x.m.title||x.id,onclick:()=>selectMove(x.id,true)}),
-      h('span',{class:'kdate',text:' '+(x.m.when||x.m.at||'')})]),x.m.note?h('div',{class:'kpd',text:x.m.note}):null])))])]));
+      h('span',{class:'kdate',text:' '+(x.m.when||x.m.at||'')})]),x.m.note?h('div',{class:'kpd',text:x.m.note}):null])))])]);
+  host.append(...kifuRows(B));
 }
-/* The layout of the Kifu view, kept per viewer in this browser only: where the move sits (below or beside the tree),
-   which blocks are folded to one row, and the sizes dragged with the grips (0 = the default size). */
-const KUI_KEY='duetkifu-kifu-layout';
-const kuiDefault=()=>({dock:'below',fold:{},stageH:0,panelH:0,panelW:0,sideW:0});
+/* The layout of the Kifu view, kept per viewer in this browser only: the rows of blocks (one block, or two side by
+   side), which blocks are folded to one row, and the sizes dragged with the grips (0 or missing = the default size). */
+const KUI_KEY='duetkifu-kifu-layout',KIFU_BLOCKS=['intro','tree','move','path'];
+const kuiDefault=()=>({rows:null,fold:{},stageH:0,panelH:0,split:{},sideW:0});
 let KUI=(()=>{const d=kuiDefault();try{const v=JSON.parse(localStorage.getItem(KUI_KEY)||'null');
-  if(v&&typeof v==='object'&&!Array.isArray(v)){if(v.dock==='right')d.dock='right';
+  if(v&&typeof v==='object'&&!Array.isArray(v)){
+    if(Array.isArray(v.rows)){const seen=new Set();d.rows=v.rows.map(r=>Array.isArray(r)?r.filter(k=>KIFU_BLOCKS.includes(k)&&!seen.has(k)&&seen.add(k)).slice(0,2):[]).filter(r=>r.length)}
+    else if(v.dock==='right')d.rows=[['intro'],['tree','move'],['path']]; // the layout before blocks could be dragged
     if(v.fold&&typeof v.fold==='object')for(const k in v.fold)if(v.fold[k]===true)d.fold[k]=true;
-    ['stageH','panelH','panelW','sideW'].forEach(k=>{if(Number.isFinite(v[k])&&v[k]>0)d[k]=Math.round(v[k])})}}catch(e){}return d})();
+    ['stageH','panelH','sideW'].forEach(k=>{if(Number.isFinite(v[k])&&v[k]>0)d[k]=Math.round(v[k])});
+    if(v.split&&typeof v.split==='object')for(const k in v.split)if(Number.isFinite(v.split[k])&&v.split[k]>0)d.split[k]=Math.round(v.split[k]);
+    if(Number.isFinite(v.panelW)&&v.panelW>0&&!d.split['tree+move'])d.split['tree+move']=Math.round(v.panelW)}}catch(e){}return d})();
 function saveKui(){try{localStorage.setItem(KUI_KEY,JSON.stringify(KUI))}catch(e){}}
 function resetKifuLayout(){KUI=kuiDefault();saveKui();applySideWidth();render()}
+function kuiRows(keys){ // the saved rows, with the blocks that are shown; a block missing from them goes to its default place
+  const rows=(KUI.rows||[]).map(r=>r.filter(k=>keys.includes(k))).filter(r=>r.length),seen=rows.flat();
+  keys.filter(k=>!seen.includes(k)).forEach(k=>{const at=KIFU_BLOCKS.indexOf(k),i=rows.findIndex(r=>r.some(x=>KIFU_BLOCKS.indexOf(x)>at));
+    rows.splice(i<0?rows.length:i,0,[k])});
+  return rows}
+function kifuRows(B){ // two blocks in a row sit side by side, with a grip between them; a folded block does not
+  return kuiRows(KIFU_BLOCKS.filter(k=>B[k])).flatMap(r=>{const bs=r.map(k=>B[k]);
+    if(bs.length<2||r.some(k=>KUI.fold[k]))return bs;
+    const id=r.join('+'),row=h('div',{class:'krow2'}),w=()=>KUI.split[id]?KUI.split[id]+'px':r[1]==='move'?'400px':'';
+    const setW=()=>{if(w())row.style.setProperty('--kw2',w());else row.style.removeProperty('--kw2')};setW();
+    row.append(bs[0],kgrip('x',()=>bs[1].getBoundingClientRect().width,v=>{KUI.split[id]=v;setW()},240,()=>row.getBoundingClientRect().width-260,
+      ()=>{delete KUI.split[id];setW()},-1),bs[1]);
+    return[row]})}
+function moveKifuBlock(key,to,side){ // above or below a block: a row of its own; left or right: beside it
+  const rows=kuiRows(KIFU_BLOCKS).map(r=>r.filter(k=>k!==key)).filter(r=>r.length),i=rows.findIndex(r=>r.includes(to));if(i<0)return;
+  if(side==='above'||side==='below')rows.splice(side==='above'?i:i+1,0,[key]);
+  else if(rows[i].length>1){toast(tr('At most two blocks side by side.'));return}
+  else rows[i]=side==='left'?[key,to]:[to,key];
+  KUI.rows=rows;saveKui();render()}
+function dragKifuBlock(e,key){ // drag a block by its handle; a line shows where it will go
+  if(e.button!==0)return;e.preventDefault();
+  const src=e.target.closest('.kblk'),line=h('div',{class:'kdrop'});document.body.append(line);
+  src.classList.add('kmoving');document.body.classList.add('kresizing');let drop=null;
+  const mv=ev=>{if(ev.clientY<50)scrollBy(0,-18);else if(ev.clientY>innerHeight-50)scrollBy(0,18);
+    const b=document.elementFromPoint(ev.clientX,ev.clientY),t=b&&b.closest('#treehost .kblk');
+    if(!t||t===src){drop=null;line.style.display='none';return}
+    const r=t.getBoundingClientRect(),fx=(ev.clientX-r.left)/r.width,fy=(ev.clientY-r.top)/r.height;
+    const side=fx<.2?'left':fx>.8?'right':fy<.5?'above':'below',v=side==='left'||side==='right';drop={to:t.dataset.k,side};
+    Object.assign(line.style,{display:'block',left:(v?(side==='left'?r.left:r.right)-2:r.left)+'px',top:(v?r.top:(side==='above'?r.top:r.bottom)-2)+'px',
+      width:(v?4:r.width)+'px',height:(v?r.height:4)+'px'})};
+  const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);
+    line.remove();src.classList.remove('kmoving');document.body.classList.remove('kresizing');if(drop)moveKifuBlock(key,drop.to,drop.side)};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up)}
 const moveTitle=x=>x?(x.m.title||x.id):'';
 function kblock(key,title,body,o){ // a block with a header row; folded, only the header row shows
   o=o||{};const folded=!!KUI.fold[key];
-  return h('section',{class:'kblk kb-'+key+(folded?' folded':'')},[
-    h('div',{class:'kbh'},[h('button',{type:'button',class:'kfold','aria-expanded':String(!folded),title:tr(folded?'Expand':'Collapse'),
+  return h('section',{class:'kblk kb-'+key+(folded?' folded':''),'data-k':key},[
+    h('div',{class:'kbh'},[h('span',{class:'kdrag',title:tr('Drag to move this block'),'aria-hidden':'true',text:'\u283f',onpointerdown:e=>dragKifuBlock(e,key)}),h('button',{type:'button',class:'kfold','aria-expanded':String(!folded),title:tr(folded?'Expand':'Collapse'),
       onclick:()=>{if(folded)delete KUI.fold[key];else KUI.fold[key]=true;saveKui();render()}},[h('span',{class:'kfa','aria-hidden':'true',text:folded?'\u25b8':'\u25be'}),title]),
       h('span',{class:'kbsub',text:folded?(o.sub||''):''}),o.tools?h('span',{class:'kbtools'},o.tools):null]),
     folded?null:h('div',{class:'kbody'},body)])}
