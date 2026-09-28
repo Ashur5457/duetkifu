@@ -29,7 +29,7 @@ Reply in the user's language. Tell the user what you are about to do before each
    It opens the page in the browser, already connected to the folder.
 9. **Listen for the page.** Run this as a second background process:
    `python "${CLAUDE_PLUGIN_ROOT}/duetkifu.py" wait "<folder>"`
-   It costs nothing while it waits and exits when the user clicks **Ask the agent to revise** (or **Ask the agent to fill this in** on a move), or when Duetkifu stops; you are notified when it exits. Tell the user the page is open: **Report view/edit** for the report, **Kifu view/edit** for the research tree, and the button at the top sends their comments to you, with no need to come back to this conversation.
+   It costs nothing while it waits and exits when the user clicks **Ask the agent to revise** (or **Ask the agent to fill this in** on a move, or **Ask the agent** in the questions panel of the view modes), or when Duetkifu stops; you are notified when it exits. Tell the user the page is open: **Report view/edit** for the report, **Kifu view/edit** for the research tree. While editing, the button at the top sends their comments to you; while reading, they can draw around part of a figure or select text to ask a question, and the questions panel sends them. No need to come back to this conversation.
 
 ## When `wait` exits
 
