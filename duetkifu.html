@@ -583,6 +583,25 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #qc .qrow{margin:0 0 8px;font-size:12.5px;color:var(--muted);white-space:pre-line;line-height:1.45;overflow-wrap:anywhere}
 #qc textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13px;margin:0 0 8px}
 #qc .crow{display:flex;gap:8px;align-items:center}#qc .sp{flex:1}
+/* the view modes: a button next to selected text, and the floating questions panel */
+#asksel{position:fixed;z-index:56;font-size:12.5px;padding:3px 10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+#qa{position:fixed;z-index:50;right:16px;top:90px;width:360px;height:min(560px,calc(100vh - 110px));min-width:260px;min-height:180px;max-width:calc(100vw - 16px);
+  max-height:calc(100vh - 16px);display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 6px 24px rgba(0,0,0,.14);resize:both;overflow:hidden;font-size:13px}
+#qa[hidden]{display:none}
+#qa.min{resize:none;width:auto!important;height:auto!important;min-width:0;min-height:0}
+#qa .qah{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--line);cursor:move;user-select:none;touch-action:none}
+#qa.min .qah{border-bottom:0}
+#qa .qah b{font-size:13.5px}#qa .qah .sp{flex:1}
+#qa .qah button{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:6px;min-width:26px;height:24px;cursor:pointer;font:inherit}
+#qa .qab{flex:1;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+#qa .qaf{border-top:1px solid var(--line);padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+#qa .qaf .sp{flex:1}#qa .qaf .ast{font-size:12px;color:var(--muted)}
+#qa .anno{margin:0}#qa .empty{color:var(--muted);font-size:12.5px;margin:4px 0}
+#qa .where{margin:2px 0}
+.kfigb{position:relative}
+.kfov{position:absolute;pointer-events:none}
+.kfov path{fill:color-mix(in srgb,var(--accent) 12%,transparent);stroke:var(--accent);stroke-width:2.4;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .flowbar{max-width:var(--pw);margin:0 auto 8px;display:flex;justify-content:flex-end}
 #flow.compact .pgsep{font-size:12px;color:var(--muted);margin:14px 0 4px;border-bottom:1px dotted var(--line);padding-bottom:2px}
 #flow.compact .cg{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin:4px 0;cursor:grab}
@@ -682,6 +701,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
 <input type="file" id="reportfile" accept=".json,application/json" hidden>
 <div id="tip" hidden></div>
 <div id="qc" hidden role="dialog" aria-label="Comment"></div>
+<button type="button" class="btn small primary" id="asksel" hidden>Ask the agent</button>
+<aside id="qa" hidden aria-label="Questions"></aside>
 <div id="toast" hidden></div>
 
 <!-- Interface translations. Keys are the English text; "context|English" keys disambiguate the same English in different places.
@@ -1448,6 +1469,15 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Add to my questions": "加入我的問題",
+ "Question #{n} added. Send your questions with \"Ask the agent\" in the questions panel.": "已加入問題 #{n}。請用問答側欄的「詢問 agent」一起送出。",
+ "{nm}: a region of {file}": "{nm}：{file} 的圈選範圍",
+ "Drag to move": "拖曳可移動",
+ "Questions": "問答",
+ "{n} open": "{n} 則待處理",
+ "No questions yet. Draw around part of a figure, or select some text, to ask the agent about it.": "還沒有問題。在圖上圈出一塊，或選取一段文字，就能詢問 agent。",
+ "Ask the agent ({n})": "詢問 agent（{n}）",
+ "Ask the agent": "詢問 agent",
  "Result, in words": "結果說明",
  "Drag to reorder": "拖曳可調整順序",
  "An image or a CSV/TSV table in the folder": "資料夾裡的圖片，或 CSV/TSV 表格",
@@ -2354,6 +2384,15 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Add to my questions": "加入我的问题",
+ "Question #{n} added. Send your questions with \"Ask the agent\" in the questions panel.": "已加入问题 #{n}。请用问答侧栏的“询问 agent”一起发送。",
+ "{nm}: a region of {file}": "{nm}：{file} 的圈选范围",
+ "Drag to move": "拖动可移动",
+ "Questions": "问答",
+ "{n} open": "{n} 条待处理",
+ "No questions yet. Draw around part of a figure, or select some text, to ask the agent about it.": "还没有问题。在图上圈出一块，或选取一段文字，就能询问 agent。",
+ "Ask the agent ({n})": "询问 agent（{n}）",
+ "Ask the agent": "询问 agent",
  "Result, in words": "结果说明",
  "Drag to reorder": "拖动可调整顺序",
  "An image or a CSV/TSV table in the folder": "文件夹里的图片，或 CSV/TSV 表格",
@@ -3260,6 +3299,15 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Add to my questions": "質問に追加",
+ "Question #{n} added. Send your questions with \"Ask the agent\" in the questions panel.": "質問 #{n} を追加しました。質問パネルの「agent に聞く」でまとめて送ってください。",
+ "{nm}: a region of {file}": "{nm}：{file} の囲んだ範囲",
+ "Drag to move": "ドラッグで移動",
+ "Questions": "質問",
+ "{n} open": "未対応 {n} 件",
+ "No questions yet. Draw around part of a figure, or select some text, to ask the agent about it.": "まだ質問はありません。図の一部を囲むか、文章を選ぶと agent に質問できます。",
+ "Ask the agent ({n})": "agent に聞く（{n}）",
+ "Ask the agent": "agent に聞く",
  "Result, in words": "結果の説明",
  "Drag to reorder": "ドラッグで順番を変更",
  "An image or a CSV/TSV table in the folder": "フォルダ内の画像、または CSV/TSV の表",
@@ -4166,6 +4214,15 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Add to my questions": "내 질문에 추가",
+ "Question #{n} added. Send your questions with \"Ask the agent\" in the questions panel.": "질문 #{n}을(를) 추가했습니다. 질문 패널의 \"agent에게 묻기\"로 함께 보내세요.",
+ "{nm}: a region of {file}": "{nm}: {file}의 선택 영역",
+ "Drag to move": "드래그하여 이동",
+ "Questions": "질문",
+ "{n} open": "미처리 {n}건",
+ "No questions yet. Draw around part of a figure, or select some text, to ask the agent about it.": "아직 질문이 없습니다. 그림의 일부를 둘러싸거나 텍스트를 선택하면 agent에게 물을 수 있습니다.",
+ "Ask the agent ({n})": "agent에게 묻기 ({n})",
+ "Ask the agent": "agent에게 묻기",
  "Result, in words": "결과 설명",
  "Drag to reorder": "드래그하여 순서 변경",
  "An image or a CSV/TSV table in the folder": "폴더 안의 이미지 또는 CSV/TSV 표",
@@ -5072,6 +5129,15 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Add to my questions": "Añadir a mis preguntas",
+ "Question #{n} added. Send your questions with \"Ask the agent\" in the questions panel.": "Pregunta #{n} añadida. Envía tus preguntas con \"Preguntar al agente\" en el panel de preguntas.",
+ "{nm}: a region of {file}": "{nm}: una región de {file}",
+ "Drag to move": "Arrastra para mover",
+ "Questions": "Preguntas",
+ "{n} open": "{n} abiertas",
+ "No questions yet. Draw around part of a figure, or select some text, to ask the agent about it.": "Aún no hay preguntas. Rodea parte de una figura o selecciona texto para preguntar al agente.",
+ "Ask the agent ({n})": "Preguntar al agente ({n})",
+ "Ask the agent": "Preguntar al agente",
  "Result, in words": "El resultado, en palabras",
  "Drag to reorder": "Arrastra para reordenar",
  "An image or a CSV/TSV table in the folder": "Una imagen o una tabla CSV/TSV de la carpeta",
@@ -6301,14 +6367,31 @@ function moveFigures(m){
   if(!figs.length&&!tabs.length)return null;
   const box=h('div',{class:'kfigs'},[h('h3',{text:tr('Figures and tables')})]);
   if(!S.folder){box.append(h('p',{class:'kln',text:tr('Open the project folder to see them.')}));return box}
-  [...figs,...tabs].forEach(r=>box.append(fileFigure(r,true)));
+  [...figs,...tabs].forEach(r=>box.append(fileFigure(r,true,m.id)));
   return box}
-function fileFigure(r,cap){ // one figure (image) or table (CSV) of the folder, with its caption when cap
+function fileFigure(r,cap,moveId){ // one figure (image) or table (CSV) of the folder, with its caption when cap; in Kifu view, draw on it to ask
   if(IMG_FILE.test(r.path)){const img=h('img',{alt:r.note||baseName(r.path)});
     const fig=h('figure',{class:'kfig'},[h('button',{type:'button',class:'kfigb',title:tr('Enlarge'),onclick:()=>openModal(baseName(r.path),[h('div',{class:'kbig'},[img.cloneNode(),
       h('p',{class:'kln',text:r.note||''}),h('div',{class:'mono kln',text:r.path})])])},[img]),cap&&r.note?h('figcaption',{text:r.note}):null]);
     if(!S.folder)return h('p',{class:'kln',text:tr('Open the project folder to see them.')});
+    if(moveId)bindFigureLasso(fig.firstChild,img,moveId,r.path);
     folderURL(r).then(u=>{if(u)img.src=u;else fig.replaceWith(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}))});return fig}
+function bindFigureLasso(btn,img,moveId,file){ // drag on a move's figure: a free-hand region to ask the agent about; a click still enlarges it
+  const ov=el('svg',{class:'kfov',viewBox:'0 0 1000 1000',preserveAspectRatio:'none'},null);btn.append(ov);let d=null,moved=false;
+  const loc=e=>{const r=img.getBoundingClientRect();return[clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
+  const draw=pts=>{ov.replaceChildren();if(pts.length>1)el('path',{d:'M'+pts.map(q=>(q[0]*1000).toFixed(1)+','+(q[1]*1000).toFixed(1)).join(' L')+(d?'':' Z')},ov)};
+  btn.addEventListener('pointerdown',e=>{if(e.button!==0||editingMode()||S.readonly)return;
+    Object.assign(ov.style,{left:img.offsetLeft+'px',top:img.offsetTop+'px',width:img.offsetWidth+'px',height:img.offsetHeight+'px'});
+    d={pts:[loc(e)],x:e.clientX,y:e.clientY,id:e.pointerId};moved=false});
+  btn.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;
+    if(!moved){if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<6)return;moved=true;try{btn.setPointerCapture(e.pointerId)}catch(x){}}
+    e.preventDefault();d.pts.push(loc(e));draw(d.pts)});
+  const end=e=>{if(!d||e.pointerId!==d.id)return;const pts=d.pts;d=null;if(!moved)return;draw(pts);
+    if(pts.length<8||polyArea(pts.map(q=>[q[0]*1000,q[1]*1000]))<2500){ov.replaceChildren();toast(tr('Lasso too small. Draw a larger closed shape'));return}
+    const key='move:'+moveId;draftOf(key).target={kind:'move',moveId,file,region:{kind:'lasso',space:'image',polygon:decimate(pts,200).map(q=>[r3(q[0]),r3(q[1])])}};
+    openQuick(key,e.clientX,e.clientY)};
+  btn.addEventListener('pointerup',end);btn.addEventListener('pointercancel',end);
+  btn.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopImmediatePropagation();moved=false}},true)}
   const hold=h('div',{class:'ktabw kpreview'},[h('p',{class:'kln',text:tr('Loading…')})]);
   if(!S.folder)return h('p',{class:'kln',text:tr('Open the project folder to see them.')});
   folderText(r).then(t=>{if(t==null){hold.replaceChildren(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}));return}
@@ -6459,7 +6542,7 @@ function renderView(){
   const host=$('#pagehost');host.replaceChildren();S.geo={};
   const blocks=S.pages[S.page]||[];
   const pg=h('div',{class:'page'});const inner=h('div',{class:'inner'});pg.append(inner);
-  blockGroups(blocks).forEach(g=>inner.append(...buildGroup(g,false)));
+  blockGroups(blocks).forEach(g=>inner.append(...buildGroup(g,!S.readonly))); // interactive: draw on a figure to ask about it
   pg.append(h('span',{class:'pno',text:`${S.page+1} / ${S.pages.length}`}));
   host.append(pg);
   fitPage(inner,blocks);
@@ -6838,13 +6921,17 @@ async function submitDraft(id){
   if(!text&&!d.tags.length){toast(tr('Write a comment or pick a tag first'));return false}
   const no=S.annos.reduce((m,a)=>Math.max(m,a.no||0),0)+1;
   const a={id:uid('a'),no,target:d.target||{kind:'block',blockId:id},tags:[...d.tags],text,status:'open',reply:'',createdAt:now()};
+  if(!editingMode())a.from='view'; // asked while reading: listed in the questions panel
   if(d.withFiles!==false&&S.fsel&&S.fsel.size){a.files=[...S.fsel].map(normPath).sort();S.fsel.clear()} // the files ticked in Folder > Data
   S.drafts.delete(id);S.annos=[...S.annos,a];
   const box=document.activeElement,again=!!box&&box.dataset&&box.dataset.fid===fid({id},'comment'); // sent with Ctrl+Enter: keep typing in a fresh box
   if(again)box.blur();render();if(again){const n=$(`[data-fid="${CSS.escape(fid({id},'comment'))}"]`);if(n)n.focus({preventScroll:true})}
-  await put('annotations/'+a.id,a);toast(tr('Comment sent #')+no);
+  await put('annotations/'+a.id,a);questionAdded(a);
   return true;
 }
+function questionAdded(a){ // after a comment is saved: in the view modes it waits in the questions panel
+  if(a.from!=='view'){toast(tr('Comment sent #')+a.no);return}
+  QA.min=false;saveQA();renderQA(true);toast(tr('Question #{n} added. Send your questions with "Ask the agent" in the questions panel.',{n:a.no}))}
 async function submitAndAsk(id){if(await submitDraft(id))await askAgent()}
 
 /* A move of the research record is annotated the same way as a report block (target.kind:"move", moveId): a comment
@@ -6869,10 +6956,11 @@ async function submitMoveDraft(id){
   const key='move:'+id,d=draftOf(key),text=d.text.trim();
   if(!text&&!d.tags.length){toast(tr('Write a comment or pick a tag first'));return false}
   const no=S.annos.reduce((m,a)=>Math.max(m,a.no||0),0)+1;
-  const a={id:uid('a'),no,target:{kind:'move',moveId:id},tags:[...d.tags],text,status:'open',reply:'',createdAt:now()};
+  const a={id:uid('a'),no,target:d.target&&d.target.kind==='move'?d.target:{kind:'move',moveId:id},tags:[...d.tags],text,status:'open',reply:'',createdAt:now()};
+  if(!editingMode())a.from='view';
   if(d.withFiles!==false&&S.fsel&&S.fsel.size){a.files=[...S.fsel].map(normPath).sort();S.fsel.clear()}
   S.drafts.delete(key);S.annos=[...S.annos,a];render();
-  await put('annotations/'+a.id,a);toast(tr('Comment sent #')+no);
+  await put('annotations/'+a.id,a);questionAdded(a);
   return true;
 }
 async function submitAndAskMove(id){if(await submitMoveDraft(id))await askAgent()}
@@ -6967,7 +7055,10 @@ function ids(l){const a=(l||[]).slice(0,10).map(i=>'#'+i).join(' ');return(l||[]
 function blockName(id){const b=S.blocks.get(id);if(!b){const c=S.changes.find(c=>c.blockId===id&&c.name);return c?c.name:tr('(deleted block)')}return b.title||tr('{t} block',{t:typeName(b.type)})}
 function describe(t){
   try{
-    if(t.kind==='move'){const mv=(S.kifu&&S.kifu.data&&S.kifu.data.moves)||{},m=mv[t.moveId];return m?moveNo(m)+' '+(m.title||t.moveId):tr('(move not found)')}
+    if(t.kind==='move'){const mv=(S.kifu&&S.kifu.data&&S.kifu.data.moves)||{},m=mv[t.moveId];if(!m)return tr('(move not found)');
+      const nm=moveNo(m)+' '+(m.title||t.moveId);
+      if(t.region&&t.file)return tr('{nm}: a region of {file}',{nm,file:baseName(t.file)});
+      return nm+(t.file?' · '+baseName(t.file):'')+(t.quote?tr(': "{q}"',{q:t.quote.length>40?t.quote.slice(0,40)+'…':t.quote}):'')}
     const nm=blockName(t.blockId);
     if(t.kind==='block')return nm+(t.quote?tr(': "{q}"',{q:t.quote.length>40?t.quote.slice(0,40)+'…':t.quote}):'');
     if(t.kind==='point'){const b=S.blocks.get(t.blockId),ds=b&&b.chart&&pointDataset(b,t),r=ds&&ds.rows.find(r=>r.id===t.rowId),s=b&&ds?seriesFor(b,ds.id):{};
@@ -6989,7 +7080,7 @@ async function removeAnno(a){S.annos=S.annos.filter(x=>x.id!==a.id);renderPanel(
 const threadOf=a=>Array.isArray(a.thread)&&a.thread.length?a.thread.filter(m=>m&&m.text):a.reply?[{by:'claude',text:a.reply,at:a.resolvedAt||''}]:[];
 async function replyAnno(a,text){text=String(text||'').trim();if(!text)return;
   const m={...a,thread:[...threadOf(a),{by:'user',text,at:now()}],status:'open',resolvedAt:null}; // answering reopens the comment for the agent
-  S.replyDrafts&&S.replyDrafts.delete(a.id);S.annos=S.annos.map(x=>x.id===a.id?m:x);renderPanel();paintAllOverlays();await put('annotations/'+a.id,m);
+  S.replyDrafts&&S.replyDrafts.delete(a.id);S.annos=S.annos.map(x=>x.id===a.id?m:x);renderPanel();renderQA(true);paintAllOverlays();await put('annotations/'+a.id,m);
   toast(tr('Reply added. Click "Ask the agent to revise" when you are ready.'))}
 function replyBox(a){
   S.replyDrafts=S.replyDrafts||new Map();
@@ -7027,7 +7118,7 @@ function jumpTo(id,annoId){
 }
 function jumpToMove(id){
   if(!S.kifu||!(S.kifu.data.moves||{})[id]){toast(tr('This move no longer exists'));return}
-  setMode(canEditKifu()?'kifu-edit':'kifu-view');selectMove(id,true);
+  setMode(editingMode()&&canEditKifu()?'kifu-edit':'kifu-view');selectMove(id,true);
 }
 
 /* ---------- Panel: change log ---------- */
@@ -7345,7 +7436,7 @@ function inPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){co
 // without moving is left to the point click handler. "Box on figure" switches the next drag to a rectangle.
 function bindDraw(G,svg){
   let d=null;
-  const active=()=>S.mode==='edit'&&(!S.draw||S.draw.blockId===G.b.id);
+  const active=()=>(S.mode==='edit'||S.mode==='view'&&!S.readonly)&&(!S.draw||S.draw.blockId===G.b.id);
   const scale=()=>G.space==='image'?G.W/680:1;
   const loc=e=>{const r=svg.getBoundingClientRect();return[clamp((e.clientX-r.left)*G.W/r.width,G.plot.x0,G.plot.x1),clamp((e.clientY-r.top)*G.H/r.height,G.plot.y0,G.plot.y1)]};
   svg.addEventListener('pointerdown',e=>{
@@ -7394,10 +7485,10 @@ function pointLines(b,ds,r,max){
   return lines.length>max?[...lines.slice(0,max),tr('… {n} more',{n:lines.length-max})]:lines}
 // the dataset of a point target: its datasetId, or the chart's first series
 const pointDataset=(b,t)=>S.datasets.get(t.datasetId||(b&&b.chart&&b.chart.dataset));
-// Clicking a data point in edit mode (not while drawing) opens the comment dialog next to it; view mode is for reading
+// Clicking a data point (not while drawing) opens the comment dialog next to it, in Report edit and Report view
 document.addEventListener('click',e=>{
-  if(S.readonly||S.draw||S.mode!=='edit')return;const pt=e.target.closest&&e.target.closest('#flow .pt');if(!pt||!pt.dataset.row)return;
-  const host=pt.closest('.cw'),id=host&&host.dataset.id;if(!id||!S.blocks.has(id))return;
+  if(S.readonly||S.draw||(S.mode!=='edit'&&S.mode!=='view'))return;const pt=e.target.closest&&e.target.closest('#flow .pt,#pagehost .pt');if(!pt||!pt.dataset.row)return;
+  const host=pt.closest('.cw,.blk'),id=host&&host.dataset.id;if(!id||!S.blocks.has(id))return;
   const t={kind:'point',blockId:id,rowId:+pt.dataset.row};if(seriesOf(S.blocks.get(id)).length>1&&pt.dataset.ds)t.datasetId=pt.dataset.ds;
   draftOf(id).target=t;
   render();
@@ -7417,21 +7508,24 @@ document.addEventListener('pointermove',e=>{
 // It edits the same draft as the comment box under the block, so nothing typed is lost when it closes.
 function openQuick(blockId,x,y){S.quick={blockId,x,y};$('#tip').hidden=true;renderQuick();const t=$('#qc textarea');if(t)t.focus({preventScroll:true})}
 function closeQuick(clear){const q=S.quick;S.quick=null;$('#qc').hidden=true;
-  if(clear&&q){draftOf(q.blockId).target=null;if(S.mode==='edit')render();else paintAllOverlays()}}
+  if(clear&&q){draftOf(q.blockId).target=null;if(S.mode!=='view')render();else paintAllOverlays()}}
 function renderQuick(){
   const box=$('#qc'),q=S.quick;if(!q){box.hidden=true;return}
-  const b=S.blocks.get(q.blockId),d=draftOf(q.blockId),t=d.target;if(!b||!t){closeQuick(false);return}
+  const mv=q.blockId.startsWith('move:')?q.blockId.slice(5):null,b=mv?null:S.blocks.get(q.blockId),d=draftOf(q.blockId),t=d.target;
+  if((!b&&!mv)||!t){closeQuick(false);return}
+  const type=mv?'move':b.type,asking=!editingMode(); // in the view modes a question is collected, and sent from the questions panel
   const kids=[h('p',{class:'qwhere',text:describe(t)})];
-  if(t.kind==='point'&&b.chart){const ds=pointDataset(b,t),r=ds&&ds.rows.find(r=>r.id===t.rowId);if(r)kids.push(h('p',{class:'qrow',text:pointLines(b,ds,r,8).join('\n')}))}
-  kids.push(h('div',{class:'chips'},(PRESETS[b.type]||[]).map(label=>{const id=tagId(label);
+  if(b&&t.kind==='point'&&b.chart){const ds=pointDataset(b,t),r=ds&&ds.rows.find(r=>r.id===t.rowId);if(r)kids.push(h('p',{class:'qrow',text:pointLines(b,ds,r,8).join('\n')}))}
+  kids.push(h('div',{class:'chips'},(PRESETS[type]||[]).map(label=>{const id=tagId(label);
     const c=h('button',{type:'button',class:'chip','aria-pressed':String(d.tags.includes(id)),text:tr(label)});
     c.onclick=()=>{d.tags=d.tags.includes(id)?d.tags.filter(x=>x!==id):[...d.tags,id];c.setAttribute('aria-pressed',String(d.tags.includes(id)))};return c})));
   const ta=h('textarea',{rows:'3',placeholder:tr('What should change here? Ctrl + Enter to send.')});ta.value=d.text;
   ta.addEventListener('input',()=>{d.text=ta.value});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendQuick()}});
-  kids.push(ta,examplesFor(b.type==='chart'?'region':b.type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
+  kids.push(ta,examplesFor(type==='chart'?'region':type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
+    ...(asking?[h('button',{type:'button',class:'btn small primary',text:tr('Add to my questions'),onclick:sendQuick})]:[
     h('button',{type:'button',class:'btn small',text:tr('Send comment'),onclick:sendQuick}),
-    h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:async()=>{if(await sendQuick())await askAgent()}})]));
+    h('button',{type:'button',class:'btn small primary',text:tr('Send and ask the agent'),onclick:async()=>{if(await sendQuick())await askAgent()}})])]));
   box.replaceChildren(...kids);box.hidden=false;
   const w=box.offsetWidth,hh=box.offsetHeight;
   box.style.left=Math.max(8,Math.min(q.x+14,innerWidth-w-8))+'px';
@@ -7439,9 +7533,9 @@ function renderQuick(){
 }
 async function sendQuick(){const q=S.quick;if(!q)return false;const d=draftOf(q.blockId);
   if(!d.text.trim()&&!d.tags.length){toast(tr('Write a comment or pick a tag first'));return false}
-  S.quick=null;$('#qc').hidden=true;return submitDraft(q.blockId)}
+  S.quick=null;$('#qc').hidden=true;return q.blockId.startsWith('move:')?submitMoveDraft(q.blockId.slice(5)):submitDraft(q.blockId)}
 // A click elsewhere closes the dialog; the draft is kept unless it is still empty
-document.addEventListener('pointerdown',e=>{if(!S.quick||!(e.target instanceof Element)||e.target.closest('#qc,.pt'))return;
+document.addEventListener('pointerdown',e=>{if(!S.quick||!(e.target instanceof Element)||e.target.closest('#qc,.pt,#asksel'))return;
   const d=draftOf(S.quick.blockId);closeQuick(!d.text.trim()&&!d.tags.length)},true);
 
 /* ---------- Main render ---------- */
@@ -7482,7 +7576,88 @@ function setMode(btn){leaveField();
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
 // The side panel (comments, changes, style, folder) is for editing: the view modes read at full width without it
 const editingMode=()=>S.mode==='edit'||(S.mode==='tree'&&!!kifuView().edit);
-function showPanel(){const ed=editingMode();document.body.classList.toggle('nopanel',!ed||!!S.panelHidden);$('#togglePanel').hidden=!ed}
+function showPanel(){const ed=editingMode();document.body.classList.toggle('nopanel',!ed||!!S.panelHidden);$('#togglePanel').hidden=!ed;renderAgentBar()}
+/* ---------- The questions panel (view modes) ----------
+   What was asked while reading (annotations with from: "view") and the agent's answers, with a reply box to go on;
+   the questions are sent together with its "Ask the agent" button. It floats, can be moved by its header, resized
+   from its corner and folded to one line; where it sits is kept in this browser. */
+const QA_KEY='duetkifu-qa';
+let QA=(()=>{const d={min:false,x:null,y:null,w:0,h:0};try{const v=JSON.parse(localStorage.getItem(QA_KEY)||'null');
+  if(v&&typeof v==='object'){d.min=v.min===true;['x','y'].forEach(k=>{if(Number.isFinite(v[k]))d[k]=v[k]});['w','h'].forEach(k=>{if(Number.isFinite(v[k])&&v[k]>0)d[k]=v[k]})}}catch(e){}return d})();
+function saveQA(){try{localStorage.setItem(QA_KEY,JSON.stringify(QA))}catch(e){}}
+const viewQuestions=()=>S.annos.filter(a=>a.from==='view').sort((p,q)=>(q.no||0)-(p.no||0));
+function placeQA(box){ // keep it on screen
+  if(QA.x==null||QA.y==null){box.style.left='';box.style.top='';box.style.right='';return}
+  const w=box.offsetWidth||360,hh=box.offsetHeight||60;
+  box.style.right='auto';box.style.left=clamp(QA.x,4,Math.max(4,innerWidth-w-4))+'px';box.style.top=clamp(QA.y,4,Math.max(4,innerHeight-Math.min(hh,60)))+'px'}
+function renderQA(force){
+  const box=$('#qa');if(!box)return;
+  const show=!!S.meta&&!S.readonly&&!editingMode();box.hidden=!show;if(!show){box.dataset.key='';return}
+  const qs=viewQuestions(),open=openCount(),v=agentView(),busy=v.state==='sent'||v.state==='working',listening=!!(S.agent&&S.agent.listening);
+  const key=JSON.stringify([QA.min,open,v.state,v.text,listening,!!S.server,document.documentElement.lang,qs.map(a=>[a.id,a.status,a.text,threadOf(a).length])]);
+  if(!force&&key===box.dataset.key)return;
+  const ae=document.activeElement;if(!force&&ae&&box.contains(ae)&&ae.tagName==='TEXTAREA'){S.qaLater=true;return} // typing: redraw on leaving the box
+  box.dataset.key=key;S.qaLater=false;
+  const scroll=$('.qab',box)?$('.qab',box).scrollTop:0;
+  box.classList.toggle('min',QA.min);
+  if(!QA.min){if(QA.w)box.style.width=QA.w+'px';if(QA.h)box.style.height=QA.h+'px'}
+  const waiting=qs.filter(a=>a.status!=='done').length;
+  const head=h('div',{class:'qah',title:tr('Drag to move')},[h('b',{text:tr('Questions')}),
+    h('span',{class:'kln',text:tr('{n} open',{n:waiting})}),h('span',{class:'sp'}),
+    h('button',{type:'button',text:QA.min?'\u25a2':'\u2013',title:QA.min?tr('Expand'):tr('Collapse'),'aria-label':QA.min?tr('Expand'):tr('Collapse'),
+      onclick:()=>{QA.min=!QA.min;saveQA();renderQA(true)}})]);
+  dragQA(head,box);
+  const kids=[head];
+  if(!QA.min){
+    const body=h('div',{class:'qab'});
+    if(!qs.length)body.append(h('p',{class:'empty',text:tr('No questions yet. Draw around part of a figure, or select some text, to ask the agent about it.')}));
+    qs.forEach(a=>{const t=a.target||{},done=a.status==='done';
+      body.append(h('div',{class:'anno'+(done?' is-done':'')},[
+        h('div',{class:'atop'},[h('span',{class:'no',text:String(a.no||'?')}),h('span',{class:'chip2',text:done?tr('Done'):tr('Open')})]),
+        h('p',{class:'where'},[h('button',{type:'button',class:'linkbtn',text:describe(t),title:tr('Jump to'),onclick:()=>t.kind==='move'?jumpToMove(t.moveId):jumpTo(t.blockId,a.id)})]),
+        a.tags&&a.tags.length?h('p',{class:'tags'},a.tags.map(x=>h('span',{class:'tag',text:tagText(x)}))):null,
+        a.text?h('p',{class:'txt',text:a.text}):null,
+        ...threadOf(a).map(m=>h('p',{class:'reply'+(m.by==='user'?' me':'')},[h('strong',{text:m.by==='user'?tr('You: '):tr('Agent: ')}),m.text])),
+        threadOf(a).some(m=>m.by!=='user')?replyBox(a):null,
+        h('div',{class:'acts'},[h('button',{type:'button',text:done?tr('Reopen'):tr('Mark done'),onclick:()=>setStatus(a,done?'open':'done')}),
+          h('button',{type:'button',text:tr('Delete'),onclick:()=>removeAnno(a)})])]))});
+    const foot=h('div',{class:'qaf'},[h('span',{class:'conn'},[h('span',{class:'dot'+(listening?' ok':'')}),h('span',{class:'ast',text:listening?tr('Agent listening'):tr('No agent connected')})]),
+      v.text?h('span',{class:'ast'+(v.cls?' '+v.cls:''),text:v.text}):null,h('span',{class:'sp'}),
+      !listening?h('button',{type:'button',class:'linkbtn',text:tr('Get a prompt to paste'),onclick:openAgentPrompt}):null,
+      h('button',{type:'button',class:'btn small primary',text:tr('Ask the agent ({n})',{n:open}),disabled:!open||busy?'':null,
+        title:listening?tr('An agent is listening and will revise the report now.'):tr('No agent is listening. You will get a prompt to paste into your agent.'),onclick:askAgent})]);
+    kids.push(body,foot);
+    requestAnimationFrame(()=>{body.scrollTop=scroll})}
+  box.replaceChildren(...kids);placeQA(box)}
+document.addEventListener('focusout',()=>setTimeout(()=>{if(S.qaLater&&!($('#qa').contains(document.activeElement)))renderQA()},0));
+function dragQA(head,box){
+  head.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('button'))return;e.preventDefault();head.setPointerCapture(e.pointerId);
+    const r=box.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;
+    const mv=ev=>{QA.x=ev.clientX-dx;QA.y=ev.clientY-dy;placeQA(box)};
+    const up=()=>{head.removeEventListener('pointermove',mv);head.removeEventListener('pointerup',up);head.removeEventListener('pointercancel',up);saveQA()};
+    head.addEventListener('pointermove',mv);head.addEventListener('pointerup',up);head.addEventListener('pointercancel',up)})}
+if(window.ResizeObserver)new ResizeObserver(()=>{const box=$('#qa');if(box.hidden||QA.min||!box.style.width&&!box.style.height&&!box.dataset.resized)return;
+  QA.w=Math.round(box.offsetWidth);QA.h=Math.round(box.offsetHeight);saveQA()}).observe($('#qa'));
+$('#qa').addEventListener('pointerdown',e=>{const b=$('#qa'),r=b.getBoundingClientRect();if(e.clientX>r.right-18&&e.clientY>r.bottom-18)b.dataset.resized='1'}); // the resize corner
+/* In the view modes, selecting text shows a button that asks the agent about it (a report block, or the selected move) */
+function selectionAsk(){
+  const btn=$('#asksel'),sel=getSelection(),txt=sel&&!sel.isCollapsed?sel.toString().trim():'';
+  const hide=()=>{btn.hidden=true;btn.dataset.key=''};
+  if(!txt||editingMode()||S.readonly||!S.meta)return hide();
+  const within=n=>{const e=n&&(n.nodeType===1?n:n.parentElement);return e&&(e.closest('#pagehost .blk[data-id]')||e.closest('#treehost .kpanel'))};
+  const a=within(sel.anchorNode),b=within(sel.focusNode);if(!a||a!==b)return hide();
+  const quote=txt.replace(/\s+/g,' ').slice(0,300);
+  const key=a.matches('.kpanel')?'move:'+kifuView().sel:a.dataset.id;if(key==='move:null')return hide();
+  const rr=sel.getRangeAt(0).getBoundingClientRect();
+  btn.textContent=tr('Ask the agent');btn.hidden=false;
+  btn.style.left=clamp(rr.right-btn.offsetWidth,8,innerWidth-btn.offsetWidth-8)+'px';
+  btn.style.top=(rr.bottom+6+btn.offsetHeight>innerHeight-8?Math.max(8,rr.top-btn.offsetHeight-6):rr.bottom+6)+'px';
+  btn.onpointerdown=e=>e.preventDefault(); // keep the selection
+  btn.onclick=()=>{const r=btn.getBoundingClientRect();hide();
+    draftOf(key).target=key.startsWith('move:')?{kind:'move',moveId:key.slice(5),quote}:{kind:'block',blockId:key,quote};
+    openQuick(key,r.left,r.top)}}
+document.addEventListener('selectionchange',()=>{clearTimeout(S.selT);S.selT=setTimeout(selectionAsk,120)});
+addEventListener('scroll',()=>{if(!$('#asksel').hidden)selectionAsk()},{passive:true});
 $('#togglePanel').addEventListener('click',()=>{S.panelHidden=!S.panelHidden;showPanel();render()});
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.tab=b.dataset.tab;renderPanel()}});
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.filter=b.dataset.f;renderPanel()}});
@@ -8442,7 +8617,8 @@ function agentView(){ // what the bar shows: {state, text, cls}
 function renderAgentBar(){ // the agent strip above the report: connection, progress, and the two round buttons
   const box=$('#agentbar');if(!box)return;
   const open=openCount(),cur=currentChanges().length,v=agentView(),busy=v.state==='sent'||v.state==='working',listening=!!(S.agent&&S.agent.listening);
-  const show=!S.readonly&&!!S.meta&&!!(S.server||open||cur);
+  renderQA();
+  const show=!S.readonly&&!!S.meta&&!!(S.server||open||cur)&&editingMode(); // while reading, the questions panel does this
   const key=show?[open,cur,v.state,v.text,listening,!!S.server].join('|'):'';
   if(key===box.dataset.key)return;box.dataset.key=key;box.replaceChildren();box.hidden=!show;if(!show)return; // rebuilt only when it changes, so a click is never lost
   const B=(t,fn,cls,title)=>h('button',{type:'button',class:'btn small'+(cls?' '+cls:''),text:t,title,onclick:fn});

@@ -177,6 +177,8 @@ Both attach to the block right before in `order`, so put a discussion right afte
 
 `thread` is the conversation after the comment itself (`text`), oldest first. When the user answers you, the page adds their message and sets `status` back to `"open"`. `reply` is kept equal to your latest message, so older pages still show it. Reports without `thread` have at most the one `reply`.
 
+`from: "view"` marks a question the user asked while reading (Report view or Kifu view) rather than a comment written while editing. The page lists these questions, with your answers, in a questions panel next to the report and the tree, where the user can reply. Handle them like any other comment: often the answer is an explanation in `thread` rather than a change.
+
 `target` is one of:
 
 | `kind` | Fields | Meaning |
@@ -185,7 +187,7 @@ Both attach to the block right before in `order`, so put a discussion right afte
 | `point` | `blockId`, `rowId`, and `datasetId` in a chart with several series | One data point of a chart |
 | `box` | `blockId`, `space`, `x: [min, max]`, `y: [min, max]`, and for charts `xKey`, `yKey`, `enclosed` | A rectangle |
 | `lasso` | `blockId`, `space`, `polygon: [[x, y], ...]`, and for charts `xKey`, `yKey`, `enclosed` | A free-hand region |
-| `move` | `moveId` (no `blockId`) | One move of the research record, `kifu.json`: see [Handle comments on a move](#handle-comments-on-a-move) |
+| `move` | `moveId` (no `blockId`), optional `quote`, `file`, `region` | One move of the research record, `kifu.json`: see [Handle comments on a move](#handle-comments-on-a-move). `quote` is a passage of the move as shown; `file` is one of its figures or tables (a path from `evidence.files`), and `region` = `{ "kind": "lasso", "space": "image", "polygon": [[x, y], ...] }` a region of that figure, normalised as for images below |
 
 `space: "data"` means coordinates are in the chart's data units for the columns `xKey` and `yKey`, and `enclosed` lists the row ids inside the region (of the first series; with several series, `enclosedBy` = `{ "<dataset id>": [row ids] }` lists them per dataset). `space: "image"` means coordinates are normalised to the visible (cropped) image, from 0 to 1, with y pointing down.
 

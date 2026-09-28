@@ -209,6 +209,11 @@
           "properties": {
             "kind": { "enum": ["block", "point", "box", "lasso", "move"], "description": "move: a comment on one move of the research record (kifu.json), with moveId instead of blockId." },
             "moveId": { "type": "string", "description": "For kind move: the id of the move in kifu.json." },
+            "file": { "type": "string", "description": "For kind move: a figure or table of the move (a path from its evidence.files) the comment is about." },
+            "region": { "type": "object", "description": "For kind move with file: the region of that figure, as a lasso or box on an image (space image, coordinates from 0 to 1).",
+              "properties": { "kind": { "enum": ["lasso", "box"] }, "space": { "enum": ["image"] },
+                "polygon": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+                "x": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }, "y": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } } },
             "blockId": { "type": "string" },
             "quote": { "type": "string" },
             "rowId": { "type": "number" },
@@ -232,6 +237,7 @@
         "files": { "type": "array", "items": { "type": "string" }, "description": "With the tags add-data-files or replace-data-files: the files the user chose, relative to the folder of report.json." },
         "status": { "enum": ["open", "done"] },
         "reply": { "type": "string", "description": "The agent's latest answer (the same text as its last thread message)." },
+        "from": { "enum": ["view"], "description": "view: a question asked while reading (Report view or Kifu view); the page lists these in its questions panel." },
         "thread": {
           "type": "array",
           "description": "The conversation after the comment, oldest first. A user message sets status back to open.",
