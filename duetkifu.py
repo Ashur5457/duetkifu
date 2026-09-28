@@ -1066,11 +1066,22 @@ def pending_request(project):
     return None
 
 
+def launcher_stale(project, tries=3):
+    """True when launcher.json is old or missing on `tries` reads a second apart. A single read can fail while the
+    launcher replaces the file (Windows locks it for that moment), which is not a stopped launcher."""
+    for i in range(tries):
+        if age_s(read_json(agent_file(project, 'launcher.json'))) <= LAUNCHER_STALE_S:
+            return False
+        if i < tries - 1:
+            time.sleep(1)
+    return True
+
+
 def wait_for_request(root):
     """For an agent: return when the user asks for something (exit 0), or when the launcher stops (exit 3).
     Meant to run in the background; each line it prints is something the agent should act on."""
     project, _ = project_of(root)
-    if age_s(read_json(agent_file(project, 'launcher.json'))) > LAUNCHER_STALE_S:
+    if launcher_stale(project):
         say('LAUNCHER NOT RUNNING: start it first:', f'python "{HERE / "duetkifu.py"}" "{root}"')
         return 3
     beat = 0
@@ -1084,7 +1095,7 @@ def wait_for_request(root):
                 say(f'{req.get("kind", "revise").upper()} REQUESTED: {req.get("open", 0)} open annotation(s) (request {req.get("id")}).',
                     'Report progress with agent-status, then run wait again.')
                 return 0
-            if age_s(read_json(agent_file(project, 'launcher.json'))) > LAUNCHER_STALE_S:
+            if launcher_stale(project):
                 say('LAUNCHER STOPPED: Duetkifu is no longer running for', root)
                 return 3
             time.sleep(1)

@@ -115,8 +115,9 @@ details.ex{margin:4px 0;font-size:12.5px}details.ex summary{cursor:pointer;color
 .btn:disabled{opacity:.45;cursor:default}
 
 /* layout */
-.wrap{max-width:1500px;margin:0 auto;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:26px;align-items:start}
+.wrap{max-width:1500px;margin:0 auto;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) 10px var(--sidew,380px);gap:26px 8px;align-items:start}
 body.nopanel .wrap{grid-template-columns:minmax(0,1fr)}
+body.nopanel .sidegrip{display:none}
 body.nopanel #panel{display:none}
 main{min-width:0}
 #note-db{background:var(--hl-fill);border:1px solid var(--hl-stroke);border-radius:8px;padding:8px 12px;margin:0 0 14px;font-size:13.5px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
@@ -212,13 +213,35 @@ main{min-width:0}
 .klegend{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--muted);align-items:center}
 .klegend>span{display:inline-flex;align-items:center;gap:6px}
 .kyou{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c5)}
-.kmain{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.kmain{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
+.kmain.kright{grid-template-columns:minmax(0,1fr) 10px var(--kpw,380px);column-gap:3px}
+.kmain.kright.mvfold{grid-template-columns:minmax(0,1fr)}.kmain.kright.mvfold>.kgrip{display:none}
+.kmain.kright .kb-move{position:sticky;top:12px}
 .kstage{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:auto;height:min(76vh,860px)}
+.kmain:not(.kright) .kstage{height:min(66vh,760px)}
+/* blocks of the Kifu view: a header row that folds the block, and grips that resize it (kept in this browser) */
+.kblk{min-width:0;margin:0 0 10px}.kmain .kblk{margin:0}
+.kbh{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;min-height:28px;margin:0 0 4px;font-size:12.5px;color:var(--muted)}
+.kblk.folded .kbh{margin:0;padding:3px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.kfold{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:2px 0;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
+.kfold:hover{color:var(--ink)}.kfold .kfa{display:inline-block;width:1em;text-align:center}
+.kbsub{flex:1 1 12em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.kbtools{display:inline-flex;gap:14px;margin-left:auto}.kbtools .linkbtn{font-size:12.5px}
+.kgrip{touch-action:none;border-radius:5px;position:relative}
+.kgrip.ky{height:10px;cursor:row-resize;margin-top:2px}.kgrip.kx{align-self:stretch;cursor:col-resize}
+.kgrip::after,.sidegrip::after{content:"";position:absolute;background:var(--line);border-radius:2px}
+.kgrip.ky::after{left:calc(50% - 22px);width:44px;top:3px;height:4px}
+.kgrip.kx::after,.sidegrip::after{top:calc(50% - 22px);height:44px;left:3px;width:4px}
+.kgrip:hover::after,.kgrip:focus-visible::after,.sidegrip:hover::after,.sidegrip:focus-visible::after,body.kresizing .kgrip::after{background:var(--accent)}
+.sidegrip{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);height:calc(100vh - 90px);cursor:col-resize;touch-action:none}
+body.kresizing{user-select:none;-webkit-user-select:none}
 .kstage.klist{padding:2px;display:flex;flex-direction:column;gap:8px;background:transparent;border:0}
 .kstage svg{display:block}
 .kpanel{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px;
-  position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;font-size:14px}
-@media (max-width:980px){.kmain{grid-template-columns:minmax(0,1fr)}.kstage{height:62vh}.kpanel{position:static;max-height:none}.kzoom{margin-left:0}}
+  overflow:auto;font-size:14px}
+.kmain.kright .kpanel{max-height:calc(100vh - 60px)}
+@media (max-width:980px){.kmain,.kmain.kright{grid-template-columns:minmax(0,1fr)}.kmain>.kgrip{display:none}.kstage{height:62vh}
+  .kmain.kright .kb-move{position:static}.kmain.kright .kpanel{max-height:none}.kzoom{margin-left:0}}
 /* the tree */
 .f-ink{fill:var(--ink)}.f-ok{fill:var(--ok)}.f-path{fill:var(--accent)}.f-fix{fill:var(--c2)}
 .s-dead{fill:var(--paper);stroke:var(--c0);stroke-width:1.6;stroke-linecap:round}
@@ -324,7 +347,8 @@ main{min-width:0}
 .kno{font:600 12px var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
 .kid{font:12px ui-monospace,Menlo,Consolas,monospace;color:var(--muted)}
 .kres{margin:0;font-size:13.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.kpath{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin-top:16px}
+.kpath{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 20px}
+.kb-path{margin-top:16px}
 .kpath h3{font:700 17px var(--serif);margin:0 0 8px}
 .kpath ol{margin:0;padding-left:1.6em;display:flex;flex-direction:column;gap:6px}
 .kpath .kpd{font-size:13.5px;color:var(--muted)}
@@ -561,7 +585,7 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #flow.compact .cgi .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.readonly #note-db{display:none!important}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:8px;font-size:14px;max-width:80vw}
-@media (max-width:1100px){.wrap{grid-template-columns:1fr}#panel{position:static;max-height:none}}
+@media (max-width:1100px){.wrap{grid-template-columns:1fr}.sidegrip{display:none}#panel{position:static;max-height:none}}
 </style>
 </head>
 <body data-mode="view" data-tool="edit" class="nopanel">
@@ -608,6 +632,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
     </div>
   </section>
 </main>
+<div class="sidegrip" id="sideGrip" role="separator" aria-orientation="vertical" tabindex="0"></div>
 <aside id="panel" aria-label="Panel">
   <div class="tabs" id="tabs" role="tablist">
     <button type="button" role="tab" data-tab="annos" aria-selected="true">Comments</button>
@@ -1407,6 +1432,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Clue": "線索",
  "Corrected later": "後來被更正",
  "Cross links": "交叉連結",
+ "Question and counts": "研究問題與統計",
+ "This move": "這一步",
+ "Collapse": "收合成一排",
+ "Expand": "展開",
+ "Put it below the tree": "移到樹狀圖下方",
+ "Put it beside the tree": "移到樹狀圖右側",
+ "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
+ "Reset layout": "還原版面",
  "Fit": "全覽",
  "Follows": "延伸自",
  "Highlight": "顯示模式",
@@ -2298,6 +2331,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Clue": "线索",
  "Corrected later": "后来被更正",
  "Cross links": "交叉链接",
+ "Question and counts": "研究问题与统计",
+ "This move": "这一步",
+ "Collapse": "收起成一行",
+ "Expand": "展开",
+ "Put it below the tree": "移到树状图下方",
+ "Put it beside the tree": "移到树状图右侧",
+ "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
+ "Reset layout": "还原版面",
  "Fit": "全览",
  "Follows": "延伸自",
  "Highlight": "显示模式",
@@ -3189,6 +3230,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Clue": "手がかり",
  "Corrected later": "後で訂正",
  "Cross links": "相互リンク",
+ "Question and counts": "研究の問いと集計",
+ "This move": "この手",
+ "Collapse": "1行にたたむ",
+ "Expand": "展開する",
+ "Put it below the tree": "ツリーの下に置く",
+ "Put it beside the tree": "ツリーの右に置く",
+ "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
+ "Reset layout": "レイアウトを元に戻す",
  "Fit": "全体表示",
  "Follows": "前の手",
  "Highlight": "強調表示",
@@ -4080,6 +4129,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Clue": "단서",
  "Corrected later": "나중에 정정됨",
  "Cross links": "교차 링크",
+ "Question and counts": "연구 질문과 집계",
+ "This move": "이 수",
+ "Collapse": "한 줄로 접기",
+ "Expand": "펼치기",
+ "Put it below the tree": "트리 아래에 두기",
+ "Put it beside the tree": "트리 오른쪽에 두기",
+ "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
+ "Reset layout": "레이아웃 초기화",
  "Fit": "전체 보기",
  "Follows": "이어받은 수",
  "Highlight": "강조",
@@ -4971,6 +5028,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Clue": "Pista",
  "Corrected later": "Corregido después",
  "Cross links": "Enlaces cruzados",
+ "Question and counts": "Pregunta y recuentos",
+ "This move": "Esta jugada",
+ "Collapse": "Contraer a una fila",
+ "Expand": "Expandir",
+ "Put it below the tree": "Ponerlo debajo del árbol",
+ "Put it beside the tree": "Ponerlo junto al árbol",
+ "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
+ "Reset layout": "Restablecer el diseño",
  "Fit": "Ajustar",
  "Follows": "Sigue a",
  "Highlight": "Resaltar",
@@ -5655,12 +5720,13 @@ function renderKifu(host,K){
   if(!K.byId.has(V.sel))V.sel=(all.find(x=>!x.parent)||all[0]).id;
   $('#tree').classList.add('kifu');
   // what the research asks, and what the record holds
-  if(meta.question)host.append(h('p',{class:'kq',text:meta.question}));
-  if(meta.context)host.append(h('p',{class:'treeintro',text:meta.context}));
+  const intro=[];
+  if(meta.question)intro.push(h('p',{class:'kq',text:meta.question}));
+  if(meta.context)intro.push(h('p',{class:'treeintro',text:meta.context}));
   const count=sh=>all.filter(x=>sh.includes(F.get(x.id).shape)).length;
   const pill=(icon,label,n)=>n?h('span',{class:'kpill'},[icon,label,h('b',{text:String(n)})]):null;
   const cs=all.flatMap(x=>checksOf(x.m)),lv=k=>all.filter(x=>F.get(x.id).chain.level===k).length;
-  host.append(h('div',{class:'kstats'},[h('span',{class:'kpill'},[tr('{n} moves',{n:all.length})]),
+  intro.push(h('div',{class:'kstats'},[h('span',{class:'kpill'},[tr('{n} moves',{n:all.length})]),
     ...[['Holds',['ok','key','root']],['Dead end',['dead']],['Correction',['fix']],['Independent audit',['audit']],['Not resolved yet',['open']],['Early clue',['clue']],['To be tested',['todo']]]
       .map(([t,sh])=>pill(shapeIcon(sh[0]),tr(t),count(sh))),
     pill(h('span',{class:'kyou'}),tr('Started by you'),all.filter(x=>F.get(x.id).user).length),
@@ -5668,6 +5734,8 @@ function renderKifu(host,K){
       h('span',{class:'kpl',text:tr('not recorded')+' '+all.filter(x=>!F.get(x.id).chain.level).length})]),
     cs.length?h('span',{class:'kpill'},[tr('{n} checks against recomputed numbers',{n:cs.length})+': ',
       ...MATCHES.map(k=>{const n=cs.filter(c=>c.match===k).length;return n?h('span',{class:'kc m-'+k,text:MATCH_SIGN[k]+' '+n,title:tr(MATCH_TEXT[k])}):null})]):null]));
+  host.append(kblock('intro',tr('Question and counts'),intro,{sub:meta.question}));
+  const top=[];
   // layout, what to highlight, search, zoom
   const seg=(label,map,cur,set)=>h('div',{class:'kseg',role:'group','aria-label':label},Object.entries(map).map(([v,t])=>
     h('button',{type:'button','aria-pressed':String(cur===v),text:tr(t),onclick:()=>{set(v);render()}})));
@@ -5676,28 +5744,79 @@ function renderKifu(host,K){
   const zb=(t,label,fn)=>h('button',{type:'button',text:t,'aria-label':label,onclick:fn});
   const editing=canEditKifu()&&V.edit;
   if(editing){// view or edit is chosen by the buttons at the top (Kifu view, Kifu edit)
-    host.append(h('div',{class:'kbar kedit'},[
+    top.push(h('div',{class:'kbar kedit'},[
       h('button',{type:'button',class:'btn small primary',text:'+ '+tr('Next move'),title:tr('Add a move after the selected one'),onclick:()=>addMove(V.sel)}),
       h('span',{class:'kln',text:tr('Changes are saved to {file} at once and recorded.',{file:KIFU_FILE})}),
       V.layout==='list'?null:h('button',{type:'button',class:'linkbtn',text:tr('How to edit on the tree'),onclick:kifuEditHelp})]))}
-  host.append(h('div',{class:'kbar'},[seg(tr('Layout'),KIFU_LAYOUTS,V.layout,v=>{V.layout=v;V.scroll=null}),seg(tr('Highlight'),KIFU_MODES,V.mode,v=>V.mode=v),
+  top.push(h('div',{class:'kbar'},[seg(tr('Layout'),KIFU_LAYOUTS,V.layout,v=>{V.layout=v;V.scroll=null}),seg(tr('Highlight'),KIFU_MODES,V.mode,v=>V.mode=v),
     V.layout==='list'||editing?null:h('label',{class:'kchkb'},[h('input',{type:'checkbox',checked:V.xl?'':null,onchange:e=>{V.xl=e.target.checked;render()}}),tr('Cross links')]),
     h('label',{class:'ksearch'},[q,h('span',{class:'kqn'})]),
     V.layout==='list'?null:h('div',{class:'kzoom'},[zb('−',tr('Zoom out'),()=>zoomKifu(V.z-.15)),zb('+',tr('Zoom in'),()=>zoomKifu(V.z+.15)),
       h('button',{type:'button',class:'wide',text:tr('Fit'),onclick:()=>zoomKifu('fit')})]),
     kifuLegend()]));
   const stage=h('div',{class:'kstage'+(V.layout==='list'?' klist':'')}),panel=h('aside',{class:'kpanel','aria-live':'polite'});
-  host.append(h('div',{class:'kmain'},[stage,panel]));
+  // the tree and the selected move: the move below the tree or beside it; each block folds to one row and can be resized
+  const right=KUI.dock==='right',main=h('div',{class:'kmain'+(right?' kright':'')+(KUI.fold.move?' mvfold':'')});
+  if(KUI.stageH)stage.style.height=KUI.stageH+'px';
+  if(KUI.panelH&&!right)panel.style.height=KUI.panelH+'px';
+  if(KUI.panelW)main.style.setProperty('--kpw',KUI.panelW+'px');
+  const hgt=el=>()=>el.getBoundingClientRect().height;
+  const treeBlk=kblock('tree',tr(KIFU_LAYOUTS[V.layout]),[...top,stage,
+    kgrip('y',hgt(stage),v=>{KUI.stageH=v;stage.style.height=v+'px'},160,()=>innerHeight*3,()=>{KUI.stageH=0;stage.style.height=''})],
+    {tools:[h('button',{type:'button',class:'linkbtn',text:tr('Reset layout'),onclick:resetKifuLayout})]});
+  const moveBlk=kblock('move',tr('This move'),[panel,right?null:
+    kgrip('y',hgt(panel),v=>{KUI.panelH=v;panel.style.height=v+'px'},120,()=>innerHeight*3,()=>{KUI.panelH=0;panel.style.height=''})],
+    {sub:moveTitle(K.byId.get(V.sel)),
+     tools:[h('button',{type:'button',class:'linkbtn',text:tr(right?'Put it below the tree':'Put it beside the tree'),onclick:()=>{KUI.dock=right?'below':'right';saveKui();render()}})]});
+  main.append(...[treeBlk,right?kgrip('x',()=>moveBlk.getBoundingClientRect().width,v=>{KUI.panelW=v;main.style.setProperty('--kpw',v+'px')},
+    260,()=>main.getBoundingClientRect().width-300,()=>{KUI.panelW=0;main.style.removeProperty('--kpw')},-1):null,moveBlk].filter(Boolean));
+  host.append(main);
   if(V.layout==='list')stage.append(...all.map(x=>moveCard(x,K,F.get(x.id))));
   else{stage.append(kifuSVG(K,F,P,V));
     stage.addEventListener('scroll',()=>{V.scroll=[stage.scrollLeft,stage.scrollTop]});
     requestAnimationFrame(()=>{zoomKifu(V.z||(stage.clientWidth<700?.8:.9));if(V.scroll){stage.scrollLeft=V.scroll[0];stage.scrollTop=V.scroll[1]}})}
   applyKifuFilter(host,K,F,P);
   panel.append(...movePanel(K.byId.get(V.sel),K,F));
-  if(P.line.length>1)host.append(h('section',{class:'kpath'},[h('h3',{text:tr('The main path, from the question to the conclusion')}),
+  if(P.line.length>1)host.append(kblock('path',tr('The main path, from the question to the conclusion'),[h('div',{class:'kpath'},[
     h('ol',{},P.line.map(x=>h('li',{},[h('div',{},[h('button',{type:'button',class:'linkbtn kgo',text:x.m.title||x.id,onclick:()=>selectMove(x.id,true)}),
-      h('span',{class:'kdate',text:' '+(x.m.when||x.m.at||'')})]),x.m.note?h('div',{class:'kpd',text:x.m.note}):null])))]));
+      h('span',{class:'kdate',text:' '+(x.m.when||x.m.at||'')})]),x.m.note?h('div',{class:'kpd',text:x.m.note}):null])))])]));
 }
+/* The layout of the Kifu view, kept per viewer in this browser only: where the move sits (below or beside the tree),
+   which blocks are folded to one row, and the sizes dragged with the grips (0 = the default size). */
+const KUI_KEY='duetkifu-kifu-layout';
+const kuiDefault=()=>({dock:'below',fold:{},stageH:0,panelH:0,panelW:0,sideW:0});
+let KUI=(()=>{const d=kuiDefault();try{const v=JSON.parse(localStorage.getItem(KUI_KEY)||'null');
+  if(v&&typeof v==='object'&&!Array.isArray(v)){if(v.dock==='right')d.dock='right';
+    if(v.fold&&typeof v.fold==='object')for(const k in v.fold)if(v.fold[k]===true)d.fold[k]=true;
+    ['stageH','panelH','panelW','sideW'].forEach(k=>{if(Number.isFinite(v[k])&&v[k]>0)d[k]=Math.round(v[k])})}}catch(e){}return d})();
+function saveKui(){try{localStorage.setItem(KUI_KEY,JSON.stringify(KUI))}catch(e){}}
+function resetKifuLayout(){KUI=kuiDefault();saveKui();applySideWidth();render()}
+const moveTitle=x=>x?(x.m.title||x.id):'';
+function kblock(key,title,body,o){ // a block with a header row; folded, only the header row shows
+  o=o||{};const folded=!!KUI.fold[key];
+  return h('section',{class:'kblk kb-'+key+(folded?' folded':'')},[
+    h('div',{class:'kbh'},[h('button',{type:'button',class:'kfold','aria-expanded':String(!folded),title:tr(folded?'Expand':'Collapse'),
+      onclick:()=>{if(folded)delete KUI.fold[key];else KUI.fold[key]=true;saveKui();render()}},[h('span',{class:'kfa','aria-hidden':'true',text:folded?'\u25b8':'\u25be'}),title]),
+      h('span',{class:'kbsub',text:folded?(o.sub||''):''}),o.tools?h('span',{class:'kbtools'},o.tools):null]),
+    folded?null:h('div',{class:'kbody'},body)])}
+function kgrip(dir,get,set,min,max,reset,sign,el){ // drag (or arrow keys) to resize; double-click for the default size
+  sign=sign||1;const g=el||h('div',{class:'kgrip k'+dir,role:'separator',tabindex:'0','aria-orientation':dir==='y'?'horizontal':'vertical',
+    title:tr('Drag to resize; double-click to reset')});
+  const to=v=>set(Math.round(Math.max(min,Math.min(Math.max(min,max()),v))));
+  g.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();g.setPointerCapture(e.pointerId);
+    const p0=dir==='y'?e.clientY:e.clientX,s0=get();document.body.classList.add('kresizing');
+    const mv=ev=>to(s0+sign*((dir==='y'?ev.clientY:ev.clientX)-p0));
+    const up=()=>{g.removeEventListener('pointermove',mv);g.removeEventListener('pointerup',up);g.removeEventListener('pointercancel',up);
+      document.body.classList.remove('kresizing');saveKui()};
+    g.addEventListener('pointermove',mv);g.addEventListener('pointerup',up);g.addEventListener('pointercancel',up)});
+  g.addEventListener('dblclick',()=>{reset();saveKui()});
+  g.addEventListener('keydown',e=>{const d={ArrowUp:-24,ArrowLeft:-24,ArrowDown:24,ArrowRight:24}[e.key];if(d==null)return;
+    e.preventDefault();to(get()+(dir==='x'?sign:1)*d);saveKui()});
+  return g}
+function applySideWidth(){const w=$('.wrap');if(KUI.sideW)w.style.setProperty('--sidew',KUI.sideW+'px');else w.style.removeProperty('--sidew')}
+applySideWidth();
+kgrip('x',()=>$('#panel').getBoundingClientRect().width,v=>{KUI.sideW=v;applySideWidth()},260,()=>$('.wrap').getBoundingClientRect().width*.6,
+  ()=>{KUI.sideW=0;applySideWidth()},-1,$('#sideGrip')); // the side panel (comments, changes, style, folder), in every mode
 function kifuLegend(){
   const line=(cls,t)=>h('span',{},[(()=>{const s=el('svg',{width:30,height:10,'aria-hidden':'true'});el('path',{d:'M1,5H29',class:'xl '+cls},s);return s})(),t]);
   const dotIcon=(cls,t)=>h('span',{},[(()=>{const s=el('svg',{width:12,height:12,viewBox:'-6 -6 12 12','aria-hidden':'true'});el('circle',{r:3.6,class:'kdot '+cls},s);return s})(),t]);
@@ -5860,6 +5979,7 @@ function selectMove(id,scroll){
   $$('#treehost .knode.sel,#treehost .kmove.sel').forEach(g=>g.classList.remove('sel'));
   const g=$(`#treehost [data-id="${CSS.escape(id)}"],#treehost [data-move="${CSS.escape(id)}"]`);if(g){g.classList.add('sel');if(g.matches('.knode'))g.parentNode.append(g)} // on top, so its buttons are not covered
   const panel=$('#treehost .kpanel');if(panel){const F=new Map(K.list.map(y=>[y.id,kifuFacts(y)]));panel.replaceChildren(...movePanel(x,K,F));panel.scrollTop=0}
+  const sub=$('#treehost .kb-move.folded .kbsub');if(sub)sub.textContent=moveTitle(x);
   if(scroll&&g){const stage=$('#treehost .kstage'),b=g.getBoundingClientRect(),sb=stage.getBoundingClientRect();
     if(V.layout==='list')g.scrollIntoView({block:'center',behavior:'smooth'});
     else stage.scrollBy({left:b.left-sb.left-sb.width/2,top:b.top-sb.top-sb.height/2,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}
@@ -7223,6 +7343,7 @@ function render(){
   S.deferred=false;S.chainMemo=null;S.kifuMemo=null;
   const focusF=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fid;
   paginate();
+  $('#sideGrip').title=tr('Drag to resize; double-click to reset');
   $('#doc-title').textContent=S.meta.title||'Duetkifu';document.title=(S.meta.title||'Duetkifu')+tr(' | Duetkifu');
   $('#view').hidden=S.mode!=='view';$('#edit').hidden=S.mode!=='edit';$('#tree').hidden=S.mode!=='tree';
   if(S.mode==='view')renderView();else if(S.mode==='tree')renderTree();else renderEdit();
