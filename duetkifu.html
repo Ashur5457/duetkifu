@@ -7365,12 +7365,15 @@ function setMode(btn){leaveField();
   S.mode=m;document.body.dataset.mode=m;if(S.draw){S.draw=null;document.body.dataset.draw=''}
   if(m==='tree')kifuView().edit=btn==='kifu-edit'&&canEditKifu();
   $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===currentModeButton())));
-  document.body.classList.toggle('nopanel',m!=='edit'&&!S.panelInView);
+  showPanel();
   $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render();
   if(btn==='kifu-edit'&&canEditKifu())onceOnly('duetkifu-edit-help',kifuEditHelp)}
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
-$('#togglePanel').addEventListener('click',()=>{const hid=document.body.classList.toggle('nopanel');if(S.mode!=='edit')S.panelInView=!hid;render()});
-$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.tab=b.dataset.tab;if(S.mode!=='edit'&&document.body.classList.contains('nopanel')){document.body.classList.remove('nopanel');S.panelInView=true}renderPanel()}});
+// The side panel (comments, changes, style, folder) is for editing: the view modes read at full width without it
+const editingMode=()=>S.mode==='edit'||(S.mode==='tree'&&!!kifuView().edit);
+function showPanel(){const ed=editingMode();document.body.classList.toggle('nopanel',!ed||!!S.panelHidden);$('#togglePanel').hidden=!ed}
+$('#togglePanel').addEventListener('click',()=>{S.panelHidden=!S.panelHidden;showPanel();render()});
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.tab=b.dataset.tab;renderPanel()}});
 $('#filters').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.filter=b.dataset.f;renderPanel()}});
 $('#finishRound').addEventListener('click',finishRound);
 $('#toggleHist').addEventListener('click',()=>{S.showHist=!S.showHist;renderPanel()});
@@ -7617,7 +7620,7 @@ async function openFolder(root,ask){
     S.folder=f;S.lastFolder=root;S.caps=folderCaps(dir);S.assetURL=new Map();await loadAssetURLs(dir);
     useDB(f);S.kifuWatch=watchKifu(dir);await loadFolderLangs(dir);
     if(!root.virtual)try{await idb.set('folder',root)}catch(e){}
-    S.tab='folder';S.panelInView=true;document.body.classList.remove('nopanel');
+    S.tab='folder';if(editingMode()){S.panelHidden=false;showPanel()}
     renderLocalBar();refreshFolderFiles();toast(tr('Opened folder {name}',{name:root.name}))}
   catch(e){fail(e&&e.msg?e.msg:tr('Could not open the folder ({m}).',{m:errText(e)||tr('unknown')}),e&&e.detail)}
 }
