@@ -203,6 +203,9 @@ Tags come from preset buttons and are stored as stable ids, whatever the interfa
 | `table` | `add-units`, `change-sort`, `add-remove-columns`, `highlight-key-points` |
 | `image` | `crop`, `add-labels`, `replace-image`, `add-caption` |
 | a move (`target.kind: "move"`) | `fill-in-this-move`, `recompute-this`, `needs-a-clearer-reason`, `add-to-the-report`, `reopen-this` |
+| any block, and a move (questions) | `explain`, `where-from`, `how-computed`, `why-so`, `how-reliable`, `compare` |
+
+The question tags ask for an answer, not a change: answer in `thread` (what it means, where the data comes from and through which steps, how it was computed, why, how far it can be trusted, how it compares), taking the facts from the data chain and the sources, and change the report only if the user also asked for it.
 
 Reports from `duetsheet/0.2` stored the button text instead, in the interface language of the time (for example `Add trend line` or its Chinese translation). Read such a tag by its meaning; do not rewrite old annotations just to change the tag format. A tag that is not in the table above is free text from the user.
 

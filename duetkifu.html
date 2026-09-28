@@ -369,6 +369,12 @@ body.kresizing{user-select:none;-webkit-user-select:none}
 .kfig{margin:0;display:flex;flex-direction:column;gap:4px}
 .kfigb{border:1px solid var(--line);border-radius:6px;background:#fff;padding:4px;cursor:zoom-in;display:block;width:100%}
 .kfigb img{display:block;max-width:100%;height:auto;margin:0 auto}
+div.kfigb{cursor:crosshair;touch-action:none;user-select:none}body.readonly div.kfigb{cursor:default}
+.kzoomb{position:absolute;top:6px;right:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;font:inherit;font-size:12px;
+  padding:2px 8px;cursor:zoom-in;opacity:0;transition:opacity .15s}
+div.kfigb:hover .kzoomb,.kzoomb:focus-visible{opacity:1}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}.chiprow .chipk{font-size:11.5px;color:var(--muted);min-width:2.5em}
+.chips.two{display:block}
 .kfig figcaption,.kfigcap{font-size:12.5px;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .kpreview{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:6px}
 .kpreview .ktab th{position:sticky;top:0;background:var(--paper)}
@@ -603,7 +609,7 @@ details.round summary{cursor:pointer;font-size:13.5px}
 .uinames dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0 0}.uinames dt{font-weight:600}.uinames dd{margin:0;color:var(--muted)}
 .kfigb{position:relative}
 .kfov{position:absolute;pointer-events:none}
-.kfov path{fill:color-mix(in srgb,var(--accent) 12%,transparent);stroke:var(--accent);stroke-width:2.4;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+
 .flowbar{max-width:var(--pw);margin:0 auto 8px;display:flex;justify-content:flex-end}
 #flow.compact .pgsep{font-size:12px;color:var(--muted);margin:14px 0 4px;border-bottom:1px dotted var(--line);padding-bottom:2px}
 #flow.compact .cg{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin:4px 0;cursor:grab}
@@ -1471,6 +1477,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "What does this mean?": "這是什麼意思？",
+ "Where does the data come from?": "資料從哪來？",
+ "How was it computed?": "怎麼算出來的？",
+ "Why is it so?": "為什麼會這樣？",
+ "Can it be trusted?": "可信嗎？",
+ "How does it compare?": "和其他的比呢？",
+ "Ask": "詢問",
+ "Change": "修改",
+ "What would you like to ask or change? Ctrl + Enter to send.": "想要詢問或修改什麼？（Ctrl + Enter 送出）",
+ "Drag on a figure to draw around a region and ask the agent about it. ⤢ enlarges it.": "在圖上拖曳圈出一塊，就能詢問 agent。按 ⤢ 放大。",
+ "Drag on a figure to draw around a region and comment on it. ⤢ enlarges it.": "在圖上拖曳圈出一塊，就能留言。按 ⤢ 放大。",
+ "Drag on the chart to draw around points, or click one point, to ask the agent about them.": "在圖表上拖曳圈出一些點，或點一個點，就能詢問 agent。",
+ "Drag on the figure to draw around a region and ask the agent about it.": "在圖上拖曳圈出一塊，就能詢問 agent。",
+ "Ask while you read": "閱讀時也能發問",
+ "Figures.": "圖：",
+ "Drag on a figure to draw around a region, or click a point of a chart.": "在圖上拖曳圈出一塊，或點圖表上的一個點。",
+ "Text.": "文字：",
+ "Select some text; an \"Ask the agent\" button appears next to it.": "選取一段文字，旁邊會出現「詢問 agent」按鈕。",
+ "Send.": "送出：",
+ "Your questions wait in the questions panel. Send them together with \"Ask the agent\"; the answers come back there, and you can reply.": "問題會先放在問答側欄，用「詢問 agent」一起送出；回答也會回到那裡，你可以接著回覆。",
  "ui|Top bar": "頂列",
  "ui|Folder bar": "資料夾列",
  "ui|Agent bar": "agent 列",
@@ -2415,6 +2441,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "What does this mean?": "这是什么意思？",
+ "Where does the data come from?": "数据从哪来？",
+ "How was it computed?": "怎么算出来的？",
+ "Why is it so?": "为什么会这样？",
+ "Can it be trusted?": "可信吗？",
+ "How does it compare?": "和其他的比呢？",
+ "Ask": "询问",
+ "Change": "修改",
+ "What would you like to ask or change? Ctrl + Enter to send.": "想要询问或修改什么？（Ctrl + Enter 发送）",
+ "Drag on a figure to draw around a region and ask the agent about it. ⤢ enlarges it.": "在图上拖动圈出一块，就能询问 agent。按 ⤢ 放大。",
+ "Drag on a figure to draw around a region and comment on it. ⤢ enlarges it.": "在图上拖动圈出一块，就能留言。按 ⤢ 放大。",
+ "Drag on the chart to draw around points, or click one point, to ask the agent about them.": "在图表上拖动圈出一些点，或点一个点，就能询问 agent。",
+ "Drag on the figure to draw around a region and ask the agent about it.": "在图上拖动圈出一块，就能询问 agent。",
+ "Ask while you read": "阅读时也能提问",
+ "Figures.": "图：",
+ "Drag on a figure to draw around a region, or click a point of a chart.": "在图上拖动圈出一块，或点图表上的一个点。",
+ "Text.": "文字：",
+ "Select some text; an \"Ask the agent\" button appears next to it.": "选取一段文字，旁边会出现“询问 agent”按钮。",
+ "Send.": "发送：",
+ "Your questions wait in the questions panel. Send them together with \"Ask the agent\"; the answers come back there, and you can reply.": "问题会先放在问答侧栏，用“询问 agent”一起发送；回答也会回到那里，你可以接着回复。",
  "ui|Top bar": "顶栏",
  "ui|Folder bar": "文件夹栏",
  "ui|Agent bar": "agent 栏",
@@ -3359,6 +3405,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "What does this mean?": "これはどういう意味？",
+ "Where does the data come from?": "データの出どころは？",
+ "How was it computed?": "どう計算した？",
+ "Why is it so?": "なぜこうなる？",
+ "Can it be trusted?": "信頼できる？",
+ "How does it compare?": "ほかと比べると？",
+ "Ask": "質問",
+ "Change": "修正",
+ "What would you like to ask or change? Ctrl + Enter to send.": "質問や修正したいことは？（Ctrl + Enter で送信）",
+ "Drag on a figure to draw around a region and ask the agent about it. ⤢ enlarges it.": "図の上をドラッグして範囲を囲むと agent に質問できます。⤢ で拡大。",
+ "Drag on a figure to draw around a region and comment on it. ⤢ enlarges it.": "図の上をドラッグして範囲を囲むとコメントできます。⤢ で拡大。",
+ "Drag on the chart to draw around points, or click one point, to ask the agent about them.": "グラフ上をドラッグして点を囲むか、点をクリックすると agent に質問できます。",
+ "Drag on the figure to draw around a region and ask the agent about it.": "図の上をドラッグして範囲を囲むと agent に質問できます。",
+ "Ask while you read": "読みながら質問できます",
+ "Figures.": "図：",
+ "Drag on a figure to draw around a region, or click a point of a chart.": "図の上をドラッグして範囲を囲むか、グラフの点をクリック。",
+ "Text.": "文章：",
+ "Select some text; an \"Ask the agent\" button appears next to it.": "文章を選ぶと、横に「agent に聞く」ボタンが出ます。",
+ "Send.": "送信：",
+ "Your questions wait in the questions panel. Send them together with \"Ask the agent\"; the answers come back there, and you can reply.": "質問は質問パネルにたまり、「agent に聞く」でまとめて送ります。回答もそこに届き、返信できます。",
  "ui|Top bar": "上部バー",
  "ui|Folder bar": "フォルダバー",
  "ui|Agent bar": "agent バー",
@@ -4303,6 +4369,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "What does this mean?": "이게 무슨 뜻인가요?",
+ "Where does the data come from?": "데이터는 어디서 왔나요?",
+ "How was it computed?": "어떻게 계산했나요?",
+ "Why is it so?": "왜 이렇게 되나요?",
+ "Can it be trusted?": "믿을 수 있나요?",
+ "How does it compare?": "다른 것과 비교하면?",
+ "Ask": "질문",
+ "Change": "수정",
+ "What would you like to ask or change? Ctrl + Enter to send.": "묻거나 고치고 싶은 것은? (Ctrl + Enter로 보내기)",
+ "Drag on a figure to draw around a region and ask the agent about it. ⤢ enlarges it.": "그림 위를 드래그해 영역을 둘러싸면 agent에게 물을 수 있습니다. ⤢ 로 확대.",
+ "Drag on a figure to draw around a region and comment on it. ⤢ enlarges it.": "그림 위를 드래그해 영역을 둘러싸면 댓글을 달 수 있습니다. ⤢ 로 확대.",
+ "Drag on the chart to draw around points, or click one point, to ask the agent about them.": "차트 위를 드래그해 점들을 둘러싸거나 점 하나를 누르면 agent에게 물을 수 있습니다.",
+ "Drag on the figure to draw around a region and ask the agent about it.": "그림 위를 드래그해 영역을 둘러싸면 agent에게 물을 수 있습니다.",
+ "Ask while you read": "읽으면서 질문하기",
+ "Figures.": "그림:",
+ "Drag on a figure to draw around a region, or click a point of a chart.": "그림 위를 드래그해 영역을 둘러싸거나 차트의 점을 누르세요.",
+ "Text.": "텍스트:",
+ "Select some text; an \"Ask the agent\" button appears next to it.": "텍스트를 선택하면 옆에 \"agent에게 묻기\" 버튼이 나타납니다.",
+ "Send.": "보내기:",
+ "Your questions wait in the questions panel. Send them together with \"Ask the agent\"; the answers come back there, and you can reply.": "질문은 질문 패널에 모였다가 \"agent에게 묻기\"로 함께 보냅니다. 답도 그곳에 오고, 이어서 답할 수 있습니다.",
  "ui|Top bar": "상단 바",
  "ui|Folder bar": "폴더 바",
  "ui|Agent bar": "agent 바",
@@ -5247,6 +5333,26 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "What does this mean?": "¿Qué significa esto?",
+ "Where does the data come from?": "¿De dónde vienen los datos?",
+ "How was it computed?": "¿Cómo se calculó?",
+ "Why is it so?": "¿Por qué es así?",
+ "Can it be trusted?": "¿Es fiable?",
+ "How does it compare?": "¿Cómo se compara?",
+ "Ask": "Preguntar",
+ "Change": "Cambiar",
+ "What would you like to ask or change? Ctrl + Enter to send.": "¿Qué quieres preguntar o cambiar? Ctrl + Enter para enviar.",
+ "Drag on a figure to draw around a region and ask the agent about it. ⤢ enlarges it.": "Arrastra sobre una figura para rodear una región y preguntar al agente. ⤢ la amplía.",
+ "Drag on a figure to draw around a region and comment on it. ⤢ enlarges it.": "Arrastra sobre una figura para rodear una región y comentarla. ⤢ la amplía.",
+ "Drag on the chart to draw around points, or click one point, to ask the agent about them.": "Arrastra sobre el gráfico para rodear puntos, o haz clic en uno, para preguntar al agente.",
+ "Drag on the figure to draw around a region and ask the agent about it.": "Arrastra sobre la figura para rodear una región y preguntar al agente.",
+ "Ask while you read": "Pregunta mientras lees",
+ "Figures.": "Figuras.",
+ "Drag on a figure to draw around a region, or click a point of a chart.": "Arrastra sobre una figura para rodear una región, o haz clic en un punto de un gráfico.",
+ "Text.": "Texto.",
+ "Select some text; an \"Ask the agent\" button appears next to it.": "Selecciona texto; junto a él aparece un botón \"Preguntar al agente\".",
+ "Send.": "Enviar.",
+ "Your questions wait in the questions panel. Send them together with \"Ask the agent\"; the answers come back there, and you can reply.": "Tus preguntas esperan en el panel de preguntas. Envíalas juntas con \"Preguntar al agente\"; las respuestas llegan allí y puedes responder.",
  "ui|Top bar": "Barra superior",
  "ui|Folder bar": "Barra de carpeta",
  "ui|Agent bar": "Barra del agente",
@@ -5817,6 +5923,7 @@ function buildViewBlock(b,interactive){
   else if(b.type==='image')buildImage(b,d,interactive);
   else if(b.type==='outline')d.append(buildOutline(b));
   if(b.caption&&b.type!=='text'&&b.type!=='outline')d.append(h('p',{class:'cap',text:b.caption}));
+  if(interactive&&S.mode==='view'&&(b.type==='chart'||b.type==='image'))d.append(h('p',{class:'chint',text:b.type==='chart'?tr('Drag on the chart to draw around points, or click one point, to ask the agent about them.'):tr('Drag on the figure to draw around a region and ask the agent about it.')}));
   const src=sourceLine(b);if(src)d.append(src);
   return d;
 }
@@ -6512,35 +6619,36 @@ function moveFigures(m){
   const files=(m.evidence&&Array.isArray(m.evidence.files)?m.evidence.files:[]).filter(r=>r&&typeof r.path==='string');
   const figs=files.filter(r=>IMG_FILE.test(r.path)&&r.role!=='report'),tabs=files.filter(r=>TABLE_FILE.test(r.path)&&r.role==='table');
   if(!figs.length&&!tabs.length)return null;
-  const box=h('div',{class:'kfigs'},[h('h3',{text:tr('Figures and tables')})]);
+  const box=h('div',{class:'kfigs'},[h('h3',{text:tr('Figures and tables')}),S.readonly||!figs.length?null:h('p',{class:'chint',text:tr('Drag on a figure to draw around a region and ask the agent about it. \u2922 enlarges it.')})]);
   if(!S.folder){box.append(h('p',{class:'kln',text:tr('Open the project folder to see them.')}));return box}
   [...figs,...tabs].forEach(r=>box.append(fileFigure(r,true,m.id)));
   return box}
 function fileFigure(r,cap,moveId){ // one figure (image) or table (CSV) of the folder, with its caption when cap; in Kifu view, draw on it to ask
   if(IMG_FILE.test(r.path)){const img=h('img',{alt:r.note||baseName(r.path),draggable:'false'}); // not dragged away, so it can be drawn on
-    const fig=h('figure',{class:'kfig'},[h('button',{type:'button',class:'kfigb',title:tr('Enlarge'),onclick:()=>openModal(baseName(r.path),[h('div',{class:'kbig'},[img.cloneNode(),
-      h('p',{class:'kln',text:r.note||''}),h('div',{class:'mono kln',text:r.path})])])},[img]),cap&&r.note?h('figcaption',{text:r.note}):null]);
+    const big=()=>openModal(baseName(r.path),[h('div',{class:'kbig'},[img.cloneNode(),h('p',{class:'kln',text:r.note||''}),h('div',{class:'mono kln',text:r.path})])]);
+    const wrap=h('div',{class:'kfigb',ondblclick:big},[img,h('button',{type:'button',class:'kzoomb',text:'\u2922 '+tr('Enlarge'),title:tr('Enlarge'),onclick:big})]);
+    const fig=h('figure',{class:'kfig'},[wrap,cap&&r.note?h('figcaption',{text:r.note}):null]);
     if(!S.folder)return h('p',{class:'kln',text:tr('Open the project folder to see them.')});
-    if(moveId)bindFigureLasso(fig.firstChild,img,moveId,r.path);
+    if(moveId&&!S.readonly)bindFigureLasso(wrap,img,moveId,r.path);
     folderURL(r).then(u=>{if(u)img.src=u;else fig.replaceWith(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}))});return fig}
-function bindFigureLasso(btn,img,moveId,file){ // drag on a move's figure: a free-hand region to ask about (Kifu view) or to comment on (Kifu edit); a click still enlarges it
+function bindFigureLasso(btn,img,moveId,file){ // drag on a move's figure: a free-hand region to ask about (Kifu view) or to comment on (Kifu edit), drawn like the lasso on a report figure
   const ov=el('svg',{class:'kfov',viewBox:'0 0 1000 1000',preserveAspectRatio:'none'},null);btn.append(ov);let d=null,moved=false;
   const loc=e=>{const r=img.getBoundingClientRect();return[clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1)]};
-  const draw=pts=>{ov.replaceChildren();if(pts.length>1)el('path',{d:'M'+pts.map(q=>(q[0]*1000).toFixed(1)+','+(q[1]*1000).toFixed(1)).join(' L')+(d?'':' Z')},ov)};
-  btn.addEventListener('pointerdown',e=>{if(e.button!==0||S.readonly)return;e.preventDefault();
+  const draw=(pts,closed)=>{ov.replaceChildren();if(pts.length>1)el('path',{class:closed?'shape pendshape':'trail',d:'M'+pts.map(q=>(q[0]*1000).toFixed(1)+','+(q[1]*1000).toFixed(1)).join(' L')+(closed?' Z':'')},ov)};
+  btn.addEventListener('pointerdown',e=>{if(e.button!==0||S.readonly||e.target.closest('.kzoomb'))return;e.preventDefault();
     Object.assign(ov.style,{left:img.offsetLeft+'px',top:img.offsetTop+'px',width:img.offsetWidth+'px',height:img.offsetHeight+'px'});
     d={pts:[loc(e)],x:e.clientX,y:e.clientY,id:e.pointerId};moved=false});
   btn.addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.id)return;
     if(!moved){if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<6)return;moved=true;try{btn.setPointerCapture(e.pointerId)}catch(x){}}
-    e.preventDefault();d.pts.push(loc(e));draw(d.pts)});
+    e.preventDefault();d.pts.push(loc(e));draw(d.pts,false)});
   const end=e=>{if(!d||e.pointerId!==d.id)return;const pts=d.pts;d=null;if(!moved)return;
     if(e.type==='pointercancel'){ov.replaceChildren();moved=false;return}
-    draw(pts);
+    draw(pts,true);
     if(pts.length<8||polyArea(pts.map(q=>[q[0]*1000,q[1]*1000]))<2500){ov.replaceChildren();toast(tr('Lasso too small. Draw a larger closed shape'));return}
     const key='move:'+moveId;draftOf(key).target={kind:'move',moveId,file,region:{kind:'lasso',space:'image',polygon:decimate(pts,200).map(q=>[r3(q[0]),r3(q[1])])}};
     openQuick(key,e.clientX,e.clientY)};
   btn.addEventListener('pointerup',end);btn.addEventListener('pointercancel',end);
-  btn.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopImmediatePropagation();moved=false}},true)}
+  btn.addEventListener('click',()=>{moved=false})}
   const hold=h('div',{class:'ktabw kpreview'},[h('p',{class:'kln',text:tr('Loading…')})]);
   if(!S.folder)return h('p',{class:'kln',text:tr('Open the project folder to see them.')});
   folderText(r).then(t=>{if(t==null){hold.replaceChildren(h('p',{class:'kwarn',text:tr('{file} is missing',{file:r.path})}));return}
@@ -6570,6 +6678,7 @@ function moveFiguresEdit(id,m){ // Kifu edit: the figures and tables of a move, 
   return h('div',{class:'kfigs'},[h('h3',{text:tr('Figures and tables')}),
     h('p',{class:'kln',text:tr('The numbers in a table come from its file. To change them, change the source, or ask the agent to recompute this move.')}),
     slots.length?list:h('p',{class:'kln',text:tr('No figures or tables yet.')}),
+    slots.some(i=>IMG_FILE.test(files[i].path))?h('p',{class:'chint',text:tr('Drag on a figure to draw around a region and comment on it. \u2922 enlarges it.')}):null,
     S.folder?h('div',{class:'kadd'},[fp,dl,h('button',{type:'button',class:'btn small',text:tr('Add figure or table'),onclick:add}),msg]):null])}
 const kfileMemo=new Map();
 async function folderFile(path){ // a file of the opened folder, by its path relative to the folder of report.json
@@ -7025,7 +7134,16 @@ const PRESETS={
   image:['Crop','Add labels','Replace image','Add caption'],
   move:['Fill in this move','Recompute this','Needs a clearer reason','Add to the report','Reopen this']};
 const tagId=label=>label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-const TAG_LABEL=new Map(Object.values(PRESETS).flat().map(l=>[tagId(l),l]));
+// questions, on every kind of block and on a move: the agent answers them in its reply rather than changing anything
+const ASK_TAGS=[['explain','What does this mean?'],['where-from','Where does the data come from?'],['how-computed','How was it computed?'],
+  ['why-so','Why is it so?'],['how-reliable','Can it be trusted?'],['compare','How does it compare?']];
+const TAG_LABEL=new Map([...ASK_TAGS,...Object.values(PRESETS).flat().map(l=>[tagId(l),l])]);
+function tagChips(type,d){ // two rows of tags: ask, then change; they toggle in the draft d
+  const chip=(id,label)=>{const c=h('button',{type:'button',class:'chip','aria-pressed':String(d.tags.includes(id)),text:tr(label)});
+    c.onclick=()=>{d.tags=d.tags.includes(id)?d.tags.filter(x=>x!==id):[...d.tags,id];c.setAttribute('aria-pressed',String(d.tags.includes(id)))};return c};
+  const change=(PRESETS[type]||[]).map(l=>chip(tagId(l),l));
+  return h('div',{class:'chips two'},[h('div',{class:'chiprow'},[h('span',{class:'chipk',text:tr('Ask')}),...ASK_TAGS.map(([id,l])=>chip(id,l))]),
+    change.length?h('div',{class:'chiprow'},[h('span',{class:'chipk',text:tr('Change')}),...change]):null])}
 [['add-data-files','Add these files to the chart'],['replace-data-files','Replace the data with these files']].forEach(([id,l])=>TAG_LABEL.set(id,l)); // requests made from Folder > Data
 // v0.2 stored the visible tag text in the interface language of the time; map any known translation back to its id
 const LEGACY_TAGS={'\u63db\u4e00\u5f35':'replace-image'};
@@ -7043,9 +7161,7 @@ function stopDraw(){S.draw=null;document.body.dataset.draw='';render()}
 function commentBox(b){
   const d=draftOf(b.id),visual=b.type==='chart'||b.type==='image';
   const box=h('div',{class:'cbox'});
-  box.append(h('div',{class:'chips'},(PRESETS[b.type]||[]).map(label=>{const id=tagId(label);
-    const c=h('button',{type:'button',class:'chip','aria-pressed':String(d.tags.includes(id)),text:tr(label)});
-    c.onclick=()=>{d.tags=d.tags.includes(id)?d.tags.filter(x=>x!==id):[...d.tags,id];c.setAttribute('aria-pressed',String(d.tags.includes(id)))};return c})));
+  box.append(tagChips(b.type,d));
   if(d.target&&(d.target.kind!=='block'||d.target.quote))
     box.append(h('p',{class:'ctarget'},[h('span',{text:tr('Location: ')+describe(d.target)}),
       h('button',{type:'button',class:'linkbtn',text:tr('Clear'),onclick:()=>{d.target=null;render()}})]));
@@ -7089,9 +7205,7 @@ async function submitAndAsk(id){if(await submitDraft(id))await askAgent()}
 function moveCommentBox(id){
   const key='move:'+id,d=draftOf(key);
   const box=h('div',{class:'cbox'});
-  box.append(h('div',{class:'chips'},(PRESETS.move||[]).map(label=>{const tid=tagId(label);
-    const c=h('button',{type:'button',class:'chip','aria-pressed':String(d.tags.includes(tid)),text:tr(label)});
-    c.onclick=()=>{d.tags=d.tags.includes(tid)?d.tags.filter(x=>x!==tid):[...d.tags,tid];c.setAttribute('aria-pressed',String(d.tags.includes(tid)))};return c})));
+  box.append(tagChips('move',d));
   const ta=h('textarea',{class:'cin',rows:'2',placeholder:tr('Describe what to change (or just pick tags above). Ctrl + Enter to send.'),'data-fid':fid({id:key},'comment')});ta.value=d.text;
   ta.addEventListener('input',()=>{d.text=ta.value});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();submitMoveDraft(id)}});
@@ -7665,10 +7779,8 @@ function renderQuick(){
   const type=mv?'move':b.type,asking=!editingMode(); // in the view modes a question is collected, and sent from the questions panel
   const kids=[h('p',{class:'qwhere',text:describe(t)})];
   if(b&&t.kind==='point'&&b.chart){const ds=pointDataset(b,t),r=ds&&ds.rows.find(r=>r.id===t.rowId);if(r)kids.push(h('p',{class:'qrow',text:pointLines(b,ds,r,8).join('\n')}))}
-  kids.push(h('div',{class:'chips'},(PRESETS[type]||[]).map(label=>{const id=tagId(label);
-    const c=h('button',{type:'button',class:'chip','aria-pressed':String(d.tags.includes(id)),text:tr(label)});
-    c.onclick=()=>{d.tags=d.tags.includes(id)?d.tags.filter(x=>x!==id):[...d.tags,id];c.setAttribute('aria-pressed',String(d.tags.includes(id)))};return c})));
-  const ta=h('textarea',{rows:'3',placeholder:tr('What should change here? Ctrl + Enter to send.')});ta.value=d.text;
+  kids.push(tagChips(type,d));
+  const ta=h('textarea',{rows:'3',placeholder:tr('What would you like to ask or change? Ctrl + Enter to send.')});ta.value=d.text;
   ta.addEventListener('input',()=>{d.text=ta.value});
   ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendQuick()}});
   kids.push(ta,examplesFor(type==='chart'?'region':type,ta,d)||'',attachRow(d)||'',h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:()=>closeQuick(true)}),h('span',{class:'sp'}),
@@ -7714,6 +7826,10 @@ const HINT={view:'Use the arrow keys or the buttons below to turn pages.',edit:'
 function currentModeButton(){
   if(S.mode!=='tree')return S.mode;
   return canEditKifu()&&kifuView().edit?'kifu-edit':'kifu-view'}
+function askTipOnce(){onceOnly('duetkifu-ask-tip',()=>helpModal(tr('Ask while you read'),null,[
+  [tr('Figures.'),tr('Drag on a figure to draw around a region, or click a point of a chart.')],
+  [tr('Text.'),tr('Select some text; an "Ask the agent" button appears next to it.')],
+  [tr('Send.'),tr('Your questions wait in the questions panel. Send them together with "Ask the agent"; the answers come back there, and you can reply.')]],null,true))}
 function setMode(btn){leaveField();
   const m=btn==='kifu-view'||btn==='kifu-edit'?'tree':btn;
   S.mode=m;document.body.dataset.mode=m;if(S.draw){S.draw=null;document.body.dataset.draw=''}
@@ -7721,7 +7837,8 @@ function setMode(btn){leaveField();
   $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===currentModeButton())));
   showPanel();
   $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render();
-  if(btn==='kifu-edit'&&canEditKifu())onceOnly('duetkifu-edit-help',kifuEditHelp)}
+  if(btn==='kifu-edit'&&canEditKifu())onceOnly('duetkifu-edit-help',kifuEditHelp);
+  else if(!editingMode()&&!S.readonly&&S.meta&&S.welcomed)askTipOnce()}
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
 // The side panel (comments, changes, style, folder) is for editing: the view modes read at full width without it
 const editingMode=()=>S.mode==='edit'||(S.mode==='tree'&&!!kifuView().edit);
@@ -8846,9 +8963,9 @@ const UI_NAMES=[
 function uiNames(){return h('details',{class:'uinames'},[h('summary',{text:tr('Names of the parts of the page')}),
   h('dl',{},UI_NAMES.flatMap(([n,d])=>[h('dt',{text:trc('ui',n)}),h('dd',{text:tr(d)})]))])}
 function onceOnly(key,fn){try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1')}catch(e){return}fn()}
-function helpModal(title,intro,steps,foot){ // numbered steps: [bold start, the rest]
+function helpModal(title,intro,steps,foot,short){ // numbered steps: [bold start, the rest]; short: without the names of the parts
   openModal(title,[h('div',{class:'langbox'},[intro?h('p',{text:intro}):null,
-    h('ol',{},steps.map(([t,d])=>h('li',{},[h('strong',{text:t}),' '+d]))),foot||null,uiNames(),
+    h('ol',{},steps.map(([t,d])=>h('li',{},[h('strong',{text:t}),' '+d]))),foot||null,short?null:uiNames(),
     h('div',{class:'crow'},[h('span',{class:'sp'}),h('button',{type:'button',class:'btn small primary',text:tr('Got it'),onclick:closeModal})])])])}
 function kifuViewHelp(){
   helpModal(tr('Reading the Kifu'),tr('The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.'),[
@@ -8865,7 +8982,9 @@ function kifuEditHelp(){
     [tr('Arrows and new moves.'),tr('Drag the + under the move onto another move to draw an arrow (clue, corrects, supports); onto empty space to add the next move there. Click an arrow to change or delete it.')],
     [tr('The form on the right.'),tr('On top, what only you decide: title, result, cause, mark. The written part can be filled in by the agent: click "Ask the agent to fill this in". What the agent wrote and you have not looked at yet is marked in orange. The rest is under Advanced.')],
     [tr('Every change is saved at once.'),tr('It is written to kifu.json and listed under the move, with who made it.')]])}
-function welcomeOnce(){try{if(localStorage.getItem('duetkifu-welcomed'))return;localStorage.setItem('duetkifu-welcomed','1')}catch(e){return}openHelp()}
+function welcomeOnce(){S.welcomed=true;
+  try{if(localStorage.getItem('duetkifu-welcomed')){if(!editingMode()&&!S.readonly)askTipOnce();return}localStorage.setItem('duetkifu-welcomed','1')}catch(e){return}
+  openHelp()} // on a first visit the ask tip waits for the next mode switch
 $('#helpBtn').addEventListener('click',openHelp);
 
 /* ---------- Startup and sync ---------- */
