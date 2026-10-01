@@ -39,7 +39,7 @@
 :root:lang(zh-Hans){--sans:'Noto Sans','Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;--serif:'Noto Serif','Noto Serif SC','Songti SC','SimSun',serif}
 :root:lang(ja){--sans:'Noto Sans','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo',system-ui,sans-serif;--serif:'Noto Serif','Noto Serif JP','Hiragino Mincho ProN','Yu Mincho',serif}
 :root:lang(ko){--sans:'Noto Sans','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;--serif:'Noto Serif','Noto Serif KR','AppleMyungjo','Batang',serif}
-html,body{height:100%}
+html{height:100%}body{min-height:100%} /* not height:100%: the body must grow with the page, or the sticky top bar scrolls away on a long page */
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--sans)}
 h1,h2,.btitle{font-family:var(--serif);font-weight:700}
@@ -49,13 +49,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* top bar */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);border-bottom:1px solid var(--line)}
-.top .in{max-width:1500px;margin:0 auto;padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.top .in{max-width:1500px;margin:0 auto;padding:10px 22px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+#togglePanel{white-space:nowrap}
 .top h1{font-size:18px;margin:0 8px 0 0;white-space:nowrap}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
 .seg button{border:0;background:transparent;padding:6px 14px;cursor:pointer}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-.hint{color:var(--muted);font-size:13px;flex:1 1 220px}
+.hint{color:var(--muted);font-size:12.5px;flex:1 1 80px;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #agentbar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:0 0 12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:13px}
 #agentbar[hidden]{display:none}
 .reply.me{border-left-color:var(--c2)}
@@ -224,6 +225,7 @@ main{min-width:0}
 #tree.kfull .krow2>.kgrip,#tree.kfull .kdrag,#tree.kfull .kb-tree>.kbody>.kgrip,#tree.kfull .kb-move .kgrip{display:none}
 #tree.kfull .krow2{display:block;margin:0}
 #tree.kfull .kb-tree .kstage{height:calc(100vh - 140px)!important}
+#tree.kfull:has(.kb-move:not(.folded)) .kb-tree{margin-right:calc(min(440px,40vw) + 12px)}
 #tree.kfull .kb-move{position:fixed;top:var(--kfstop,130px);right:20px;width:min(440px,40vw);max-height:calc(100vh - var(--kfstop,130px) - 16px);display:flex;flex-direction:column;z-index:5;
   background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:6px 10px 10px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
 #tree.kfull .kb-move.folded{padding:0;border:0;background:none;box-shadow:none;width:auto}
@@ -346,9 +348,9 @@ body.kresizing{user-select:none;-webkit-user-select:none}
 .ktrig{font-size:12.5px;color:var(--muted);margin:0}.ktrig.you{color:var(--c5);font-weight:700}
 .kpanel h2{font:700 20px/1.35 var(--serif);margin:0}
 .kpanel h2 .kid{font-weight:400;font-size:12px}
-.kh2in{font:700 20px/1.35 var(--serif);color:var(--ink);background:transparent;border:1px dashed transparent;border-radius:6px;padding:2px 6px;margin:0 -6px;width:calc(100% + 12px)}
+.kh2in{font:700 20px/1.35 var(--serif);color:var(--ink);background:transparent;border:1px dashed transparent;border-radius:6px;padding:2px 6px;margin:0 -6px;width:calc(100% + 12px);box-sizing:border-box;resize:none;overflow:hidden;min-height:1.4em;display:block;flex:none}
 .kh2in:hover{border-color:var(--line)}.kh2in:focus{border-color:var(--accent);outline:none;background:var(--paper)}
-.kwrit{display:flex;flex-direction:column;gap:8px}
+.kwrit{display:flex;flex-direction:column;gap:8px}.kwrit>.kf{flex:none}
 .kwrit .kf textarea{field-sizing:content;min-height:2.8em}
 .kfe{border:1px solid var(--line);border-radius:8px;padding:6px 8px 8px;display:flex;flex-direction:column;gap:6px;background:var(--paper)}
 .kfeh{display:flex;align-items:center;gap:8px;min-width:0}.kfeh .mono{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -627,7 +629,7 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #qc .crow{display:flex;gap:8px;align-items:center}#qc .sp{flex:1}
 /* the view modes: a button next to selected text, and the floating questions panel */
 #asksel{position:fixed;z-index:56;font-size:12.5px;padding:3px 10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-#qa{box-sizing:border-box;position:fixed;z-index:50;right:16px;top:90px;width:360px;height:min(560px,calc(100vh - 110px));min-width:260px;min-height:180px;max-width:calc(100vw - 16px);
+#qa{box-sizing:border-box;position:fixed;z-index:50;right:16px;bottom:16px;width:360px;height:min(560px,calc(100vh - 110px));min-width:260px;min-height:180px;max-width:calc(100vw - 16px);
   max-height:calc(100vh - 16px);display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:10px;
   box-shadow:0 6px 24px rgba(0,0,0,.14);resize:both;overflow:hidden;font-size:13px}
 #qa[hidden]{display:none}
@@ -1528,6 +1530,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu 把你的研究記成一份報告，加上一份記錄每一步的棋譜，由你和 AI agent 一起寫。每一個改動都會記下是誰做的。",
+ "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "閱覽模式把報告分頁顯示，用方向鍵翻頁。想問 agent 圖表或段落的問題，在圖上圈出一塊，或選取文字。",
+ "Follow the research.": "跟著研究走。",
+ "Kifu view draws every move of the research as a tree, dead ends included. Click a move to read why it was made and where its numbers come from.": "棋譜閱覽把研究的每一步畫成一張圖，死路也在裡面。點一步，就能看為什麼這樣做、數字從哪來。",
  "No file names match.": "沒有符合的檔名。",
  "Filter file names; Enter searches inside the files": "篩選檔名；按 Enter 搜尋檔案內容",
  "Search the folder": "搜尋資料夾",
@@ -2550,6 +2556,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu 把你的研究记成一份报告，加上一份记录每一步的棋谱，由你和 AI agent 一起写。每一个改动都会记下是谁做的。",
+ "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "阅览模式把报告分页显示，用方向键翻页。想问 agent 图表或段落的问题，在图上圈出一块，或选取文字。",
+ "Follow the research.": "跟着研究走。",
+ "Kifu view draws every move of the research as a tree, dead ends included. Click a move to read why it was made and where its numbers come from.": "棋谱阅览把研究的每一步画成一张图，死路也在里面。点一步，就能看为什么这样做、数字从哪来。",
  "No file names match.": "没有符合的文件名。",
  "Filter file names; Enter searches inside the files": "筛选文件名；按 Enter 搜索文件内容",
  "Search the folder": "搜索文件夹",
@@ -3572,6 +3582,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu は、研究をレポートと、すべての手を記した棋譜として残し、あなたと AI agent が一緒に書き進めます。変更はすべて、誰が行ったかとともに記録されます。",
+ "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "閲覧モードではレポートがページで表示され、矢印キーでめくれます。図や文章について agent に聞くには、図の一部を囲むか、文章を選びます。",
+ "Follow the research.": "研究の流れを追う。",
+ "Kifu view draws every move of the research as a tree, dead ends included. Click a move to read why it was made and where its numbers come from.": "棋譜閲覧は、研究のすべての手を、行き止まりも含めて一枚の図にします。手をクリックすると、なぜその手を打ったのか、数字がどこから来たのかが読めます。",
  "No file names match.": "一致するファイル名はありません。",
  "Filter file names; Enter searches inside the files": "ファイル名で絞り込み、Enter でファイルの中身を検索",
  "Search the folder": "フォルダを検索",
@@ -4594,6 +4608,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu는 연구를 보고서와 모든 수를 담은 기보로 기록하며, 당신과 AI agent가 함께 씁니다. 모든 변경은 누가 했는지와 함께 기록됩니다.",
+ "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "보기 모드는 보고서를 페이지로 보여 주며 화살표 키로 넘깁니다. 그림이나 문단에 대해 agent에게 물으려면 그림의 일부를 둘러싸거나 텍스트를 선택하세요.",
+ "Follow the research.": "연구의 흐름을 따라가기.",
+ "Kifu view draws every move of the research as a tree, dead ends included. Click a move to read why it was made and where its numbers come from.": "기보 보기는 막다른 길을 포함해 연구의 모든 수를 한 장의 그림으로 그립니다. 수를 누르면 왜 그렇게 했는지, 숫자가 어디서 왔는지 읽을 수 있습니다.",
  "No file names match.": "일치하는 파일 이름이 없습니다.",
  "Filter file names; Enter searches inside the files": "파일 이름 필터, Enter로 파일 내용 검색",
  "Search the folder": "폴더 검색",
@@ -5616,6 +5634,10 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu guarda tu investigación como un informe y un registro de cada jugada, que escribes junto con un agente de IA. Cada cambio queda anotado con quién lo hizo.",
+ "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "La vista muestra el informe por páginas; pasa de página con las flechas. Para preguntar al agente por una figura o un pasaje, rodea parte de la figura o selecciona el texto.",
+ "Follow the research.": "Sigue la investigación.",
+ "Kifu view draws every move of the research as a tree, dead ends included. Click a move to read why it was made and where its numbers come from.": "La vista del kifu dibuja cada jugada de la investigación como un árbol, con los callejones sin salida. Haz clic en una jugada para leer por qué se hizo y de dónde salen sus números.",
  "No file names match.": "Ningún nombre de archivo coincide.",
  "Filter file names; Enter searches inside the files": "Filtra nombres; Intro busca dentro de los archivos",
  "Search the folder": "Buscar en la carpeta",
@@ -6799,7 +6821,7 @@ async function addMove(parentId,pos){ // "Next move": a new active move after th
     if(p&&p.group)m.group=p.group;if(pos)m.pos=pos;
     d.moves[id]=m;kifuChange(d,id,'add',null,m.title);return id});
   if(!id)return;const V=kifuView();V.sel=id;V.edit=true;render();
-  const t=$('#treehost .kpanel input[data-field="title"]');if(t){t.focus();t.select()}}
+  const t=$('#treehost .kpanel [data-field="title"]');if(t){t.focus();t.select()}}
 function closeMoveDialog(id,preset){ // "Close this move": the result, and for a dead end its cause and a sentence why
   const K=kifuModel(),x=K.byId.get(id);if(!x)return;const m=x.m;
   const oc=h('select',{},Object.entries(OUTCOME_TEXT).map(([v,t])=>h('option',{value:v,text:tr(t)})));oc.value=preset||m.outcome||'success';
@@ -6892,7 +6914,9 @@ function moveEditor(x,K,F){ // the selected move as a form
       nl?h('button',{type:'button',class:'linkbtn',text:tr('Looked at it'),onclick:()=>lookedAt(id,[field])}):null]),
       rows>1?area(field,rows,ph&&tr(ph)):inp(field,'text',ph&&tr(ph))])};
   out.push(h('div',{class:'kpmeta'},[h('span',{class:'kchip sh-'+f.shape},[shapeIcon(f.shape),tr(SHAPE_TEXT[f.shape])]),h('span',{class:'kid',text:moveNo(m)+' '+id})]));
-  out.push(h('input',{type:'text',class:'kh2in','data-field':'title',value:m.title||'',placeholder:tr('Title'),'aria-label':tr('Title'),onchange:e=>editMove(id,'title',e.target.value)}));
+  const ttl=h('textarea',{rows:'1',class:'kh2in','data-field':'title',text:m.title||'',placeholder:tr('Title'),'aria-label':tr('Title'),onchange:e=>editMove(id,'title',e.target.value.replace(/\s+/g,' ')),
+    onkeydown:e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}}});
+  const grow=()=>{ttl.style.height='auto';ttl.style.height=ttl.scrollHeight+'px'};ttl.addEventListener('input',grow);out.push(ttl);if(window.ResizeObserver)new ResizeObserver(grow).observe(ttl);else setTimeout(grow,200)
   const probs=moveProblems(m);if(probs.length)out.push(h('ul',{class:'kprob'},probs.map(p=>h('li',{text:p}))));
   const form=h('div',{class:'kform'});out.push(form);
   if(m.kind==='question'&&!x.parent){const meta=K.meta||{};
@@ -7812,7 +7836,7 @@ function renderChanges(){
 function renderPanel(){
   S.chainMemo=null;renderAgentBar();
   const open=S.annos.filter(a=>a.status!=='done').length,curN=currentChanges().length;
-  $('#togglePanel').textContent=tr('Panel (comments {a}, changes {b})',{a:open,b:curN});
+  $('#togglePanel').textContent=tr('Panel')+' ('+open+' / '+curN+')';$('#togglePanel').title=tr('Panel (comments {a}, changes {b})',{a:open,b:curN});
   $$('#tabs button').forEach(b=>{b.setAttribute('aria-selected',String(b.dataset.tab===S.tab));
     b.textContent=b.dataset.tab==='annos'?tr('Comments ({n})',{n:open}):b.dataset.tab==='changes'?tr('Changes ({n})',{n:curN}):b.dataset.tab==='folder'?tr('Folder'):tr('Style')});
   if(S.tab==='folder'&&!S.folder)S.tab='annos';$('#tabs button[data-tab=folder]').hidden=!S.folder;
@@ -8211,7 +8235,7 @@ function setMode(btn){leaveField();if(btn!=='kifu-view'&&btn!=='kifu-edit'&&$('#
   if(m==='tree')kifuView().edit=btn==='kifu-edit'&&canEditKifu();
   $$('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===currentModeButton())));
   showPanel();
-  $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);render();
+  $('#hint').textContent=S.readonly?tr('Read-only copy. Use the arrow keys or the buttons below to turn pages.'):tr(HINT[m]);$('#hint').title=$('#hint').textContent;render();
   if(btn==='kifu-edit'&&canEditKifu())onceOnly('duetkifu-edit-help',kifuEditHelp);
   else if(!editingMode()&&!S.readonly&&S.meta&&S.welcomed)askTipOnce()}
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
@@ -8253,6 +8277,7 @@ function saveQA(){try{localStorage.setItem(QA_KEY,JSON.stringify(QA))}catch(e){}
 const viewQuestions=()=>S.annos.filter(a=>a.from==='view').sort((p,q)=>(q.no||0)-(p.no||0));
 function placeQA(box){ // keep it on screen
   if(QA.x==null||QA.y==null){box.style.left='';box.style.top='';box.style.right='';box.style.maxHeight='';return}
+  box.style.bottom='auto';
   const w=box.offsetWidth||360,y=clamp(QA.y,4,Math.max(4,innerHeight-60));
   box.style.right='auto';box.style.left=clamp(QA.x,4,Math.max(4,innerWidth-w-4))+'px';box.style.top=y+'px';box.style.maxHeight=(innerHeight-y-8)+'px'}
 function renderQA(force){
@@ -9126,7 +9151,7 @@ function folderTree(items,key,leaf,dirTools){ // items {path, name}: folders fol
   const q=String(S.fq||'').trim().toLowerCase(),shown=q?items.filter(it=>it.name.toLowerCase().includes(q)):items,root={dirs:new Map(),items:[]};
   shown.forEach(it=>{const parts=it.name.split('/');let n=root;parts.slice(0,-1).forEach(d=>{if(!n.dirs.has(d))n.dirs.set(d,{dirs:new Map(),items:[]});n=n.dirs.get(d)});n.items.push(it)});
   const all=n=>[...n.items,...[...n.dirs.values()].flatMap(all)];
-  const level=(n,path)=>{const ul=h('ul',{class:'ftree'}),range=n.items.map(it=>it.path);
+  const level=(n,path)=>{const ul=h('ul',{class:'ftree flist'}),range=n.items.map(it=>it.path);
     [...n.dirs.entries()].sort((x,y)=>x[0]<y[0]?-1:1).forEach(([name,sub])=>{
       let label=name,p=path+name+'/',d=sub; // a folder that only holds one folder is shown with it: raw/2026/
       while(!d.items.length&&d.dirs.size===1){const[nn,ns]=[...d.dirs.entries()][0];label+='/'+nn;p+=nn+'/';d=ns}
@@ -9382,9 +9407,10 @@ function openHelp(){
   const step=(t,d)=>h('li',{},[h('strong',{text:t}),' '+d]);
   const link=(path,t)=>h('a',{href:REPO_URL+path,target:'_blank',rel:'noopener',text:t});
   openModal(tr('Welcome to Duetkifu'),[h('div',{class:'langbox'},[
-    h('p',{text:tr('Duetkifu is a report that you and an AI agent revise together. Every change is recorded with who made it.')}),
+    h('p',{text:tr('Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.')}),
     h('ol',{},[
-      step(tr('Read.'),tr('View shows the report as pages. Turn pages with the arrow keys.')),
+      step(tr('Read.'),tr('View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.')),
+      step(tr('Follow the research.'),tr('Kifu view draws every move of the research as a tree, dead ends included. Click a move to read why it was made and where its numbers come from.')),
       step(tr('Review.'),tr('In Edit, change text and charts directly. Under each block, write a comment or pick a tag. On a chart, click a point or draw a box or a lasso.')),
       step(tr('Keep track.'),tr('The Changes tab lists every change, by you or by the agent. Click "Finish this round" when you are done.')),
       step(tr('Hand it to your agent.'),S.cloud?tr('Go back to Claude and ask it to read the annotations and revise the report.')
