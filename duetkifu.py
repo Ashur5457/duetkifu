@@ -1260,6 +1260,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
             project, data = project_of(self.root)
             return self.send(200, json.dumps({'name': self.root.name, 'version': VERSION, 'layout': 'data-folder' if project != self.root else 'project-folder',
                                               'root': str(self.root), 'app': str(stable_app(False))}), 'application/json')
+        if path == '/api/find':   # the page's search inside the files of the folder
+            q = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            query = (q.get('q') or [''])[0].strip()
+            if not query:
+                return self.send(400, 'empty query')
+            try:
+                limit = max(1, min(100, int((q.get('limit') or ['30'])[0])))
+            except ValueError:
+                limit = 30
+            try:
+                return self.send(200, json.dumps(find_data(self.root, query, limit), ensure_ascii=False), 'application/json; charset=utf-8')
+            except (OSError, sqlite3.Error) as err:
+                return self.send(500, f'search failed: {err}')
         if path == '/api/agent':
             project, _ = project_of(self.root)
             return self.send(200, json.dumps(agent_state(project)), 'application/json')
@@ -2108,6 +2121,24 @@ def search_index(con, fts, query, limit=20):
         s = body[max(0, i - 60):i + 100]
         out.append((p, l, ('...' if i > 60 else '') + ' '.join(s.split()).replace(words[0], f'[{words[0]}]') + '...'))
     return out
+
+
+FIND_LOCK = threading.Lock()   # one search at a time: it may update the index first
+
+
+def find_data(root, query, limit):
+    """For the page's search box: files named like the query, and passages that contain it (paths relative to the folder
+    of report.json, as everywhere in the page)."""
+    project, _ = project_of(root)
+    with FIND_LOCK:
+        con, fts = update_index(root, quiet=True)
+        try:
+            names = [{'path': p, 'kind': k, 'note': n or ''} for p, k, n in con.execute(
+                "SELECT path, kind, note FROM files WHERE path LIKE ? ORDER BY path LIMIT 20", (f'%{query.strip()}%',))]
+            hits = [{'path': p, 'loc': loc or '', 'excerpt': (ex or '')[:300]} for p, loc, ex in search_index(con, fts, query, limit)]
+        finally:
+            con.close()
+    return {'names': names, 'hits': hits, 'more': len(hits) == limit}
 
 
 def run_find(root, query, limit, refresh=True):

@@ -162,6 +162,19 @@ main{min-width:0}
 .chlinks li{display:flex;gap:6px;align-items:center;padding:2px 0 2px 14px}
 .flist details{width:100%}.flist summary{cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .flist .dot{align-self:center}
+/* the files of the folder as a tree: folders folded until opened; a box filters the names and searches inside the files */
+.ftree{list-style:none;margin:6px 0 8px;padding:0}.ftree .ftree{margin:0 0 0 14px}
+.ftree>li.fdir{display:block;border-bottom:0;padding:0}
+.ftree details>summary{list-style:none;display:flex;gap:6px 8px;align-items:center;flex-wrap:wrap;padding:5px 4px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}
+.ftree details>summary::-webkit-details-marker{display:none}
+.ftree details>summary::before{content:"\25B8";color:var(--muted);width:1em;display:inline-block}.ftree details[open]>summary::before{content:"\25BE"}
+.fsec{margin:4px 0}.fsec>summary{list-style:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 2px;cursor:pointer;font-size:13px}
+.fsec>summary::-webkit-details-marker{display:none}.fsec>summary::before{content:"\25B8";color:var(--muted);width:1em;display:inline-block}.fsec[open]>summary::before{content:"\25BE"}
+.ftree .dname,.fsec .dname{font-weight:600;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.fsearch{display:flex;gap:6px;align-items:center;margin:4px 0 8px}.fsearch input{flex:1;min-width:0;font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.fhits{list-style:none;margin:4px 0 10px;padding:0}.fhits li{border-bottom:1px solid var(--line);padding:6px 2px;font-size:12.5px}
+.fhits .fhp{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.fhits .fhp .mono{overflow-wrap:anywhere}.fhits .loc{color:var(--muted)}
+.fhits .ex{color:var(--muted);margin-top:2px;overflow-wrap:anywhere}.fhits mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:2px}
 
 /* page (view) */
 .page{width:var(--pw);height:var(--ph);margin:0 auto;background:var(--paper);border-radius:6px;
@@ -1513,6 +1526,19 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "No file names match.": "沒有符合的檔名。",
+ "Filter file names; Enter searches inside the files": "篩選檔名；按 Enter 搜尋檔案內容",
+ "Search the folder": "搜尋資料夾",
+ "Search inside files": "搜尋內容",
+ "Searches the text of every file in the folder: reports, Word, slides, spreadsheets, the Kifu": "搜尋資料夾裡每個檔案的文字：報告、Word、簡報、試算表、棋譜",
+ "Searching inside the files needs the Duetkifu launcher.": "搜尋檔案內容需要用 Duetkifu 啟動程式開啟。",
+ "Type what to look for first.": "請先輸入要找的字。",
+ "Searching… (the first search of a folder builds its index, which can take a minute)": "搜尋中…（第一次搜尋會先建立索引，可能要一分鐘）",
+ "The search failed: {m}": "搜尋失敗：{m}",
+ "\"{q}\": {n} found": "「{q}」：找到 {n} 筆",
+ "File names": "檔名",
+ "Inside the files": "檔案內容",
+ "Nothing found.": "找不到。",
  "Open a project folder first.": "請先開啟專案資料夾。",
  "Snapshot saved in {where}": "快照已存到 {where}",
  "Could not save the snapshot.": "快照存檔失敗。",
@@ -2522,6 +2548,19 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "No file names match.": "没有符合的文件名。",
+ "Filter file names; Enter searches inside the files": "筛选文件名；按 Enter 搜索文件内容",
+ "Search the folder": "搜索文件夹",
+ "Search inside files": "搜索内容",
+ "Searches the text of every file in the folder: reports, Word, slides, spreadsheets, the Kifu": "搜索文件夹里每个文件的文字：报告、Word、演示文稿、电子表格、棋谱",
+ "Searching inside the files needs the Duetkifu launcher.": "搜索文件内容需要用 Duetkifu 启动程序打开。",
+ "Type what to look for first.": "请先输入要找的字。",
+ "Searching… (the first search of a folder builds its index, which can take a minute)": "搜索中…（第一次搜索会先建立索引，可能要一分钟）",
+ "The search failed: {m}": "搜索失败：{m}",
+ "\"{q}\": {n} found": "“{q}”：找到 {n} 条",
+ "File names": "文件名",
+ "Inside the files": "文件内容",
+ "Nothing found.": "找不到。",
  "Open a project folder first.": "请先打开项目文件夹。",
  "Snapshot saved in {where}": "快照已存到 {where}",
  "Could not save the snapshot.": "快照保存失败。",
@@ -3531,6 +3570,19 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "No file names match.": "一致するファイル名はありません。",
+ "Filter file names; Enter searches inside the files": "ファイル名で絞り込み、Enter でファイルの中身を検索",
+ "Search the folder": "フォルダを検索",
+ "Search inside files": "中身を検索",
+ "Searches the text of every file in the folder: reports, Word, slides, spreadsheets, the Kifu": "フォルダ内のすべてのファイルの文章を検索：レポート、Word、スライド、表計算、棋譜",
+ "Searching inside the files needs the Duetkifu launcher.": "ファイルの中身の検索には Duetkifu のランチャーが必要です。",
+ "Type what to look for first.": "先に探す言葉を入力してください。",
+ "Searching… (the first search of a folder builds its index, which can take a minute)": "検索中…（最初の検索では索引を作るため、1分ほどかかることがあります）",
+ "The search failed: {m}": "検索に失敗しました：{m}",
+ "\"{q}\": {n} found": "「{q}」：{n} 件",
+ "File names": "ファイル名",
+ "Inside the files": "ファイルの中身",
+ "Nothing found.": "見つかりませんでした。",
  "Open a project folder first.": "先にプロジェクトフォルダを開いてください。",
  "Snapshot saved in {where}": "スナップショットを {where} に保存しました",
  "Could not save the snapshot.": "スナップショットを保存できませんでした。",
@@ -4540,6 +4592,19 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "No file names match.": "일치하는 파일 이름이 없습니다.",
+ "Filter file names; Enter searches inside the files": "파일 이름 필터, Enter로 파일 내용 검색",
+ "Search the folder": "폴더 검색",
+ "Search inside files": "내용 검색",
+ "Searches the text of every file in the folder: reports, Word, slides, spreadsheets, the Kifu": "폴더 안 모든 파일의 텍스트 검색: 보고서, Word, 슬라이드, 스프레드시트, 기보",
+ "Searching inside the files needs the Duetkifu launcher.": "파일 내용 검색에는 Duetkifu 실행기가 필요합니다.",
+ "Type what to look for first.": "먼저 찾을 내용을 입력하세요.",
+ "Searching… (the first search of a folder builds its index, which can take a minute)": "검색 중… (처음 검색할 때는 색인을 만들어 1분쯤 걸릴 수 있습니다)",
+ "The search failed: {m}": "검색 실패: {m}",
+ "\"{q}\": {n} found": "\"{q}\": {n}건",
+ "File names": "파일 이름",
+ "Inside the files": "파일 내용",
+ "Nothing found.": "찾지 못했습니다.",
  "Open a project folder first.": "먼저 프로젝트 폴더를 여세요.",
  "Snapshot saved in {where}": "스냅샷을 {where}에 저장했습니다",
  "Could not save the snapshot.": "스냅샷을 저장하지 못했습니다.",
@@ -5549,6 +5614,19 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "No file names match.": "Ningún nombre de archivo coincide.",
+ "Filter file names; Enter searches inside the files": "Filtra nombres; Intro busca dentro de los archivos",
+ "Search the folder": "Buscar en la carpeta",
+ "Search inside files": "Buscar dentro",
+ "Searches the text of every file in the folder: reports, Word, slides, spreadsheets, the Kifu": "Busca en el texto de cada archivo de la carpeta: informes, Word, diapositivas, hojas de cálculo, el kifu",
+ "Searching inside the files needs the Duetkifu launcher.": "Buscar dentro de los archivos necesita el lanzador de Duetkifu.",
+ "Type what to look for first.": "Escribe primero qué buscar.",
+ "Searching… (the first search of a folder builds its index, which can take a minute)": "Buscando… (la primera búsqueda crea el índice y puede tardar un minuto)",
+ "The search failed: {m}": "La búsqueda falló: {m}",
+ "\"{q}\": {n} found": "\"{q}\": {n} resultados",
+ "File names": "Nombres de archivo",
+ "Inside the files": "Dentro de los archivos",
+ "Nothing found.": "No se encontró nada.",
  "Open a project folder first.": "Abre primero una carpeta de proyecto.",
  "Snapshot saved in {where}": "Instantánea guardada en {where}",
  "Could not save the snapshot.": "No se pudo guardar la instantánea.",
@@ -8855,22 +8933,20 @@ function chainSection(){ // Folder tab: every derived file, raw file and script,
       (C.fresh.length&&!S.checking?' '+tr('{n} new raw files not used yet.',{n:C.fresh.length}):'')}),
     h('button',{type:'button',class:'btn small',style:'margin-left:auto',text:tr('Check again'),disabled:S.checking?'':null,onclick:()=>verifyChain()})]));
   const link=(t,fn)=>h('button',{type:'button',class:'linkbtn fname',text:t,onclick:fn});
-  const dl=h('ul',{class:'flist'});
-  C.steps.forEach(s=>{const st=C.stepStatus(s).state,n=inputCount(C,s);
-    s.outputs.filter(r=>r&&r.path&&C.madeBy.get(normPath(r.path))===s).forEach(r=>{const p=normPath(r.path),D=C.downstream([p]);
-      dl.append(h('li',{},[fselBox(p,C.derived),dot(st),link(p,()=>openFile(p)),h('span',{class:'fstat'+(st==='stale'?' stale':''),
-        text:'← '+scriptName(s)+' ← '+tr('{d} derived, {r} raw',{d:n.d,r:n.r})+(D.blocks.length?' · '+tr('used by {n} charts or tables',{n:D.blocks.length}):'')})]))})});
-  sec.append(h('h5',{text:tr('Derived files ← script ← inputs')}),dl);
-  const rl=h('ul',{class:'flist'});
-  groupByFolder([...C.raw,...C.fresh].map(p=>C.refOf.get(p))).forEach(([dir,list])=>{const k=list.filter(r=>C.isNew(r.path)).length,range=list.map(r=>r.path),shorts=shortNames(list.map(r=>baseName(r.path)));
-    rl.append(h('li',{},[lazyDetails(
-    [fselGroupBox(range),dot(worst(list.map(fileDot))),h('span',{class:'fname',text:dir}),h('span',{class:'fstat'+(k?' stale':''),text:tr('{n} files',{n:list.length})+(k?' · '+tr('{n} new',{n:k}):'')})],
-    ()=>[h('button',{type:'button',class:'linkbtn',text:tr('What depends on these {n} files?',{n:list.length}),onclick:()=>openFiles(list.map(r=>r.path),dir)}),
-      h('ul',{class:'chlinks'},list.map((r,i)=>h('li',{class:'fr'},[fselBox(r.path,range),dot(fileDot(r)),h('button',{type:'button',class:'linkbtn fname',text:shorts[i],title:baseName(r.path),onclick:()=>openFile(r.path)}),
-        C.isNew(r.path)?h('span',{class:'fstat stale',text:tr('new, not used yet')}):null,revealBtn(r.path)])))],'raw:'+dir)]))});
-  sec.append(h('h5',{text:tr('Raw data ({n} files): click a folder or file to see what depends on it',{n:C.raw.length})}),rl);
-  if(C.scripts.length)sec.append(h('h5',{text:tr('Scripts ({n})',{n:C.scripts.length})}),
-    h('ul',{class:'flist'},C.scripts.map(p=>h('li',{},[dot(stateOf(fileState(C.refOf.get(p)))),link(p,()=>openFile(p))]))));
+  const shown=p=>p.replace(/^(\.\.\/)+/,''); // the folder names, without the ../ that leads out of the workspace
+  const der=[];C.steps.forEach(s=>{const st=C.stepStatus(s).state,n=inputCount(C,s);
+    s.outputs.filter(r=>r&&r.path&&C.madeBy.get(normPath(r.path))===s).forEach(r=>{const p=normPath(r.path);der.push({path:p,name:shown(p),s,st,n})})});
+  const D=folderTree(der,'chain-derived',(it,range)=>{const Dn=C.downstream([it.path]);return h('li',{},[fselBox(it.path,range),dot(it.st),link(baseName(it.path),()=>openFile(it.path)),
+    h('span',{class:'fstat'+(it.st==='stale'?' stale':''),text:'← '+scriptName(it.s)+' ← '+tr('{d} derived, {r} raw',{d:it.n.d,r:it.n.r})+(Dn.blocks.length?' · '+tr('used by {n} charts or tables',{n:Dn.blocks.length}):'')})])});
+  sec.append(foldSection('chain-derived',tr('Derived files ← script ← inputs'),D.count,D.tree));
+  const raw=[...C.raw,...C.fresh].map(p=>C.refOf.get(p)).filter(Boolean).map(r=>({path:r.path,name:shown(normPath(r.path)),r}));
+  const R=folderTree(raw,'chain-raw',(it,range)=>h('li',{class:'fr'},[fselBox(it.path,range),dot(fileDot(it.r)),h('button',{type:'button',class:'linkbtn fname',text:baseName(it.path),title:it.name,onclick:()=>openFile(it.path)}),
+      C.isNew(it.path)?h('span',{class:'fstat stale',text:tr('new, not used yet')}):null,revealBtn(it.path)]),
+    (list,p)=>{const k=list.filter(it=>C.isNew(it.path)).length;return[dot(worst(list.map(it=>fileDot(it.r)))),k?h('span',{class:'fstat stale',text:tr('{n} new',{n:k})}):null,
+      h('button',{type:'button',class:'linkbtn',text:tr('What depends on these {n} files?',{n:list.length}),onclick:e=>{e.preventDefault();openFiles(list.map(it=>it.path),p)}})]});
+  sec.append(foldSection('chain-raw',tr('Raw data ({n} files): click a folder or file to see what depends on it',{n:C.raw.length}),String(S.fq||'').trim()?R.count:null,R.tree));
+  if(C.scripts.length){const sc=C.scripts.filter(p=>!String(S.fq||'').trim()||p.toLowerCase().includes(String(S.fq).trim().toLowerCase()));
+    sec.append(foldSection('chain-scripts',tr('Scripts ({n})',{n:C.scripts.length}),String(S.fq||'').trim()?sc.length:null,h('ul',{class:'flist'},sc.map(p=>h('li',{},[dot(stateOf(fileState(C.refOf.get(p)))),link(p,()=>openFile(p))])))))}
   return sec;
 }
 /* Checking the files: the launcher answers for all of them at once; in a folder opened in the page, the page reads them */
@@ -9041,21 +9117,69 @@ async function importAll(list,dir){ // every file of one folder that is not impo
   let n=0;for(const f of list)if(await importDataFile(f,true))n++;
   toast(tr('Imported {n} files from {dir}.',{n,dir}));refreshFolderFiles();
 }
-function fileList(files,empty){ // raw or derived data files that can be imported into datasets, grouped by folder
-  const B=(t,fn,cls)=>h('button',{type:'button',class:'btn small'+(cls?' '+cls:''),text:t,onclick:fn}),dl=h('ul',{class:'flist'});
-  if(!files.length){if(empty)dl.append(h('li',{class:'empty',text:empty}));return dl}
-  const groups=new Map();files.forEach(f=>{const i=f.name.lastIndexOf('/'),k=i<0?'':f.name.slice(0,i+1);(groups.get(k)||groups.set(k,[]).get(k)).push(f)});
-  groups.forEach((list,dir)=>{
-    const todo=list.filter(f=>{const ds=datasetOf(f);return!ds||S.stale.has(ds.id)}),range=list.map(f=>f.path);
-    const shorts=shortNames(list.map(f=>dir?f.name.slice(dir.length):f.name));
-    if(groups.size>1||list.length>1)dl.append(h('li',{class:'grp'},[fselGroupBox(range),h('span',{class:'fname',text:dir||'./'}),h('span',{class:'fstat',text:tr('{n} files',{n:list.length})}),
-      todo.length>1?B(tr('Import all {n}',{n:todo.length}),()=>importAll(todo,dir||'./'),'primary'):todo.length?null:h('span',{class:'fstat',text:tr('all imported')})]));
-    list.forEach((f,i)=>{const ds=datasetOf(f),stale=!!ds&&S.stale.has(ds.id);
-      dl.append(h('li',{class:dir?'sub':''},[fselBox(f.path,range),h('span',{class:'fname',text:shorts[i],title:f.name}),
-        h('span',{class:'fstat'+(stale?' stale':''),text:!ds?tr('not imported'):stale?tr('changed since import'):tr('imported as "{t}", {n} rows',{t:ds.title||ds.id,n:ds.rows.length})}),
-        revealBtn(f.path),B(ds?tr('Update'):tr('Import'),()=>importDataFile(f),stale?'primary':'')]))})});
-  return dl;
-}
+const FOPEN_KEY='duetkifu-folders-open';
+let FOPEN=(()=>{try{const v=JSON.parse(localStorage.getItem(FOPEN_KEY)||'[]');return new Set(Array.isArray(v)?v.filter(x=>typeof x==='string'):[])}catch(e){return new Set()}})();
+function saveFopen(){try{localStorage.setItem(FOPEN_KEY,JSON.stringify([...FOPEN].slice(-300)))}catch(e){}}
+function folderTree(items,key,leaf,dirTools){ // items {path, name}: folders folded until opened (kept in this browser); the name filter applies
+  const q=String(S.fq||'').trim().toLowerCase(),shown=q?items.filter(it=>it.name.toLowerCase().includes(q)):items,root={dirs:new Map(),items:[]};
+  shown.forEach(it=>{const parts=it.name.split('/');let n=root;parts.slice(0,-1).forEach(d=>{if(!n.dirs.has(d))n.dirs.set(d,{dirs:new Map(),items:[]});n=n.dirs.get(d)});n.items.push(it)});
+  const all=n=>[...n.items,...[...n.dirs.values()].flatMap(all)];
+  const level=(n,path)=>{const ul=h('ul',{class:'ftree'}),range=n.items.map(it=>it.path);
+    [...n.dirs.entries()].sort((x,y)=>x[0]<y[0]?-1:1).forEach(([name,sub])=>{
+      let label=name,p=path+name+'/',d=sub; // a folder that only holds one folder is shown with it: raw/2026/
+      while(!d.items.length&&d.dirs.size===1){const[nn,ns]=[...d.dirs.entries()][0];label+='/'+nn;p+=nn+'/';d=ns}
+      const list=all(d),k=key+':'+p;
+      const det=h('details',{open:q||FOPEN.has(k)?'':null},[h('summary',{},[fselGroupBox(list.map(it=>it.path)),h('span',{class:'dname',text:label+'/'}),
+        h('span',{class:'fstat',text:tr('{n} files',{n:list.length})}),...(dirTools?dirTools(list,p):[])]),level(d,p)]);
+      det.addEventListener('toggle',()=>{if(q)return;if(det.open)FOPEN.add(k);else FOPEN.delete(k);saveFopen()});
+      ul.append(h('li',{class:'fdir'},[det]))});
+    n.items.forEach(it=>ul.append(leaf(it,range)));
+    return ul};
+  return{tree:level(root,''),count:shown.length}}
+function foldSection(key,title,count,body){ // a part of the Folder tab that folds to its title (kept in this browser)
+  const k='sec:'+key,q=String(S.fq||'').trim(),det=h('details',{class:'fsec',open:q||FOPEN.has(k)?'':null},[h('summary',{},[h('span',{class:'dname',text:title}),
+    count!=null?h('span',{class:'fstat',text:tr('{n} files',{n:count})}):null]),body]);
+  det.addEventListener('toggle',()=>{if(q)return;if(det.open)FOPEN.add(k);else FOPEN.delete(k);saveFopen()});return det}
+function fileList(files,empty,key){ // raw or derived data files that can be imported into datasets
+  const B=(t,fn,cls)=>h('button',{type:'button',class:'btn small'+(cls?' '+cls:''),text:t,onclick:fn});
+  const q=String(S.fq||'').trim();
+  const leaf=(f,range)=>{const ds=datasetOf(f),stale=!!ds&&S.stale.has(ds.id);
+    return h('li',{},[fselBox(f.path,range),h('span',{class:'fname',text:f.name.split('/').pop(),title:f.name}),
+      h('span',{class:'fstat'+(stale?' stale':''),text:!ds?tr('not imported'):stale?tr('changed since import'):tr('imported as "{t}", {n} rows',{t:ds.title||ds.id,n:ds.rows.length})}),
+      revealBtn(f.path),B(ds?tr('Update'):tr('Import'),()=>importDataFile(f),stale?'primary':'')])};
+  const T=folderTree(files,key,leaf,(list,p)=>{const todo=list.filter(f=>{const ds=datasetOf(f);return!ds||S.stale.has(ds.id)});
+    return todo.length>1?[h('button',{type:'button',class:'btn small primary',text:tr('Import all {n}',{n:todo.length}),onclick:e=>{e.preventDefault();importAll(todo,p)}})]:[]});
+  if(!T.count){const ul=h('ul',{class:'flist'});ul.append(h('li',{class:'empty',text:q?tr('No file names match.'):empty||''}));return empty||q?ul:h('span')}
+  return T.tree}
+function folderSearch(){ // a box over the file lists: typing filters the names; Enter (or the button) searches inside every file of the folder
+  const res=h('div',{class:'fsres'});
+  const input=h('input',{type:'search',value:S.fq||'',placeholder:tr('Filter file names; Enter searches inside the files'),'aria-label':tr('Search the folder'),
+    oninput:e=>{S.fq=e.target.value;S.fhits=null;refreshFileLists()},onkeydown:e=>{if(e.key==='Enter'){e.preventDefault();searchInside()}}});
+  const btn=h('button',{type:'button',class:'btn small',text:tr('Search inside files'),disabled:S.server?null:'',
+    title:S.server?tr('Searches the text of every file in the folder: reports, Word, slides, spreadsheets, the Kifu'):tr('Searching inside the files needs the Duetkifu launcher.'),onclick:()=>searchInside()});
+  const box=h('div',{class:'stsec'},[h('div',{class:'fsearch'},[input,btn]),res]);
+  showHits(res);return box}
+async function searchInside(){
+  const q=String(S.fq||'').trim();if(!q){toast(tr('Type what to look for first.'));return}
+  if(!S.server){toast(tr('Searching inside the files needs the Duetkifu launcher.'));return}
+  S.fhits={q,busy:true};showHits();
+  try{const r=await launcherFetch('/api/find?q='+encodeURIComponent(q)+'&limit=40',{headers:{'X-Duetkifu-Token':S.server.token}});
+    if(!r.ok)throw new Error(r.status+' '+await r.text());S.fhits={q,...await r.json()}}
+  catch(e){S.fhits={q,error:errText(e)||String(e)}}
+  showHits()}
+function showHits(box){box=box||$('#tab-folder .fsres');if(!box)return;const H=S.fhits;box.replaceChildren();if(!H)return;
+  if(H.busy){box.append(h('p',{class:'cap',text:tr('Searching… (the first search of a folder builds its index, which can take a minute)')}));return}
+  if(H.error){box.append(h('p',{class:'kwarn',text:tr('The search failed: {m}',{m:H.error})}));return}
+  const mark=t=>{const out=[];String(t).split(/(\[[^\]]*\])/).forEach(part=>{if(/^\[[^\]]*\]$/.test(part))out.push(h('mark',{text:part.slice(1,-1)}));else if(part)out.push(document.createTextNode(part))});return out};
+  const item=(path,loc,ex)=>h('li',{},[h('div',{class:'fhp'},[h('span',{class:'mono',text:path}),loc?h('span',{class:'loc',text:loc}):null,revealBtn(path)]),ex?h('div',{class:'ex'},mark(ex)):null]);
+  const n=H.names.length+H.hits.length;
+  box.append(h('p',{class:'cap'},[tr('"{q}": {n} found',{q:H.q,n:n+(H.more?'+':'')})+' ',h('button',{type:'button',class:'linkbtn',text:tr('Close'),onclick:()=>{S.fhits=null;showHits()}})]));
+  if(H.names.length)box.append(h('h5',{text:tr('File names')}),h('ul',{class:'fhits'},H.names.map(x=>item(x.path,x.kind,x.note))));
+  if(H.hits.length)box.append(h('h5',{text:tr('Inside the files')}),h('ul',{class:'fhits'},H.hits.map(x=>item(x.path,x.loc,x.excerpt))));
+  if(!n)box.append(h('p',{class:'cap',text:tr('Nothing found.')}))}
+function refreshFileLists(){const F=S.folderFiles||{data:[],derived:[]};
+  const a=$('#tab-folder .fl-data'),b=$('#tab-folder .fl-derived'),c=$('#tab-folder .fl-chain');if(c)c.replaceChildren(chainSection());
+  if(a)a.replaceChildren(fileList(F.data,a.dataset.empty,'data'));if(b)b.replaceChildren(fileList(F.derived||[],'','derived'))}
 function renderFolder(){
   const box=$('#tab-folder');box.replaceChildren();if(!S.folder)return;
   const F=S.folderFiles||{data:[],derived:[],habits:[],writing:[]},B=(t,fn,cls,dis)=>h('button',{type:'button',class:'btn small'+(cls?' '+cls:''),text:t,disabled:dis?'':null,onclick:fn});
@@ -9066,11 +9190,13 @@ function renderFolder(){
   if(tab==='habits'){box.append(figureHabitsSection(F,B),writingSection(F,B),personalSection(B));return}
   box.append(h('div',{class:'stsec'},[h('h4',{text:tr('Project folder')}),
     h('p',{class:'cap',text:tr('"{name}". The report is saved to {file} automatically. An agent can read and edit the same folder (see AGENTS.md).',{name:S.folder.name,file:S.folder.file})})]));
-  box.append(chainSection());
+  box.append(folderSearch());
+  box.append(h('div',{class:'fl-chain'},[chainSection()]));
+  const empty=S.folder.prefix==='../'?tr('No CSV, TSV or JSON files in this folder yet. Add some, then click Refresh.'):tr('No files yet. Put CSV, TSV or JSON files in the data/ folder, then click Refresh.');
   box.append(h('div',{class:'stsec'},[h('h4',{text:S.folder.prefix==='../'?tr('Raw data (this folder)'):tr('Raw data (data/)')}),
-    fileList(F.data,S.folder.prefix==='../'?tr('No CSV, TSV or JSON files in this folder yet. Add some, then click Refresh.'):tr('No files yet. Put CSV, TSV or JSON files in the data/ folder, then click Refresh.')),
+    h('div',{class:'fl-data','data-empty':empty},[fileList(F.data,empty,'data')]),
     h('p',{class:'cap',text:tr('Each import records the file path and a fingerprint (SHA-256), so you can see when the file changes. Excel files: save them as CSV, or ask your agent.')})]));
-  if((F.derived||[]).length)box.append(h('div',{class:'stsec'},[h('h4',{text:tr('Derived data (derived_data/)')}),fileList(F.derived,'')]));
+  if((F.derived||[]).length)box.append(h('div',{class:'stsec'},[h('h4',{text:tr('Derived data (derived_data/)')}),h('div',{class:'fl-derived'},[fileList(F.derived,'','derived')])]));
   box.append(datasetsSection(B));
   const bar=fselBar(F,B);if(bar)box.append(bar);
 }
