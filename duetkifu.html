@@ -617,6 +617,10 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #qa .qaf .sp{flex:1}#qa .qaf .ast{font-size:12px;color:var(--muted)}
 #qa .anno{margin:0}#qa .empty{color:var(--muted);font-size:12.5px;margin:4px 0}
 #qa .where{margin:2px 0}
+.savest{font-size:12px;color:var(--muted);white-space:nowrap;cursor:help}.savest.ok::before{content:"\2713  ";color:var(--ok)}
+.savest.bad{color:var(--c5);font-weight:600}
+.undobar{display:inline-flex;gap:4px}.undobar[hidden]{display:none}.undobar .btn{min-width:30px;font-size:15px;padding:2px 8px}.savest.busy{color:var(--accent)}
+.savehelp{margin:10px 0;font-size:13px}.savehelp summary{cursor:pointer;font-weight:600}.savehelp ul{margin:6px 0 0;padding-left:1.3em}
 .uinames{margin:10px 0;font-size:13px}.uinames summary{cursor:pointer;font-weight:600}
 .uinames dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0 0}.uinames dt{font-weight:600}.uinames dd{margin:0;color:var(--muted)}
 .kfigb{position:relative}
@@ -647,6 +651,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
     <button type="button" data-mode="kifu-edit" aria-pressed="false">Kifu edit</button>
   </div>
   <span class="hint" id="hint"></span>
+  <span class="savest" id="savest" hidden></span>
+  <span class="undobar" id="undobar" hidden><button type="button" class="btn small" id="undoBtn">&#x21B6;</button><button type="button" class="btn small" id="redoBtn">&#x21B7;</button></span>
   <button type="button" class="btn issues" id="issuesBtn" hidden aria-label="Problems"></button>
   <select id="lang" aria-label="Language"></select>
   <button type="button" class="btn" id="helpBtn" aria-label="Help">?</button>
@@ -1489,6 +1495,30 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Position on the Kifu diagram": "在棋譜圖上的位置",
+ "Added the move": "新增這一步",
+ "Deleted the move": "刪除這一步",
+ "Other moves follow this one, so it cannot be taken back.": "有其他步驟接在這一步後面，所以無法退回。",
+ "Nothing to undo": "沒有可以退回的改動",
+ "Nothing to redo": "沒有可以重做的改動",
+ "Undone: {what}": "已退回：{what}",
+ "Redone: {what}": "已重做：{what}",
+ "Undo: {what}": "上一步：{what}",
+ "Redo: {what}": "下一步：{what}",
+ "{a} and {b} in the folder {name}": "資料夾「{name}」裡的 {a} 和 {b}",
+ "Not saved to a folder": "未存到資料夾",
+ "This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.": "這份報告只在這個分頁裡。請開啟資料夾，或用「檔案」選單儲存報告檔，才會保留下來。",
+ "Could not save": "存檔失敗",
+ "Saving…": "儲存中…",
+ "Saved automatically {t}": "已自動儲存 {t}",
+ "Saved automatically": "已自動儲存",
+ "Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.": "每次改動都會立即寫進{where}，不需要按存檔。要留一份備份，請用「檔案」選單存快照或匯出。",
+ "the report": "報告",
+ "Saving and backups": "存檔與備份",
+ "Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.": "自動儲存：每次改動都會立即寫進開啟的資料夾裡的 report.json 和 kifu.json。頂列會顯示最後一次儲存的時間。",
+ "Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.": "快照：「檔案 > 存一份快照」會把兩個檔案加上日期，另存到 exports/，之後可以拿回來用。",
+ "Export: File > Save report file, Export read-only copy or Export the Kifu, to send or keep elsewhere.": "匯出：「檔案」選單裡的儲存報告檔、匯出唯讀報告、匯出棋譜，可以寄給別人或另外保存。",
+ "Undo: the arrow in the top bar takes back your last change, one at a time.": "上一步：頂列的箭頭會一步一步退回你最近的改動。",
  "Full screen": "全螢幕",
  "Exit full screen": "離開全螢幕",
  "What does this mean?": "這是什麼意思？",
@@ -2455,6 +2485,30 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Position on the Kifu diagram": "在棋谱图上的位置",
+ "Added the move": "新增这一步",
+ "Deleted the move": "删除这一步",
+ "Other moves follow this one, so it cannot be taken back.": "有其他步骤接在这一步后面，所以无法退回。",
+ "Nothing to undo": "没有可以退回的改动",
+ "Nothing to redo": "没有可以重做的改动",
+ "Undone: {what}": "已退回：{what}",
+ "Redone: {what}": "已重做：{what}",
+ "Undo: {what}": "上一步：{what}",
+ "Redo: {what}": "下一步：{what}",
+ "{a} and {b} in the folder {name}": "文件夹“{name}”里的 {a} 和 {b}",
+ "Not saved to a folder": "未存到文件夹",
+ "This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.": "这份报告只在这个标签页里。请打开文件夹，或用“文件”菜单保存报告文件，才会保留下来。",
+ "Could not save": "保存失败",
+ "Saving…": "保存中…",
+ "Saved automatically {t}": "已自动保存 {t}",
+ "Saved automatically": "已自动保存",
+ "Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.": "每次改动都会立即写进{where}，不需要按保存。要留一份备份，请用“文件”菜单存快照或导出。",
+ "the report": "报告",
+ "Saving and backups": "保存与备份",
+ "Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.": "自动保存：每次改动都会立即写进打开的文件夹里的 report.json 和 kifu.json。顶栏会显示最后一次保存的时间。",
+ "Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.": "快照：“文件 > 存一份快照”会把两个文件加上日期，另存到 exports/，之后可以拿回来用。",
+ "Export: File > Save report file, Export read-only copy or Export the Kifu, to send or keep elsewhere.": "导出：“文件”菜单里的保存报告文件、导出只读报告、导出棋谱，可以发给别人或另外保存。",
+ "Undo: the arrow in the top bar takes back your last change, one at a time.": "上一步：顶栏的箭头会一步一步退回你最近的改动。",
  "Full screen": "全屏",
  "Exit full screen": "退出全屏",
  "What does this mean?": "这是什么意思？",
@@ -3421,6 +3475,30 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Position on the Kifu diagram": "棋譜図上の位置",
+ "Added the move": "手を追加",
+ "Deleted the move": "手を削除",
+ "Other moves follow this one, so it cannot be taken back.": "この手に続く手があるため、戻せません。",
+ "Nothing to undo": "戻せる変更はありません",
+ "Nothing to redo": "やり直せる変更はありません",
+ "Undone: {what}": "元に戻しました：{what}",
+ "Redone: {what}": "やり直しました：{what}",
+ "Undo: {what}": "元に戻す：{what}",
+ "Redo: {what}": "やり直す：{what}",
+ "{a} and {b} in the folder {name}": "フォルダ「{name}」の {a} と {b}",
+ "Not saved to a folder": "フォルダに未保存",
+ "This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.": "このレポートはこのタブの中だけにあります。残すにはフォルダを開くか、「ファイル」メニューでレポートファイルを保存してください。",
+ "Could not save": "保存できませんでした",
+ "Saving…": "保存中…",
+ "Saved automatically {t}": "自動保存済み {t}",
+ "Saved automatically": "自動保存済み",
+ "Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.": "変更はすべて、その場で{where}に書き込まれます。保存ボタンはありません。控えを残すには「ファイル」メニューでスナップショットか書き出しを。",
+ "the report": "レポート",
+ "Saving and backups": "保存とバックアップ",
+ "Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.": "自動保存：変更はすべて、開いたフォルダの report.json と kifu.json にその場で書き込まれます。上部バーに最後の保存時刻が出ます。",
+ "Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.": "スナップショット：「ファイル > スナップショットを保存」で、両方のファイルを日付つきで exports/ に残します。",
+ "Export: File > Save report file, Export read-only copy or Export the Kifu, to send or keep elsewhere.": "書き出し：「ファイル」メニューのレポートファイル保存、閲覧専用コピー、棋譜の書き出しで、人に送ったり別に保管したりできます。",
+ "Undo: the arrow in the top bar takes back your last change, one at a time.": "元に戻す：上部バーの矢印で、直前の自分の変更を一つずつ戻せます。",
  "Full screen": "全画面",
  "Exit full screen": "全画面を終了",
  "What does this mean?": "これはどういう意味？",
@@ -4387,6 +4465,30 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Position on the Kifu diagram": "기보도 위의 위치",
+ "Added the move": "수 추가",
+ "Deleted the move": "수 삭제",
+ "Other moves follow this one, so it cannot be taken back.": "이 수 뒤에 이어지는 수가 있어 되돌릴 수 없습니다.",
+ "Nothing to undo": "되돌릴 변경이 없습니다",
+ "Nothing to redo": "다시 할 변경이 없습니다",
+ "Undone: {what}": "되돌림: {what}",
+ "Redone: {what}": "다시 함: {what}",
+ "Undo: {what}": "되돌리기: {what}",
+ "Redo: {what}": "다시 하기: {what}",
+ "{a} and {b} in the folder {name}": "폴더 \"{name}\"의 {a}와 {b}",
+ "Not saved to a folder": "폴더에 저장 안 됨",
+ "This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.": "이 보고서는 이 탭에만 있습니다. 보관하려면 폴더를 열거나 \"파일\" 메뉴에서 보고서 파일을 저장하세요.",
+ "Could not save": "저장 실패",
+ "Saving…": "저장 중…",
+ "Saved automatically {t}": "자동 저장됨 {t}",
+ "Saved automatically": "자동 저장됨",
+ "Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.": "모든 변경은 즉시 {where}에 기록됩니다. 저장 버튼은 없습니다. 사본을 남기려면 \"파일\" 메뉴에서 스냅샷이나 내보내기를 하세요.",
+ "the report": "보고서",
+ "Saving and backups": "저장과 백업",
+ "Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.": "자동 저장: 모든 변경은 열린 폴더의 report.json과 kifu.json에 즉시 기록됩니다. 상단 바에 마지막 저장 시각이 표시됩니다.",
+ "Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.": "스냅샷: \"파일 > 스냅샷 저장\"은 두 파일을 날짜를 붙여 exports/에 보관합니다.",
+ "Export: File > Save report file, Export read-only copy or Export the Kifu, to send or keep elsewhere.": "내보내기: \"파일\" 메뉴의 보고서 파일 저장, 읽기 전용 사본, 기보 내보내기로 다른 사람에게 보내거나 따로 보관합니다.",
+ "Undo: the arrow in the top bar takes back your last change, one at a time.": "되돌리기: 상단 바의 화살표로 내 최근 변경을 하나씩 되돌립니다.",
  "Full screen": "전체 화면",
  "Exit full screen": "전체 화면 종료",
  "What does this mean?": "이게 무슨 뜻인가요?",
@@ -5353,6 +5455,30 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Position on the Kifu diagram": "Posición en el diagrama",
+ "Added the move": "Jugada añadida",
+ "Deleted the move": "Jugada eliminada",
+ "Other moves follow this one, so it cannot be taken back.": "Otras jugadas siguen a esta, así que no se puede deshacer.",
+ "Nothing to undo": "Nada que deshacer",
+ "Nothing to redo": "Nada que rehacer",
+ "Undone: {what}": "Deshecho: {what}",
+ "Redone: {what}": "Rehecho: {what}",
+ "Undo: {what}": "Deshacer: {what}",
+ "Redo: {what}": "Rehacer: {what}",
+ "{a} and {b} in the folder {name}": "{a} y {b} en la carpeta {name}",
+ "Not saved to a folder": "No guardado en una carpeta",
+ "This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.": "Este informe solo está en esta pestaña. Abre una carpeta o guarda el archivo del informe (menú Archivo) para conservarlo.",
+ "Could not save": "No se pudo guardar",
+ "Saving…": "Guardando…",
+ "Saved automatically {t}": "Guardado automáticamente {t}",
+ "Saved automatically": "Guardado automáticamente",
+ "Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.": "Cada cambio se escribe al instante en {where}. No hay botón Guardar; haz una instantánea o exporta una copia desde el menú Archivo.",
+ "the report": "el informe",
+ "Saving and backups": "Guardado y copias",
+ "Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.": "Guardado automático: cada cambio se escribe al instante en report.json y kifu.json de la carpeta abierta. La barra superior muestra cuándo se guardó.",
+ "Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.": "Instantánea: Archivo > Guardar una instantánea deja una copia fechada de ambos archivos en exports/.",
+ "Export: File > Save report file, Export read-only copy or Export the Kifu, to send or keep elsewhere.": "Exportar: en el menú Archivo, Guardar archivo de informe, Exportar copia de solo lectura o Exportar el kifu, para enviar o guardar aparte.",
+ "Undo: the arrow in the top bar takes back your last change, one at a time.": "Deshacer: la flecha de la barra superior deshace tu último cambio, uno a uno.",
  "Full screen": "Pantalla completa",
  "Exit full screen": "Salir de pantalla completa",
  "What does this mean?": "¿Qué significa esto?",
@@ -6441,11 +6567,13 @@ function kifuWrite(apply){ // read kifu.json fresh, apply one change, write it b
     const m=fh.mtime?await fh.mtime():(await fh.getFile()).lastModified;
     if(S.kifuWatch)S.kifuWatch.seen(m);
     S.kifu={data};if(S.mode==='tree')render()})
-  .catch(e=>{logIssue('error',tr('Could not save {file}.',{file:KIFU_FILE}),e&&e.msg?e.msg:errText(e))});
-  return kifuQueue.then(()=>result)}
-function kifuChange(d,move,field,before,after){const id=uid('k-');
+  .catch(e=>{logIssue('error',tr('Could not save {file}.',{file:KIFU_FILE}),e&&e.msg?e.msg:errText(e));throw e});
+  const done=saving(kifuQueue);kifuQueue=done.catch(()=>{});
+  return done.then(()=>result,()=>result)}
+function kifuChange(d,move,field,before,after,extra){const id=uid('k-');
   if(!d.changes||typeof d.changes!=='object')d.changes={};
-  d.changes[id]={id,by:'user',at:now(),move,field,before:before===undefined?null:clone(before),after:after===undefined?null:clone(after)}}
+  if(!extra)UNDO.redo=[]; // a new change of yours: nothing to redo any more
+  d.changes[id]={id,by:'user',at:now(),move,field,before:before===undefined?null:clone(before),after:after===undefined?null:clone(after),...(extra||{})}}
 function setMoveField(o,path,v){ // an empty value removes the field, and objects left empty (result, trigger, ...) go with it
   const ks=path.split('.'),last=ks.pop(),up=[];let a=o;
   for(const k of ks){if(!a[k]||typeof a[k]!=='object')a[k]={};up.push([a,k]);a=a[k]}
@@ -6962,8 +7090,21 @@ const strip=b=>{if(!b)return null;const{prev,...rest}=b;return rest};
 function shortTime(iso){if(!iso)return'';const d=new Date(iso);const p=n=>String(n).padStart(2,'0');return`${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`}
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
 function writeErr(e){const c=e&&e.code;return c==='invalid_argument'?tr('No write permission. This account may be view-only.'):c==='quota_exceeded'?tr('Storage limit reached.'):c==='resource_exhausted'?tr('Too many requests. Please try again shortly.'):tr('Save failed. Please try again.')}
-async function put(path,data){try{await db.doc(path).set(data)}catch(e){fail(writeErr(e),e)}}
-async function drop(path){try{await db.doc(path).delete()}catch(e){fail(writeErr(e),e)}}
+async function put(path,data){return saving(db.doc(path).set(data)).catch(e=>fail(writeErr(e),e))}
+async function drop(path){return saving(db.doc(path).delete()).catch(e=>fail(writeErr(e),e))}
+/* Every change is written to the folder at once; the top bar says so: saving, saved at a time, or a failure */
+const SAVE={busy:0,at:null,err:null};
+function saving(p){SAVE.busy++;showSave();
+  return Promise.resolve(p).then(v=>{SAVE.at=new Date();SAVE.err=null;return v},e=>{SAVE.err=errText(e)||String(e);throw e}).finally(()=>{SAVE.busy--;showSave()})}
+function showSave(){const n=$('#savest');if(!n)return;
+  const where=S.folder?tr('{a} and {b} in the folder {name}',{a:REPORT_FILE,b:KIFU_FILE,name:S.folder.name}):'';
+  if(!S.meta||S.readonly){n.hidden=true;return}n.hidden=false;
+  if(!S.folder&&!S.cloud){n.className='savest bad';n.textContent=tr('Not saved to a folder');
+    n.title=tr('This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.');return}
+  if(SAVE.err){n.className='savest bad';n.textContent=tr('Could not save');n.title=SAVE.err;return}
+  if(SAVE.busy){n.className='savest busy';n.textContent=tr('Saving…');n.title='';return}
+  n.className='savest ok';n.textContent=SAVE.at?tr('Saved automatically {t}',{t:SAVE.at.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}):tr('Saved automatically');
+  n.title=tr('Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.',{where:where||tr('the report')})}
 
 /* ---------- Change log: field definitions ---------- */
 const FIELDS=['title','text','caption','breakBefore','parent','status','datasets',
@@ -7025,14 +7166,16 @@ const lastRoundAt=()=>S.rounds.reduce((m,r)=>r.at>m?r.at:m,'');
 const currentChanges=()=>{const t=lastRoundAt();return S.changes.filter(c=>c.at>t)};
 function roundOf(at){const rs=[...S.rounds].sort((a,b)=>a.at<b.at?-1:1);const r=rs.find(r=>at<=r.at);return r?r.id:'current'}
 async function recordChange(e){
+  if(UNDO.undoing)e={...e,undo:true}; // a record made by Undo is not undone again
+  const fresh=()=>{if(!UNDO.busy)UNDO.redo=[]}; // a real new change of yours clears Redo
   const blk=e.blockId&&S.blocks.get(e.blockId);const name=e.name||(blk?blockName(e.blockId):'');
   const ex=currentChanges().find(c=>c.by==='user'&&c.blockId===e.blockId&&c.field===e.field);
   if(ex){const m={...ex,after:clone(e.after),at:now(),name:name||ex.name,revertible:ex.revertible!==false&&e.revertible!==false};
     if(same(m.before,m.after)&&m.field!=='image.src'){S.changes=S.changes.filter(c=>c.id!==ex.id);renderPanel();await drop('changes/'+ex.id)}
-    else{S.changes=S.changes.map(c=>c.id===ex.id?m:c);renderPanel();await put('changes/'+ex.id,m)}
+    else{fresh();S.changes=S.changes.map(c=>c.id===ex.id?m:c);renderPanel();await put('changes/'+ex.id,m)}
     return}
   if(same(e.before,e.after)&&e.field!=='image.src')return;
-  const c={id:uid('c'),by:'user',at:now(),revertible:e.revertible!==false,...e,name};
+  fresh();const c={id:uid('c'),by:'user',at:now(),revertible:e.revertible!==false,...e,name};
   S.changes=[...S.changes,c];renderPanel();await put('changes/'+c.id,c);
 }
 async function finishRound(){
@@ -7846,7 +7989,7 @@ function render(){
   S.deferred=false;S.chainMemo=null;S.kifuMemo=null;
   const focusF=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fid;
   paginate();
-  $('#sideGrip').title=tr('Drag to resize; double-click to reset');
+  $('#sideGrip').title=tr('Drag to resize; double-click to reset');showSave();showUndo();
   $('#doc-title').textContent=S.meta.title||'Duetkifu';document.title=(S.meta.title||'Duetkifu')+tr(' | Duetkifu');
   $('#view').hidden=S.mode!=='view';$('#edit').hidden=S.mode!=='edit';$('#tree').hidden=S.mode!=='tree';
   if(S.mode==='view')renderView();else if(S.mode==='tree')renderTree();else renderEdit();
@@ -8980,7 +9123,7 @@ function openHelp(){
       step(tr('Keep track.'),tr('The Changes tab lists every change, by you or by the agent. Click "Finish this round" when you are done.')),
       step(tr('Hand it to your agent.'),S.cloud?tr('Go back to Claude and ask it to read the annotations and revise the report.')
         :tr('Open a project folder. Your agent (Claude Code, Codex, Gemini CLI, ...) edits report.json in the same folder, following AGENTS.md.'))]),
-    uiNames(),
+    saveHelp(),uiNames(),
     h('p',{},[link('/blob/main/docs/tutorial.md',tr('Tutorial with screenshots')),' · ',link('/blob/main/AGENTS.md',tr('AGENTS.md (for agents)'))]),
     h('div',{class:'crow'},[h('span',{class:'sp'}),h('button',{type:'button',class:'btn small primary',text:tr('Got it'),onclick:closeModal})])])]);
 }
@@ -8997,12 +9140,80 @@ const UI_NAMES=[
   ['Main path','Kifu: the moves from the question to the conclusion.'],
   ['Side panel','Edit modes: comments, changes, style, folder.'],
   ['Questions panel','View modes: your questions to the agent and its answers.']];
+/* ---------- Undo and redo: your own changes, newest first ----------
+   Report: the changes of the current round (one record per block and field, as the Changes tab shows them); undoing one
+   puts the field back, which removes its record. Kifu: every change since the last round; an undo is recorded too
+   (undoOf), and a redo (redoOf), so the record keeps everything. The agent's changes are not undone here (Changes tab). */
+const UNDO={redo:[],busy:false,undoing:false};
+const KIFU_FIELD_NAMES={title:'Title','result.text':'Result, in words',why:'Why',note:'What it means',population:'Population',reason:'Why it ended',status:'Status',
+  outcome:'Result',cause:'Cause',causeConfirmed:'Cause',parent:'Follows',links:'Links',mark:'Mark',milestone:'Milestone',kind:'Kind',pos:'Position on the Kifu diagram',
+  add:'Added the move',delete:'Deleted the move'};
+function kifuChangesList(){return Object.values((S.kifu&&S.kifu.data&&S.kifu.data.changes)||{}).filter(c=>c&&typeof c==='object')}
+function undoCandidates(){
+  const rep=currentChanges().filter(c=>c.by==='user'&&c.revertible!==false&&!c.undo).map(c=>({kind:'report',c}));
+  const since=lastRoundAt(),all=kifuChangesList(),state=new Map();
+  all.filter(c=>c.undoOf||c.redoOf).sort((a,b)=>(a.at||'')<(b.at||'')?-1:1).forEach(c=>state.set(c.undoOf||c.redoOf,c.undoOf?'undone':'redone'));
+  const kf=all.filter(c=>c.by==='user'&&!c.undoOf&&!c.redoOf&&(c.at||'')>since&&state.get(c.id)!=='undone').map(c=>({kind:'kifu',c}));
+  return[...rep,...kf].sort((a,b)=>(b.c.at||'')<(a.c.at||'')?-1:1)}
+function undoLabel(x){const c=x.c;
+  if(x.kind==='kifu'){const m=(S.kifu.data.moves||{})[c.move]||(c.before&&typeof c.before==='object'?c.before:null);
+    const f=c.field.startsWith('evidence.')?'Data chain':c.field.startsWith('source.')?'Source':c.field.startsWith('kifu.meta.')?'Research question':KIFU_FIELD_NAMES[c.field.split('.')[0]==='result'?c.field:c.field.split('.')[0]];
+    return(m?(m.title||c.move):c.move||'')+' · '+(f?tr(f):c.field)}
+  return tr('{a}, {b}',{a:c.name||blockName(c.blockId),b:fieldLabel(c.field)})}
+function kifuPut(d,c,mode,extra,snap){ // undo or redo kifu change c inside d; false when it cannot be done
+  const remove=()=>{const m=d.moves[c.move];if(!m)return false;
+    if(Object.values(d.moves).some(o=>o&&o!==m&&(o.parent===c.move||(Array.isArray(o.links)&&o.links.some(l=>l&&l.to===c.move))))){toast(tr('Other moves follow this one, so it cannot be taken back.'));return false}
+    delete d.moves[c.move];kifuChange(d,c.move,'delete',m,null,extra);return true};
+  const restore=m=>{if(!m||typeof m!=='object'||d.moves[c.move])return false;d.moves[c.move]=clone(m);kifuChange(d,c.move,'add',null,m.title||c.move,extra);return true};
+  if(c.field==='add')return mode==='undo'?remove():restore(snap);
+  if(c.field==='delete')return mode==='undo'?restore(c.before):remove();
+  const val=clone(mode==='undo'?c.before:c.after);
+  if(c.field.startsWith('kifu.meta.')){const f=c.field.slice(10);if(!d.kifu||typeof d.kifu!=='object')d.kifu={};if(!d.kifu.meta||typeof d.kifu.meta!=='object')d.kifu.meta={};
+    const cur=d.kifu.meta[f];if(val==null||val==='')delete d.kifu.meta[f];else d.kifu.meta[f]=val;kifuChange(d,c.move,c.field,cur,val,extra);return true}
+  const m=d.moves[c.move];if(!m)return false;const cur=getPath(m,c.field);setMoveField(m,c.field,val);kifuChange(d,c.move,c.field,cur,val,extra);return true}
+async function undoLast(){
+  if(!editingMode()||UNDO.busy)return;const x=undoCandidates()[0];if(!x){toast(tr('Nothing to undo'));return}
+  UNDO.busy=UNDO.undoing=true;
+  try{if(x.kind==='report'){if(x.c.field==='add'){x.snap=clone(S.blocks.get(x.c.blockId)||null);x.index=orderedBlocks().findIndex(b=>b.id===x.c.blockId)} // kept here for Redo
+      await revertChange(x.c)}
+    else{const c=x.c;x.snap=c.field==='add'?clone((S.kifu.data.moves||{})[c.move]||null):null; // a move taken back is kept here for Redo
+      const ok=await kifuWrite(d=>kifuPut(d,c,'undo',{undoOf:c.id}));if(!ok)return}
+    UNDO.redo.push(x);toast(tr('Undone: {what}',{what:undoLabel(x)}))}
+  finally{UNDO.busy=UNDO.undoing=false;render()}}
+async function redoLast(){
+  if(!editingMode()||UNDO.busy)return;const x=UNDO.redo.pop();if(!x){toast(tr('Nothing to redo'));return}
+  UNDO.busy=true;
+  try{const c=x.c;
+    if(x.kind==='report'){
+      if(c.field==='add'){const b=x.snap;if(b&&!S.blocks.has(b.id)){S.blocks.set(b.id,b);const o=orderedBlocks().map(y=>y.id).filter(y=>y!==b.id);
+          o.splice(clamp(x.index<0?o.length:x.index,0,o.length),0,b.id);S.meta={...S.meta,order:o};render();
+          await put('blocks/'+b.id,b);await put('report/meta',S.meta);await recordChange({blockId:b.id,field:'add',before:null,after:typeName(b.type),name:c.name})}}
+      else if(c.field==='delete')await removeBlock(c.blockId);
+      else if(c.field==='order')await saveOrder(c.after);
+      else if(c.field.startsWith('style.'))await saveStyle(setPath(clone(styleNow()),c.field.slice(6),clone(c.after)));
+      else{const b=S.blocks.get(c.blockId);if(b)await saveBlock(setPath(clone(b),c.field,clone(c.after)))}}
+    else if(!await kifuWrite(d=>kifuPut(d,c,'redo',{redoOf:c.id},x.snap))){UNDO.redo.push(x);return}
+    toast(tr('Redone: {what}',{what:undoLabel(x)}))}
+  finally{UNDO.busy=false;render()}}
+function showUndo(){const bar=$('#undobar');if(!bar)return;const on=!!S.meta&&!S.readonly&&editingMode();bar.hidden=!on;if(!on)return;
+  const x=undoCandidates()[0],y=UNDO.redo[UNDO.redo.length-1];
+  $('#undoBtn').disabled=!x;$('#undoBtn').title=x?tr('Undo: {what}',{what:undoLabel(x)})+' (Ctrl+Z)':tr('Nothing to undo');
+  $('#redoBtn').disabled=!y;$('#redoBtn').title=y?tr('Redo: {what}',{what:undoLabel(y)})+' (Ctrl+Y)':tr('Nothing to redo')}
+$('#undoBtn').addEventListener('click',undoLast);$('#redoBtn').addEventListener('click',redoLast);
+document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)return;const a=document.activeElement;
+  if(a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable))return; // in a text box the browser undoes your typing
+  const k=e.key.toLowerCase();if(k==='z'&&!e.shiftKey){e.preventDefault();undoLast()}else if(k==='y'||(k==='z'&&e.shiftKey)){e.preventDefault();redoLast()}});
+function saveHelp(){return h('details',{class:'savehelp'},[h('summary',{text:tr('Saving and backups')}),h('ul',{},[
+  h('li',{text:tr('Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.')}),
+  h('li',{text:tr('Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.')}),
+  h('li',{text:tr('Export: File > Save report file, Export read-only copy or Export the Kifu, to send or keep elsewhere.')}),
+  h('li',{text:tr('Undo: the arrow in the top bar takes back your last change, one at a time.')})])])}
 function uiNames(){return h('details',{class:'uinames'},[h('summary',{text:tr('Names of the parts of the page')}),
   h('dl',{},UI_NAMES.flatMap(([n,d])=>[h('dt',{text:trc('ui',n)}),h('dd',{text:tr(d)})]))])}
 function onceOnly(key,fn){try{if(localStorage.getItem(key))return;localStorage.setItem(key,'1')}catch(e){return}fn()}
 function helpModal(title,intro,steps,foot,short){ // numbered steps: [bold start, the rest]; short: without the names of the parts
   openModal(title,[h('div',{class:'langbox'},[intro?h('p',{text:intro}):null,
-    h('ol',{},steps.map(([t,d])=>h('li',{},[h('strong',{text:t}),' '+d]))),foot||null,short?null:uiNames(),
+    h('ol',{},steps.map(([t,d])=>h('li',{},[h('strong',{text:t}),' '+d]))),foot||null,short?null:saveHelp(),short?null:uiNames(),
     h('div',{class:'crow'},[h('span',{class:'sp'}),h('button',{type:'button',class:'btn small primary',text:tr('Got it'),onclick:closeModal})])])])}
 function kifuViewHelp(){
   helpModal(tr('Reading the Kifu'),tr('The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.'),[
