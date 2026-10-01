@@ -628,7 +628,13 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #qa .where{margin:2px 0}
 .savest{font-size:12px;color:var(--muted);white-space:nowrap;cursor:help}.savest.ok::before{content:"\2713  ";color:var(--ok)}
 .savest.bad{color:var(--c5);font-weight:600}
-.undobar{display:inline-flex;gap:4px}.undobar[hidden]{display:none}.undobar .btn{min-width:30px;font-size:15px;padding:2px 8px}.savest.busy{color:var(--accent)}
+.undobar{display:inline-flex;gap:4px}
+#filemenu{position:fixed;z-index:75;min-width:230px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.16);padding:4px;font-size:13px}
+#filemenu[hidden]{display:none}
+#filemenu button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);font:inherit;padding:6px 10px;border-radius:6px;cursor:pointer}
+#filemenu button:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 10%,transparent)}#filemenu button:disabled{color:var(--muted);cursor:default}
+#filemenu button.danger{color:var(--c5)}#filemenu hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
+#filemenu .fmn{float:right;color:var(--muted);margin-left:12px}.undobar[hidden]{display:none}.undobar .btn{min-width:30px;font-size:15px;padding:2px 8px}.savest.busy{color:var(--accent)}
 .savehelp{margin:10px 0;font-size:13px}.savehelp summary{cursor:pointer;font-weight:600}.savehelp ul{margin:6px 0 0;padding-left:1.3em}
 .uinames{margin:10px 0;font-size:13px}.uinames summary{cursor:pointer;font-weight:600}
 .uinames dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:8px 0 0}.uinames dt{font-weight:600}.uinames dd{margin:0;color:var(--muted)}
@@ -660,6 +666,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
     <button type="button" data-mode="kifu-edit" aria-pressed="false">Kifu edit</button>
   </div>
   <span class="hint" id="hint"></span>
+  <button type="button" class="btn small" id="fileBtn" aria-haspopup="menu" aria-expanded="false">File</button>
   <span class="savest" id="savest" hidden></span>
   <span class="undobar" id="undobar" hidden><button type="button" class="btn small" id="undoBtn">&#x21B6;</button><button type="button" class="btn small" id="redoBtn">&#x21B7;</button></span>
   <button type="button" class="btn issues" id="issuesBtn" hidden aria-label="Problems"></button>
@@ -737,6 +744,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
 <input type="file" id="reportfile" accept=".json,application/json" hidden>
 <div id="tip" hidden></div>
 <div id="qc" hidden role="dialog" aria-label="Comment"></div>
+<div id="filemenu" hidden role="menu"></div>
 <button type="button" class="btn small primary" id="asksel" hidden>Ask the agent</button>
 <aside id="qa" hidden aria-label="Questions"></aside>
 <div id="toast" hidden></div>
@@ -1505,6 +1513,23 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Open a project folder first.": "請先開啟專案資料夾。",
+ "Snapshot saved in {where}": "快照已存到 {where}",
+ "Could not save the snapshot.": "快照存檔失敗。",
+ "There is no Kifu to export yet.": "還沒有棋譜可以匯出。",
+ "There are no comments.": "沒有任何註記。",
+ "There are no done comments.": "沒有已處理的註記。",
+ "Clear all comments": "清除所有註記",
+ "Clear the done comments": "清除已處理的註記",
+ "{n} comments will be removed, the agent's answers with them.": "將刪除 {n} 則註記，連同 agent 的回答。",
+ "{n} of them are not done yet.": "其中 {n} 則還沒處理。",
+ "A snapshot of report.json and kifu.json is saved in exports/snapshots/ first, so they can be found again.": "會先把 report.json 和 kifu.json 存一份快照到 exports/snapshots/，之後還找得回來。",
+ "This report is not in a folder, so no snapshot can be kept: save the report file first if you may need them.": "這份報告不在資料夾裡，無法存快照；如果之後可能還需要，請先儲存報告檔。",
+ "Remove {n} comments": "刪除 {n} 則註記",
+ "{n} comments removed.": "已刪除 {n} 則註記。",
+ "Take a snapshot": "存一份快照",
+ "A dated copy of report.json and kifu.json in exports/snapshots/": "把 report.json 和 kifu.json 加上日期，另存到 exports/snapshots/",
+ "Export the Kifu": "匯出棋譜",
  "Pin on the right": "固定在右側",
  "Float": "改為浮動",
  "Position on the Kifu diagram": "在棋譜圖上的位置",
@@ -2497,6 +2522,23 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Open a project folder first.": "请先打开项目文件夹。",
+ "Snapshot saved in {where}": "快照已存到 {where}",
+ "Could not save the snapshot.": "快照保存失败。",
+ "There is no Kifu to export yet.": "还没有棋谱可以导出。",
+ "There are no comments.": "没有任何注记。",
+ "There are no done comments.": "没有已处理的注记。",
+ "Clear all comments": "清除所有注记",
+ "Clear the done comments": "清除已处理的注记",
+ "{n} comments will be removed, the agent's answers with them.": "将删除 {n} 条注记，连同 agent 的回答。",
+ "{n} of them are not done yet.": "其中 {n} 条还没处理。",
+ "A snapshot of report.json and kifu.json is saved in exports/snapshots/ first, so they can be found again.": "会先把 report.json 和 kifu.json 存一份快照到 exports/snapshots/，之后还找得回来。",
+ "This report is not in a folder, so no snapshot can be kept: save the report file first if you may need them.": "这份报告不在文件夹里，无法存快照；如果之后可能还需要，请先保存报告文件。",
+ "Remove {n} comments": "删除 {n} 条注记",
+ "{n} comments removed.": "已删除 {n} 条注记。",
+ "Take a snapshot": "存一份快照",
+ "A dated copy of report.json and kifu.json in exports/snapshots/": "把 report.json 和 kifu.json 加上日期，另存到 exports/snapshots/",
+ "Export the Kifu": "导出棋谱",
  "Pin on the right": "固定在右侧",
  "Float": "改为浮动",
  "Position on the Kifu diagram": "在棋谱图上的位置",
@@ -3489,6 +3531,23 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Open a project folder first.": "先にプロジェクトフォルダを開いてください。",
+ "Snapshot saved in {where}": "スナップショットを {where} に保存しました",
+ "Could not save the snapshot.": "スナップショットを保存できませんでした。",
+ "There is no Kifu to export yet.": "書き出せる棋譜はまだありません。",
+ "There are no comments.": "コメントはありません。",
+ "There are no done comments.": "対応済みのコメントはありません。",
+ "Clear all comments": "すべてのコメントを消去",
+ "Clear the done comments": "対応済みのコメントを消去",
+ "{n} comments will be removed, the agent's answers with them.": "コメント {n} 件を、agent の回答ごと削除します。",
+ "{n} of them are not done yet.": "そのうち {n} 件はまだ対応していません。",
+ "A snapshot of report.json and kifu.json is saved in exports/snapshots/ first, so they can be found again.": "先に report.json と kifu.json のスナップショットを exports/snapshots/ に保存するので、後で取り戻せます。",
+ "This report is not in a folder, so no snapshot can be kept: save the report file first if you may need them.": "このレポートはフォルダにないため、スナップショットを残せません。後で必要になりそうなら、先にレポートファイルを保存してください。",
+ "Remove {n} comments": "{n} 件を削除",
+ "{n} comments removed.": "{n} 件のコメントを削除しました。",
+ "Take a snapshot": "スナップショットを保存",
+ "A dated copy of report.json and kifu.json in exports/snapshots/": "report.json と kifu.json を日付つきで exports/snapshots/ に残します",
+ "Export the Kifu": "棋譜を書き出す",
  "Pin on the right": "右側に固定",
  "Float": "浮かせる",
  "Position on the Kifu diagram": "棋譜図上の位置",
@@ -4481,6 +4540,23 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Open a project folder first.": "먼저 프로젝트 폴더를 여세요.",
+ "Snapshot saved in {where}": "스냅샷을 {where}에 저장했습니다",
+ "Could not save the snapshot.": "스냅샷을 저장하지 못했습니다.",
+ "There is no Kifu to export yet.": "아직 내보낼 기보가 없습니다.",
+ "There are no comments.": "댓글이 없습니다.",
+ "There are no done comments.": "처리된 댓글이 없습니다.",
+ "Clear all comments": "모든 댓글 지우기",
+ "Clear the done comments": "처리된 댓글 지우기",
+ "{n} comments will be removed, the agent's answers with them.": "댓글 {n}개를 agent의 답과 함께 삭제합니다.",
+ "{n} of them are not done yet.": "그중 {n}개는 아직 처리되지 않았습니다.",
+ "A snapshot of report.json and kifu.json is saved in exports/snapshots/ first, so they can be found again.": "먼저 report.json과 kifu.json의 스냅샷을 exports/snapshots/에 저장하므로 나중에 되찾을 수 있습니다.",
+ "This report is not in a folder, so no snapshot can be kept: save the report file first if you may need them.": "이 보고서는 폴더에 없어서 스냅샷을 남길 수 없습니다. 나중에 필요할 수 있으면 먼저 보고서 파일을 저장하세요.",
+ "Remove {n} comments": "{n}개 삭제",
+ "{n} comments removed.": "댓글 {n}개를 삭제했습니다.",
+ "Take a snapshot": "스냅샷 저장",
+ "A dated copy of report.json and kifu.json in exports/snapshots/": "report.json과 kifu.json을 날짜를 붙여 exports/snapshots/에 보관",
+ "Export the Kifu": "기보 내보내기",
  "Pin on the right": "오른쪽에 고정",
  "Float": "떠 있게",
  "Position on the Kifu diagram": "기보도 위의 위치",
@@ -5473,6 +5549,23 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Open a project folder first.": "Abre primero una carpeta de proyecto.",
+ "Snapshot saved in {where}": "Instantánea guardada en {where}",
+ "Could not save the snapshot.": "No se pudo guardar la instantánea.",
+ "There is no Kifu to export yet.": "Todavía no hay kifu que exportar.",
+ "There are no comments.": "No hay comentarios.",
+ "There are no done comments.": "No hay comentarios resueltos.",
+ "Clear all comments": "Borrar todos los comentarios",
+ "Clear the done comments": "Borrar los comentarios resueltos",
+ "{n} comments will be removed, the agent's answers with them.": "Se borrarán {n} comentarios, con las respuestas del agente.",
+ "{n} of them are not done yet.": "{n} de ellos aún no están resueltos.",
+ "A snapshot of report.json and kifu.json is saved in exports/snapshots/ first, so they can be found again.": "Antes se guarda una instantánea de report.json y kifu.json en exports/snapshots/, para poder recuperarlos.",
+ "This report is not in a folder, so no snapshot can be kept: save the report file first if you may need them.": "Este informe no está en una carpeta, así que no se puede guardar una instantánea: guarda antes el archivo del informe si podrías necesitarlos.",
+ "Remove {n} comments": "Borrar {n} comentarios",
+ "{n} comments removed.": "{n} comentarios borrados.",
+ "Take a snapshot": "Guardar una instantánea",
+ "A dated copy of report.json and kifu.json in exports/snapshots/": "Una copia fechada de report.json y kifu.json en exports/snapshots/",
+ "Export the Kifu": "Exportar el kifu",
  "Pin on the right": "Fijar a la derecha",
  "Float": "Flotante",
  "Position on the Kifu diagram": "Posición en el diagrama",
@@ -7121,8 +7214,9 @@ function showSave(){const n=$('#savest');if(!n)return;
   if(!S.meta||S.readonly){n.hidden=true;return}n.hidden=false;
   if(!S.folder&&!S.cloud){n.className='savest bad';n.textContent=tr('Not saved to a folder');
     n.title=tr('This report is only in this tab. Open a folder, or save the report file (File menu), to keep it.');return}
-  if(SAVE.err){n.className='savest bad';n.textContent=tr('Could not save');n.title=SAVE.err;return}
-  if(SAVE.busy){n.className='savest busy';n.textContent=tr('Saving…');n.title='';return}
+  const err=SAVE.err||(S.saveState==='error'?S.saveError||tr('Could not save'):'');
+  if(err){n.className='savest bad';n.textContent=tr('Could not save');n.title=err;return}
+  if(SAVE.busy||S.saveState==='pending'){n.className='savest busy';n.textContent=tr('Saving…');n.title='';return}
   n.className='savest ok';n.textContent=SAVE.at?tr('Saved automatically {t}',{t:SAVE.at.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}):tr('Saved automatically');
   n.title=tr('Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.',{where:where||tr('the report')})}
 
@@ -8010,6 +8104,7 @@ function render(){
   const focusF=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fid;
   paginate();
   $('#sideGrip').title=tr('Drag to resize; double-click to reset');showSave();showUndo();
+  $('#fileBtn').textContent=tr('File')+' \u25be';$('#fileBtn').hidden=!!S.readonly;
   $('#doc-title').textContent=S.meta.title||'Duetkifu';document.title=(S.meta.title||'Duetkifu')+tr(' | Duetkifu');
   $('#view').hidden=S.mode!=='view';$('#edit').hidden=S.mode!=='edit';$('#tree').hidden=S.mode!=='tree';
   if(S.mode==='view')renderView();else if(S.mode==='tree')renderTree();else renderEdit();
@@ -8404,7 +8499,7 @@ async function restoreFolder(){
   if(!FS_OK)return;let d=null;try{d=await idb.get('folder')}catch(e){}if(!d)return;S.lastFolder=d;
   try{if(await d.queryPermission({mode:'readwrite'})==='granted'){await openFolder(d,false);return}}catch(e){}
   renderLocalBar()}
-function setSave(state,e){S.saveState=state;S.saveError=e?String(e.message||e.name||e.code||e):'';renderLocalBar()}
+function setSave(state,e){S.saveState=state;S.saveError=e?String(e.message||e.name||e.code||e):'';if(state==='saved')SAVE.at=new Date();renderLocalBar();showSave()}
 function renderLocalBar(){
   if(S.cloud)return;
   if(launcherGone){showNote(tr(LAUNCHER_GONE),[h('button',{type:'button',class:'btn small primary',text:tr('Reload'),onclick:()=>location.reload()})],false);return}
@@ -8413,7 +8508,6 @@ function renderLocalBar(){
     text=tr('Project folder "{name}": changes are saved to {file} automatically.',{name:S.folder.name,file:S.folder.file})+' '+
       ({pending:tr('Saving…'),saved:tr('All changes saved.'),error:tr('Could not save ({m}).',{m:S.saveError})}[S.saveState]||'');
     if(!S.server)acts.push(B(tr('Open another folder'),pickFolder));
-    acts.push(B(tr('Save a copy'),exportReport),B(tr('Export read-only copy'),exportReadonly));
   }else if(S.server){
     text=tr('The report could not be opened. See Problems (⚠) for the reason, fix report.json, then reload this page.');
     acts.push(B(tr('Reload'),()=>location.reload(),true));
@@ -9247,6 +9341,52 @@ $('#undoBtn').addEventListener('click',undoLast);$('#redoBtn').addEventListener(
 document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)return;const a=document.activeElement;
   if(a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable))return; // in a text box the browser undoes your typing
   const k=e.key.toLowerCase();if(k==='z'&&!e.shiftKey){e.preventDefault();undoLast()}else if(k==='y'||(k==='z'&&e.shiftKey)){e.preventDefault();redoLast()}});
+/* ---------- The File menu: snapshot, export, clear the comments ---------- */
+const stamp=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`};
+async function readFolderFile(name){try{return await(await(await S.folder.dir.getFileHandle(name)).getFile()).text()}catch(e){return null}}
+async function takeSnapshot(quiet){ // a dated copy of report.json and kifu.json in exports/snapshots/
+  if(!S.folder){toast(tr('Open a project folder first.'));return null}
+  try{if(S.folder.flush)await S.folder.flush();await kifuQueue;
+    const name=stamp(),d=await subdir(await subdir(await subdir(S.folder.dir,'exports',true),'snapshots',true),name,true);if(!d)throw new Error('exports/snapshots/'+name);
+    for(const f of[REPORT_FILE,KIFU_FILE]){const t=await readFolderFile(f);if(t!=null)await saving(writeFile(d,f,t))}
+    const where='exports/snapshots/'+name+'/';if(!quiet)toast(tr('Snapshot saved in {where}',{where}));return where}
+  catch(e){fail(tr('Could not save the snapshot.'),e);return null}}
+async function exportKifu(){const t=S.folder?await readFolderFile(KIFU_FILE):S.kifu&&S.kifu.data?JSON.stringify(S.kifu.data,null,1)+'\n':null;
+  if(!t){toast(tr('There is no Kifu to export yet.'));return}
+  const name=((S.meta&&S.meta.title)||'kifu').replace(/[\/:*?"<>|\u0000-\u001f]+/g,' ').trim().slice(0,80)||'kifu';
+  await saveTextFile(name+'.kifu.json',t,'application/json')}
+function clearComments(all){ // remove the comments (all, or only the done ones), after a snapshot so they can be found again
+  const list=S.annos.filter(a=>all||a.status==='done'),open=list.filter(a=>a.status!=='done').length;
+  if(!list.length){toast(all?tr('There are no comments.'):tr('There are no done comments.'));return}
+  openModal(all?tr('Clear all comments'):tr('Clear the done comments'),[h('div',{class:'langbox'},[
+    h('p',{text:tr('{n} comments will be removed, the agent\'s answers with them.',{n:list.length})}),
+    open?h('p',{class:'kwarn',text:tr('{n} of them are not done yet.',{n:open})}):null,
+    S.folder?h('p',{class:'kln',text:tr('A snapshot of report.json and kifu.json is saved in exports/snapshots/ first, so they can be found again.')}):
+      h('p',{class:'kwarn',text:tr('This report is not in a folder, so no snapshot can be kept: save the report file first if you may need them.')}),
+    h('div',{class:'crow'},[h('button',{type:'button',class:'btn small',text:tr('Cancel'),onclick:closeModal}),h('span',{class:'sp'}),
+      h('button',{type:'button',class:'btn small primary',text:tr('Remove {n} comments',{n:list.length}),onclick:async()=>{closeModal();
+        if(S.folder&&!await takeSnapshot(true))return;
+        const ids=new Set(list.map(a=>a.id));S.annos=S.annos.filter(a=>!ids.has(a.id));render();paintAllOverlays();
+        for(const id of ids)await drop('annotations/'+id);
+        toast(tr('{n} comments removed.',{n:ids.size}))}})])])])}
+function openFileMenu(){
+  const m=$('#filemenu'),btn=$('#fileBtn');if(!m.hidden){closeFileMenu();return}
+  const done=S.annos.filter(a=>a.status==='done').length,F=!!S.folder;
+  const it=(t,fn,opt)=>h('button',{type:'button',role:'menuitem',class:opt&&opt.cls||null,disabled:opt&&opt.off?'':null,title:opt&&opt.title||null,
+    onclick:()=>{closeFileMenu();fn()}},[t,opt&&opt.n!=null?h('span',{class:'fmn',text:String(opt.n)}):null]);
+  m.replaceChildren(
+    it(tr('Take a snapshot'),()=>takeSnapshot(),{off:!F,title:F?tr('A dated copy of report.json and kifu.json in exports/snapshots/'):tr('Open a project folder first.')}),
+    h('hr'),
+    it(tr('Save report file'),exportReport),it(tr('Export read-only copy'),exportReadonly),it(tr('Export the Kifu'),exportKifu,{off:!(S.kifu&&S.kifu.data)}),
+    h('hr'),
+    it(tr('Clear the done comments'),()=>clearComments(false),{n:done,off:!done}),
+    it(tr('Clear all comments'),()=>clearComments(true),{n:S.annos.length,off:!S.annos.length,cls:'danger'}));
+  const r=btn.getBoundingClientRect();m.hidden=false;m.style.top=(r.bottom+4)+'px';m.style.left=Math.max(8,Math.min(r.left,innerWidth-m.offsetWidth-8))+'px';
+  btn.setAttribute('aria-expanded','true');const f=m.querySelector('button:not(:disabled)');if(f)f.focus()}
+function closeFileMenu(){$('#filemenu').hidden=true;$('#fileBtn').setAttribute('aria-expanded','false')}
+$('#fileBtn').addEventListener('click',openFileMenu);
+document.addEventListener('pointerdown',e=>{if(!$('#filemenu').hidden&&!e.target.closest('#filemenu,#fileBtn'))closeFileMenu()},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#filemenu').hidden)closeFileMenu()});
 function saveHelp(){return h('details',{class:'savehelp'},[h('summary',{text:tr('Saving and backups')}),h('ul',{},[
   h('li',{text:tr('Saved automatically: every change is written at once to report.json and kifu.json in the opened folder. The top bar shows when it last saved.')}),
   h('li',{text:tr('Snapshot: File > Take a snapshot keeps a dated copy of both files in exports/, to go back to later.')}),

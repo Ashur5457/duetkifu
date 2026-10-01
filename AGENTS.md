@@ -46,7 +46,8 @@ battery-test-0924/            the folder the user opens
     habits/                   the user's habits: figures/ (SVG, PNG, .mplstyle, plotting scripts),
                               writing/ (their own articles: .md, .txt, .docx, .pdf), profile.json, writing.json
     assets/                   images and files uploaded in the page, named <asset id>.<ext>
-    exports/                  files the page exports (styles, report copies, translation templates)
+    exports/                  files the page exports (styles, report copies, translation templates);
+                              snapshots/<date-time>/ holds the copies of report.json and kifu.json the user took
     lang/                     extra interface translations (optional)
     cache/                    fingerprints of large files, kept by the launcher (safe to delete)
     errors.log                problems the page reported (written by the launcher)
@@ -348,6 +349,7 @@ A move with none of the three is "not recorded"; `check` lists such moves.
 The same rules as for `report.json`: read the file fresh right before you change it, change only the moves you mean to change, and write the whole file in one step (a temporary file, then rename). Then:
 
 - **Record every field you write** as one document in `changes`: `{ "id": "k-<random>", "by": "claude", "at": "ISO-8601", "move": "<move id>", "field": "<field, for example why or result.text>", "before": ..., "after": ... }` (`add` and `delete` for a whole move). The page marks text the agent wrote and the user has not looked at yet, from these records; without them it cannot.
+- The page's Undo and Redo of a Kifu change are recorded too, with `undoOf` or `redoOf` = the id of the change taken back or put again. Leave them as they are.
 - Give a new move the next `no`, a `parent`, `trigger` (`self` when you started it from a result, `user` when the user asked), `by: "claude"`, and `startedAt`.
 - Never delete a move that was made: close it with an outcome and a reason. A planned move nothing depends on may be deleted.
 - Never change a move's `outcome` or `mark`, confirm a `cause`, or change a `check` the user decided (`decidedBy`), unless the user asks.
