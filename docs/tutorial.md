@@ -84,6 +84,8 @@ Click **Kifu view**. The research question is on the left; each move follows the
 
 ![The record of the demo as a tree, with the move "Cycle 5" open beside it](kifu-tree.png)
 
+![Clicking moves of the tree: a wrong idea, an oven that failed, the correction that points back at it, data that cannot be trusted, and a re-check against the raw files](kifu-read.gif)
+
 - **The shape says how a move ended**: a filled dot holds, a crossed circle is a dead end, an orange diamond corrects an earlier move, a hexagon is an independent audit, an open circle is not resolved yet, a dashed square is planned. The legend above the tree lists them all.
 - **Arrows**: a dotted arrow is a clue (the good run of cycle 1 pointed at the region cycle 3 found), a dashed orange arrow a correction, a grey dashed arrow support.
 - **The small dot at the lower left of a move** is its data chain: filled green when its numbers are recomputed from the raw files and nothing changed, red when something changed, a ring when its sources are named.
@@ -104,6 +106,8 @@ The Kifu view is made of blocks with names: **Question and counts**, **Kifu tree
 
 ![Dragging This move by its handle toward the right edge of the tree: the blue line shows where it will land](kifu-layout.png)
 
+![Arranging the page: drag a block, fold one, resize with the grip, full screen](arrange-page.gif)
+
 - **Move a block**: drag its handle (⠿, left of the title). A blue line shows where it will go: on the top or bottom half of another block it gets a row of its own there; on its left or right edge it sits beside that block (two blocks at most in a row, with a grip between them to set the widths).
 - **Fold a block to one row**: click ▾ next to its title. A folded *This move* shows the title of the selected move.
 - **Resize**: drag the grip under the tree or under *This move* to change its height; double-click a grip to go back to the default.
@@ -122,6 +126,8 @@ You do not have to switch to an edit mode to ask the agent about something you r
 A small window opens. Pick one of the **Ask** tags (*What does this mean?*, *Where does the data come from?*, *How was it computed?*, *Why is it so?*, *Can it be trusted?*, *How does it compare?*) or type your own question, and click **Add to my questions**.
 
 ![A region of a figure circled in This move, the question being written, and the questions panel with an earlier question and the agent's answer](kifu-ask.png)
+
+![Asking while reading: draw around the low scores of cycle 5, pick a question, send it, and the answer comes back into the panel](ask-while-reading.gif)
 
 Your questions wait in the **Questions panel**, which floats over the page. Drag its header to move it, drag its corner to resize it, and click **–** to fold it to one line; it remembers where you left it. It lists each question with what it points at (click it to jump there), and the agent's answer under it; **Reply** goes on with the conversation. **Ask the agent (n)** sends all open questions at once, and the answers come back into the same panel. A question can also be marked done, reopened or deleted.
 
@@ -213,6 +219,8 @@ The report works as in [Duetsheet](https://github.com/Ashur5457/duetsheet): the 
 **Nothing to save.** Every change is written at once to `report.json` and `kifu.json` in the folder, and the top bar says so: *Saving…*, then *Saved automatically* with the time. If a write fails, the bar turns red and says why; if no folder is open, it says *Not saved to a folder*.
 
 **Undo and Redo.** The arrows in the top bar (or Ctrl+Z and Ctrl+Y outside a text box, where the browser undoes your typing) take back **your own** changes, newest first: the report changes of the current round, and the changes to the record since the last round. Hover over an arrow to see what it will undo. The agent's changes are not undone this way; use **Revert** in the Changes tab. A change you take back in the Kifu is recorded too.
+
+![Changing the cause of a dead end, then Undo and Redo in the top bar](edit-undo.gif)
 
 **The File menu.**
 

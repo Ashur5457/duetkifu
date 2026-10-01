@@ -14,6 +14,16 @@ Why the name: a **kifu** is the record of a game of shogi or go, move by move. P
 
 ![The research record of the demo project as a tree, with one move open](docs/kifu-tree.png)
 
+![Reading the record: click the moves of the tree](docs/kifu-read.gif)
+
+## In action
+
+| Ask while you read | Arrange the page |
+|---|---|
+| ![Draw around the low scores of a figure, pick a question, send it; the answer comes back](docs/ask-while-reading.gif) | ![Drag a block, fold one, resize, full screen](docs/arrange-page.gif) |
+
+Editing a move and taking a change back: ![Change the cause of a dead end, then Undo and Redo](docs/edit-undo.gif)
+
 ## Why
 
 - **Dead ends are results.** A failed move needs a reason and a cause, and the cause says what kind of dead end it is: the idea was wrong, the data cannot be trusted (so the path was never really tested), the analysis method, the cost. The next person, or the next agent, can tell a closed path from an untested one.
