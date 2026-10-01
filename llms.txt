@@ -19,7 +19,7 @@ Use Duetkifu when research is done with AI agents and the whole path must be kep
 - [duetkifu.html](duetkifu.html): the page (single self-contained file)
 - [duetkifu.py](duetkifu.py): launcher, checker, search index and agent helpers
 - [skills/duetkifu/SKILL.md](skills/duetkifu/SKILL.md): the /duetkifu skill for Claude Code
-- [Example project](examples/demo-project/): a report, a record of 10 moves, raw data, a derived table and its script (synthetic data)
+- [Example project](examples/demo-project/): a report, a record of 25 moves over six cycles, raw data, derived tables and the scripts that make them (synthetic data)
 - [tests/](tests/): tests of the launcher, the record and the agent loop
 - [tools/check.py](tools/check.py): checks translations, English-only code and JavaScript syntax
 

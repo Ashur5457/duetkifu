@@ -30,6 +30,9 @@ Why the name: a **kifu** is the record of a game of shogi or go, move by move. P
 - **Edit on the tree**: select a move and set its result with the buttons beside it (a dead end asks for its cause and one sentence why); drag a move to place it, or onto another move to follow it; drag its **+** onto another move to draw an arrow, or onto empty space to add the next move. The form beside the tree has three parts: what only you decide, the text the agent can fill in, and the rest under Advanced.
 - **Every edit recorded**: each change to a move is kept with who made it and when, whether made in the page or by the agent.
 - **Comment on a move**: under any move, write a comment with tags such as **Fill in this move** or **Recompute this**, and **Send and ask the agent**.
+- **Arrange the page**: the blocks (question, tree, the move, main path) are dragged by a handle above or beside each other, folded to one row, resized, or shown full screen; the arrangement is kept in your browser.
+- **Ask while you read**: in the read-only views, draw around a region of a figure or select some text to ask the agent about it. The questions wait in a floating panel, one button sends them, and the answers come back there to reply to. Question tags (*Where does the data come from?*, *How was it computed?*, *Can it be trusted?*) get an answer, not an edit.
+- **Saved as you go**: every change is written at once; Undo and Redo take back your own changes; a File menu takes snapshots, exports, and clears comments (after a snapshot).
 
 **For agents in large folders**
 - `find FOLDER "words"`: full-text search of every file in the folder (HTML reports by section, Word by heading, slides by slide, spreadsheets by sheet and header, the report by block, the record by move), in any language, from a local SQLite index kept outside the folder. Agents read a few excerpts instead of megabytes.
@@ -45,6 +48,8 @@ Why the name: a **kifu** is the record of a game of shogi or go, move by move. P
 - Six interface languages (English, Traditional and Simplified Chinese, Japanese, Korean, Spanish), plus your own.
 
 ![Editing a dead end on the tree: the result buttons beside the move, and the form with what you decide and what the agent wrote](docs/kifu-edit.png)
+
+![Asking while you read: a region of a figure circled, the question being written, and the questions panel with the agent's answer](docs/kifu-ask.png)
 
 ![A free-hand region and a data point marked on a chart, with the comments](docs/edit-annotate.png)
 
@@ -90,7 +95,7 @@ Duetkifu does not call any AI model. Your agent reads and writes plain JSON:
 - [`duetkifu.py`](duetkifu.py): the launcher and checker (`check`, `kifu check|tree|show`), the data chain (`step`), search (`index`, `find`), `extract`, and the helpers for the review loop (`annotations`, `wait`, `agent-status`).
 - [`skills/duetkifu/SKILL.md`](skills/duetkifu/SKILL.md): the `/duetkifu` skill for Claude Code.
 - [`schema/kifu.schema.json`](schema/kifu.schema.json) and [`schema/report.schema.json`](schema/report.schema.json): the JSON Schemas.
-- [`examples/demo-project/`](examples/demo-project/): a complete project folder with a small record.
+- [`examples/demo-project/`](examples/demo-project/): a complete project folder with a record of 25 moves.
 - [`llms.txt`](llms.txt): a short index for LLMs.
 
 Prompts that work well:
