@@ -193,6 +193,18 @@ main{min-width:0}
 .tnode .tl .k{color:var(--muted)}
 /* the research record (kifu.json): a discovery tree */
 #tree.kifu{max-width:1320px}
+/* full screen: the Kifu diagram fills the window (and the screen, when the browser allows it), This move floats on the right;
+   it is set on #tree, which stays when the page redraws */
+#tree.kfull{position:fixed;inset:0;z-index:45;max-width:none;margin:0;background:var(--bg);padding:12px 16px;overflow:hidden}
+#tree.kfull #treehost>:not(.kb-tree):not(.kb-move):not(.krow2),#tree.kfull .krow2>:not(.kb-tree):not(.kb-move),
+#tree.kfull .krow2>.kgrip,#tree.kfull .kdrag,#tree.kfull .kb-tree>.kbody>.kgrip,#tree.kfull .kb-move .kgrip{display:none}
+#tree.kfull .krow2{display:block;margin:0}
+#tree.kfull .kb-tree .kstage{height:calc(100vh - 140px)!important}
+#tree.kfull .kb-move{position:fixed;top:var(--kfstop,130px);right:20px;width:min(440px,40vw);max-height:calc(100vh - var(--kfstop,130px) - 16px);display:flex;flex-direction:column;z-index:5;
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:6px 10px 10px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+#tree.kfull .kb-move.folded{padding:0;border:0;background:none;box-shadow:none;width:auto}
+#tree.kfull .kb-move>.kbody{overflow:auto;min-height:0}
+#tree.kfull .kb-move .kpanel{height:auto!important;max-height:none;border:0;padding:6px 4px}
 .kq{font:700 19px/1.45 var(--serif);margin:0 0 6px;max-width:75ch}
 .kstats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
 .kpill{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:2px 11px 2px 8px;font-size:12.5px;color:var(--muted)}
@@ -1477,6 +1489,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Full screen": "全螢幕",
+ "Exit full screen": "離開全螢幕",
  "What does this mean?": "這是什麼意思？",
  "Where does the data come from?": "資料從哪來？",
  "How was it computed?": "怎麼算出來的？",
@@ -1506,7 +1520,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "ui|Content block": "內容區塊",
  "ui|Add bar": "新增列",
  "ui|Question and counts": "研究問題與統計",
- "ui|Kifu tree": "棋譜樹",
+ "ui|Kifu tree": "棋譜圖",
  "ui|This move": "這一步",
  "ui|Main path": "主路徑",
  "ui|Side panel": "側欄",
@@ -1521,7 +1535,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Report edit: each text, chart, table or image, with its comment box.": "報告編輯：每段文字、圖表、表格或圖片，連同下方的留言框。",
  "Report edit: the buttons that add a block.": "報告編輯：新增區塊的那排按鈕。",
  "Kifu: the research question and how many moves of each kind.": "棋譜：研究問題，以及各類步數的統計。",
- "Kifu: the tree of moves, with its toolbar and legend.": "棋譜：步驟的樹狀圖，連同工具列和圖例。",
+ "Kifu: the tree of moves, with its toolbar and legend.": "棋譜：棋譜圖，連同工具列和圖例。",
  "Kifu: the selected move. In it: header, text, relations, source, figures and tables, data chain, checks.": "棋譜：選到的那一步。裡面依序是：標頭、內文、關聯、出處、圖表、資料鏈、核對。",
  "Kifu: the moves from the question to the conclusion.": "棋譜：從問題走到結論的那一串步驟。",
  "Edit modes: comments, changes, style, folder.": "編輯模式：評論、修改紀錄、樣式、資料夾。",
@@ -1559,7 +1573,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Zoom out": "縮小",
  "not recorded": "未記錄",
  "Kifu": "棋譜",
- "Tree diagram": "樹狀圖",
+ "Tree diagram": "棋譜圖",
  "Figures and tables": "圖表",
  "Loading…": "載入中…",
  "Open the project folder to see them.": "開啟專案資料夾才看得到。",
@@ -1629,14 +1643,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Write down why this move stopped, and what would make it worth reopening.": "請寫下這一手為什麼停下，以及什麼情況下值得重新打開。",
  "Add the report chapter that discusses this move to its source.": "請把講到這一手的報告章節加進它的出處。",
  "Check whether this move corrects or is corrected by another one.": "請查一下這一手有沒有更正別的手，或被別的手更正。",
- "Placed by hand on the tree diagram.": "已在樹狀圖上手動移動過位置。",
+ "Placed by hand on the tree diagram.": "已在棋譜圖上手動移動過位置。",
  "Reset position": "恢復自動位置",
  "This move no longer exists": "這一手已經不存在了",
  "(move not found)": "（找不到這一手）",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（來自 kifu.json），包含走不通的路。拖曳節點可以安排位置；點標題可以閱讀。",
  "Drag onto another move to draw an arrow": "拖到另一手上畫箭頭",
  "That arrow is already there.": "這條箭頭已經有了。",
- "How to edit on the tree": "在樹上怎麼編輯",
+ "How to edit on the tree": "在棋譜圖上怎麼編輯",
  "Fill in this move": "補齊這一手",
  "No conclusion": "沒有結論",
  "Written by the agent, not looked at yet": "agent 寫的、你還沒看過",
@@ -1658,7 +1672,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Reading the Kifu": "怎麼看棋譜",
  "The Kifu is the record of the research: every attempt is a move, and each move follows the one it was based on, from the question on the left.": "棋譜是研究的紀錄：每一次嘗試是一手，每一手接在它所根據的那一手後面，最左邊是研究問題。",
  "Shapes.": "形狀。",
- "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "形狀代表這一手的結局：實心點＝成立、打叉的圓＝死路、菱形＝更正前面的某一手、空心圓＝還沒解決。樹上方的圖例列出全部形狀。",
+ "The shape says how a move ended: a filled dot holds, a crossed circle is a dead end, a diamond corrects an earlier move, an open circle is not resolved yet. The legend above the tree lists them all.": "形狀代表這一手的結局：實心點＝成立、打叉的圓＝死路、菱形＝更正前面的某一手、空心圓＝還沒解決。棋譜圖上方的圖例列出全部形狀。",
  "Arrows.": "箭頭。",
  "Dotted and dashed arrows between moves: a clue for, corrects, supports.": "手與手之間的點線、虛線箭頭：線索指向、更正、支持。",
  "Details.": "細節。",
@@ -1669,7 +1683,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Under a move, write a comment and ask the agent, the same as under a block of the report.": "在一手下方留言並請 agent 修改，跟報告的區塊一樣。",
  "To change the record, use Kifu edit at the top.": "要修改棋譜，請按上方的「棋譜編輯」。",
  "Editing the Kifu": "編輯棋譜",
- "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "大部分操作都在樹上完成。由你決定；文字可以讓 agent 先寫、你再查核。",
+ "Most of it is done on the tree. You decide; the agent can write the text for you to check.": "大部分操作都在棋譜圖上完成。由你決定；文字可以讓 agent 先寫、你再查核。",
  "Result.": "結果。",
  "Click a move. The small buttons beside it set the result: ✓ holds, ✗ dead end, ? no conclusion, ○ active. A dead end asks for its cause and one sentence why.": "點一手，旁邊的小按鈕設定結果：✓ 成立、✗ 死路、? 沒有結論、○ 進行中。選死路時會問原因和一句話說明。",
  "Place.": "位置。",
@@ -2441,6 +2455,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Full screen": "全屏",
+ "Exit full screen": "退出全屏",
  "What does this mean?": "这是什么意思？",
  "Where does the data come from?": "数据从哪来？",
  "How was it computed?": "怎么算出来的？",
@@ -2470,7 +2486,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "ui|Content block": "内容区块",
  "ui|Add bar": "新增栏",
  "ui|Question and counts": "研究问题与统计",
- "ui|Kifu tree": "棋谱树",
+ "ui|Kifu tree": "棋谱图",
  "ui|This move": "这一步",
  "ui|Main path": "主路径",
  "ui|Side panel": "侧栏",
@@ -2485,7 +2501,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Report edit: each text, chart, table or image, with its comment box.": "报告编辑：每段文字、图表、表格或图片，连同下方的留言框。",
  "Report edit: the buttons that add a block.": "报告编辑：新增区块的那排按钮。",
  "Kifu: the research question and how many moves of each kind.": "棋谱：研究问题，以及各类步数的统计。",
- "Kifu: the tree of moves, with its toolbar and legend.": "棋谱：步骤的树状图，连同工具栏和图例。",
+ "Kifu: the tree of moves, with its toolbar and legend.": "棋谱：棋谱图，连同工具栏和图例。",
  "Kifu: the selected move. In it: header, text, relations, source, figures and tables, data chain, checks.": "棋谱：选中的那一步。里面依次是：标头、正文、关联、出处、图表、数据链、核对。",
  "Kifu: the moves from the question to the conclusion.": "棋谱：从问题走到结论的那一串步骤。",
  "Edit modes: comments, changes, style, folder.": "编辑模式：评论、修改记录、样式、文件夹。",
@@ -2523,7 +2539,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Zoom out": "缩小",
  "not recorded": "未记录",
  "Kifu": "棋谱",
- "Tree diagram": "树状图",
+ "Tree diagram": "棋谱图",
  "Figures and tables": "图表",
  "Loading…": "加载中…",
  "Open the project folder to see them.": "打开项目文件夹才能看到。",
@@ -2593,14 +2609,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Write down why this move stopped, and what would make it worth reopening.": "请写下这一手为什么停下，以及什么情况下值得重新打开。",
  "Add the report chapter that discusses this move to its source.": "请把讲到这一手的报告章节加入它的出处。",
  "Check whether this move corrects or is corrected by another one.": "请查一下这一手有没有更正别的手，或被别的手更正。",
- "Placed by hand on the tree diagram.": "已在树状图上手动移动过位置。",
+ "Placed by hand on the tree diagram.": "已在棋谱图上手动移动过位置。",
  "Reset position": "恢复自动位置",
  "This move no longer exists": "这一手已经不存在了",
  "(move not found)": "（找不到这一手）",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "研究的每一手（来自 kifu.json），包括走不通的路。拖动节点可以安排位置；点标题可以阅读。",
  "Drag onto another move to draw an arrow": "拖到另一手上画箭头",
  "That arrow is already there.": "这条箭头已经有了。",
- "How to edit on the tree": "在树上怎么编辑",
+ "How to edit on the tree": "在棋谱图上怎么编辑",
  "Fill in this move": "补齐这一手",
  "No conclusion": "没有结论",
  "Written by the agent, not looked at yet": "agent 写的、你还没看过",
@@ -3405,6 +3421,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Full screen": "全画面",
+ "Exit full screen": "全画面を終了",
  "What does this mean?": "これはどういう意味？",
  "Where does the data come from?": "データの出どころは？",
  "How was it computed?": "どう計算した？",
@@ -3434,7 +3452,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "ui|Content block": "内容ブロック",
  "ui|Add bar": "追加バー",
  "ui|Question and counts": "研究の問いと集計",
- "ui|Kifu tree": "棋譜ツリー",
+ "ui|Kifu tree": "棋譜図",
  "ui|This move": "この手",
  "ui|Main path": "主な道筋",
  "ui|Side panel": "サイドパネル",
@@ -3449,7 +3467,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Report edit: each text, chart, table or image, with its comment box.": "レポート編集：文章・グラフ・表・画像それぞれと、その下のコメント欄。",
  "Report edit: the buttons that add a block.": "レポート編集：ブロックを追加するボタン。",
  "Kifu: the research question and how many moves of each kind.": "棋譜：研究の問いと、種類ごとの手の数。",
- "Kifu: the tree of moves, with its toolbar and legend.": "棋譜：手のツリー、ツールバーと凡例を含む。",
+ "Kifu: the tree of moves, with its toolbar and legend.": "棋譜：棋譜図、ツールバーと凡例を含む。",
  "Kifu: the selected move. In it: header, text, relations, source, figures and tables, data chain, checks.": "棋譜：選んだ手。中身は順に、見出し、本文、関連、出典、図表、データチェーン、照合。",
  "Kifu: the moves from the question to the conclusion.": "棋譜：問いから結論までの手の並び。",
  "Edit modes: comments, changes, style, folder.": "編集モード：コメント、変更履歴、スタイル、フォルダ。",
@@ -3487,7 +3505,7 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Zoom out": "縮小",
  "not recorded": "未記録",
  "Kifu": "棋譜",
- "Tree diagram": "ツリー図",
+ "Tree diagram": "棋譜図",
  "Figures and tables": "図表",
  "Loading…": "読み込み中…",
  "Open the project folder to see them.": "プロジェクトフォルダを開くと表示されます。",
@@ -3557,14 +3575,14 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Write down why this move stopped, and what would make it worth reopening.": "なぜこの手を止めたか、どうなれば再開する価値があるか書いてください。",
  "Add the report chapter that discusses this move to its source.": "この手を扱うレポートの章を出典に追加してください。",
  "Check whether this move corrects or is corrected by another one.": "この手が他の手を訂正しているか、訂正されているか確認してください。",
- "Placed by hand on the tree diagram.": "ツリー図で手動配置済み。",
+ "Placed by hand on the tree diagram.": "棋譜図で手動配置済み。",
  "Reset position": "自動配置に戻す",
  "This move no longer exists": "この手はもうありません",
  "(move not found)": "（該当する手が見つかりません）",
  "Every move of the research from kifu.json, dead ends included. Drag a node to place it; click a title to read it.": "kifu.json に記録された研究のすべての手（行き止まりも含む）。ノードをドラッグして配置し、タイトルをクリックして読めます。",
  "Drag onto another move to draw an arrow": "別の手までドラッグして矢印を引く",
  "That arrow is already there.": "この矢印はすでにあります。",
- "How to edit on the tree": "ツリー上での編集方法",
+ "How to edit on the tree": "棋譜図での編集方法",
  "Fill in this move": "この手を補う",
  "No conclusion": "結論なし",
  "Written by the agent, not looked at yet": "エージェントが書いた・未確認",
@@ -4369,6 +4387,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Full screen": "전체 화면",
+ "Exit full screen": "전체 화면 종료",
  "What does this mean?": "이게 무슨 뜻인가요?",
  "Where does the data come from?": "데이터는 어디서 왔나요?",
  "How was it computed?": "어떻게 계산했나요?",
@@ -5333,6 +5353,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Full screen": "Pantalla completa",
+ "Exit full screen": "Salir de pantalla completa",
  "What does this mean?": "¿Qué significa esto?",
  "Where does the data come from?": "¿De dónde vienen los datos?",
  "How was it computed?": "¿Cómo se calculó?",
@@ -6117,7 +6139,9 @@ function renderKifu(host,K){
     V.layout==='list'||editing?null:h('label',{class:'kchkb'},[h('input',{type:'checkbox',checked:V.xl?'':null,onchange:e=>{V.xl=e.target.checked;render()}}),tr('Cross links')]),
     h('label',{class:'ksearch'},[q,h('span',{class:'kqn'})]),
     V.layout==='list'?null:h('div',{class:'kzoom'},[zb('−',tr('Zoom out'),()=>zoomKifu(V.z-.15)),zb('+',tr('Zoom in'),()=>zoomKifu(V.z+.15)),
-      h('button',{type:'button',class:'wide',text:tr('Fit'),onclick:()=>zoomKifu('fit')})]),
+      h('button',{type:'button',class:'wide',text:tr('Fit'),onclick:()=>zoomKifu('fit')}),
+      (()=>{const fs=$('#tree').classList.contains('kfull');return h('button',{type:'button',class:'wide',text:fs?tr('Exit full screen'):'\u26f6 '+tr('Full screen'),
+        title:fs?tr('Exit full screen')+' (Esc)':tr('Full screen'),onclick:()=>kifuFullscreen()})})()]),
     kifuLegend()]));
   const stage=h('div',{class:'kstage'+(V.layout==='list'?' klist':'')}),panel=h('aside',{class:'kpanel','aria-live':'polite'});
   // the blocks: each folds to one row, can be resized, and dragged by its handle to another place (kept in this browser)
@@ -6140,6 +6164,7 @@ function renderKifu(host,K){
     h('ol',{},P.line.map(x=>h('li',{},[h('div',{},[h('button',{type:'button',class:'linkbtn kgo',text:x.m.title||x.id,onclick:()=>selectMove(x.id,true)}),
       h('span',{class:'kdate',text:' '+(x.m.when||x.m.at||'')})]),x.m.note?h('div',{class:'kpd',text:x.m.note}):null])))])]);
   host.append(...kifuRows(B));
+  if($('#tree').classList.contains('kfull'))setTimeout(placeFullMove);
 }
 /* The layout of the Kifu view, kept per viewer in this browser only: the rows of blocks (one block, or two side by
    side), which blocks are folded to one row, and the sizes dragged with the grips (0 or missing = the default size). */
@@ -6359,6 +6384,18 @@ function setArrow(from,link,type,to){ // add (link null), change the type of, or
     else{if(after.some(l=>l&&l.type===type&&l.to===to)){toast(tr('That arrow is already there.'));return false}after.push({type,to})}
     if(after.length)m.links=after;else delete m.links;kifuChange(d,from,'links',before,after.length?after:null)})}
 function resetMovePos(id){kifuWrite(d=>{const m=d.moves[id];if(!m||!m.pos)return false;const before={...m.pos};delete m.pos;kifuChange(d,id,'pos',before,null)})}
+function kifuFullscreen(on){ // the Kifu section fills the window at once; the browser's full screen is asked for too (some hosts never grant it)
+  const t=$('#tree');on=on??!t.classList.contains('kfull');t.classList.toggle('kfull',on);
+  if(on){if(document.fullscreenEnabled&&!document.fullscreenElement)t.requestFullscreen().catch(()=>{})}
+  else if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+  render();setTimeout(()=>{zoomKifu('fit');placeFullMove()})}
+function placeFullMove(){ // This move floats just under the toolbar and legend of the Kifu diagram
+  const t=$('#tree'),st=$('#treehost .kb-tree .kstage');if(t.classList.contains('kfull')&&st)t.style.setProperty('--kfstop',Math.round(st.getBoundingClientRect().top+8)+'px')}
+addEventListener('resize',()=>placeFullMove());
+document.addEventListener('fullscreenchange',()=>{ // the dialogs and messages must be inside the full-screen element to be seen
+  const host=document.fullscreenElement||document.body;['#modal','#qc','#tip','#toast','#asksel','#qa'].forEach(q=>{const n=$(q);if(n&&n.parentNode!==host)host.append(n)});
+  if(!document.fullscreenElement&&$('#tree').classList.contains('kfull'))kifuFullscreen(false)}); // Esc in the browser's full screen
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.fullscreenElement&&$('#tree').classList.contains('kfull')&&$('#modal').hidden&&$('#qc').hidden)kifuFullscreen(false)});
 function zoomKifu(z,quiet){const V=kifuView(),svg=$('#treehost svg.ktree'),stage=$('#treehost .kstage');if(!svg)return;
   const W=+svg.dataset.w,H=+svg.dataset.h;
   if(z==='fit')z=Math.min((stage.clientWidth-8)/W,(stage.clientHeight-8)/H);
@@ -7830,7 +7867,7 @@ function askTipOnce(){onceOnly('duetkifu-ask-tip',()=>helpModal(tr('Ask while yo
   [tr('Figures.'),tr('Drag on a figure to draw around a region, or click a point of a chart.')],
   [tr('Text.'),tr('Select some text; an "Ask the agent" button appears next to it.')],
   [tr('Send.'),tr('Your questions wait in the questions panel. Send them together with "Ask the agent"; the answers come back there, and you can reply.')]],null,true))}
-function setMode(btn){leaveField();
+function setMode(btn){leaveField();if(btn!=='kifu-view'&&btn!=='kifu-edit'&&$('#tree').classList.contains('kfull'))kifuFullscreen(false);
   const m=btn==='kifu-view'||btn==='kifu-edit'?'tree':btn;
   S.mode=m;document.body.dataset.mode=m;if(S.draw){S.draw=null;document.body.dataset.draw=''}
   if(m==='tree')kifuView().edit=btn==='kifu-edit'&&canEditKifu();
