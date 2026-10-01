@@ -3,7 +3,7 @@
  "kifu": {
   "meta": {
    "question": "Which combination of additives A and B gives the highest score?",
-   "context": "Synthetic demo data, not experimental results: four cycles of 15 formulations each.",
+   "context": "Synthetic demo data, not experimental results: six cycles of 15 formulations, an oven test and a handful of side questions.",
    "metric": {
     "name": "score",
     "unit": "",
@@ -13,7 +13,10 @@
     "C": "Cycles",
     "X": "Dead ends",
     "R": "Corrections",
-    "A": "Audit"
+    "A": "Audit",
+    "L": "Reading",
+    "U": "Your questions",
+    "P": "Plans"
    },
    "createdAt": "2026-04-06T09:00:00Z"
   }
@@ -126,11 +129,89 @@
       "role": "raw"
      }
     ]
-   }
+   },
+   "links": [
+    {
+     "type": "clue",
+     "to": "C5",
+     "note": "high B scored low in cycle 1; cycle 5 found the same for B above 2"
+    }
+   ]
+  },
+  "X3": {
+   "id": "X3",
+   "parent": "C1",
+   "title": "Add a third additive C",
+   "kind": "attempt",
+   "status": "done",
+   "group": "X",
+   "outcome": "failure",
+   "trigger": {
+    "kind": "user"
+   },
+   "when": "4/12",
+   "at": "2026-04-12",
+   "by": "user",
+   "cause": "cost",
+   "causeConfirmed": true,
+   "why": "A third additive could open a direction that A and B alone do not have.",
+   "reason": "The supplier quoted five times the price of B; a formulation that expensive would not be used, whatever it scores.",
+   "result": {
+    "text": "No runs were made; decided from the price list."
+   },
+   "population": "Not a measurement",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Decided from the supplier price list; no runs were made.",
+    "files": []
+   },
+   "no": 4
+  },
+  "L1": {
+   "id": "L1",
+   "parent": "C1",
+   "title": "Reading: the reported optimum of A is near 2.4 wt%",
+   "kind": "attempt",
+   "status": "done",
+   "group": "L",
+   "outcome": "success",
+   "trigger": {
+    "kind": "advisor"
+   },
+   "when": "4/14",
+   "at": "2026-04-14",
+   "by": "user",
+   "why": "Before spending a cycle, see what is known about A in similar systems.",
+   "result": {
+    "text": "One review puts the optimum of A at about 2.4 wt%, in a cell of another size."
+   },
+   "note": "It agrees with cycle 1 (the 0.89 run at A 2.14), but the cell differs, so it is a hint, not a result.",
+   "population": "One review article",
+   "source": {
+    "title": "Review of additive A in this kind of cell (reading notes)"
+   },
+   "mark": {
+    "kind": "doubtful",
+    "note": "One paper, a different cell size."
+   },
+   "links": [
+    {
+     "type": "supports",
+     "to": "C3"
+    }
+   ],
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Reading notes only; no data.",
+    "files": []
+   },
+   "no": 5
   },
   "C2": {
    "id": "C2",
-   "no": 4,
+   "no": 6,
    "title": "Cycle 2: the model's suggestions",
    "kind": "attempt",
    "parent": "C1",
@@ -170,7 +251,7 @@
   },
   "R1": {
    "id": "R1",
-   "no": 5,
+   "no": 7,
    "title": "Cycle 2 was exploring the edges on purpose",
    "kind": "correction",
    "parent": "C2",
@@ -212,7 +293,7 @@
   },
   "X2": {
    "id": "X2",
-   "no": 6,
+   "no": 8,
    "title": "Low additive A (below 1 wt%)",
    "kind": "attempt",
    "parent": "C2",
@@ -255,9 +336,124 @@
     ]
    }
   },
+  "U1": {
+   "id": "U1",
+   "parent": "C2",
+   "title": "Ask the supplier: is B the same batch in every run?",
+   "kind": "attempt",
+   "status": "done",
+   "group": "U",
+   "outcome": "success",
+   "trigger": {
+    "kind": "user"
+   },
+   "when": "4/19",
+   "at": "2026-04-19",
+   "by": "user",
+   "why": "If B changed between runs, part of the spread in cycle 2 would not come from the formulation.",
+   "result": {
+    "text": "The same batch (number 7) was used in cycles 1 and 2."
+   },
+   "population": "Cycles 1 and 2",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "An email from the supplier; it is not in the folder.",
+    "files": []
+   },
+   "no": 9
+  },
+  "X4": {
+   "id": "X4",
+   "parent": "C2",
+   "title": "Repeat the best cycle-2 run at 60 °C",
+   "kind": "attempt",
+   "status": "done",
+   "group": "X",
+   "outcome": "failure",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "4/20",
+   "at": "2026-04-20",
+   "by": "user",
+   "cause": "execution",
+   "causeConfirmed": true,
+   "why": "A warmer cell might raise the score of the best formulation of cycle 2.",
+   "reason": "The oven reached only about 45 °C in two of the three runs, so 60 °C was never tested.",
+   "result": {
+    "text": "Set 60 °C, measured 44.8, 45.6 and 60.1 °C; scores 0.61, 0.58 and 0.84.",
+    "n": 3
+   },
+   "population": "Three repeats of one formulation",
+   "mark": {
+    "kind": "bad",
+    "note": "The oven was not checked before the runs."
+   },
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/oven-log.csv",
+      "sha256": "08a2bc03e96cf69b6a2ebfb035668a4ea23f36433b71548a74d851fa975694ce",
+      "size": 106,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "raw",
+      "note": "set and measured temperature of each run"
+     }
+    ]
+   },
+   "no": 10
+  },
+  "X8": {
+   "id": "X8",
+   "parent": "C2",
+   "title": "Very high A (above 3.4 wt%)",
+   "kind": "attempt",
+   "status": "done",
+   "group": "X",
+   "outcome": "failure",
+   "trigger": {
+    "kind": "self"
+   },
+   "when": "4/21",
+   "at": "2026-04-21",
+   "by": "user",
+   "cause": "idea",
+   "causeConfirmed": true,
+   "why": "Cycle 1 hinted that more A might keep helping.",
+   "reason": "Every run above 3.4 wt% of A scored under 0.52.",
+   "result": {
+    "text": "8 runs with A above 3.4 wt%, best score 0.52.",
+    "n": 8
+   },
+   "population": "Cycles 1 and 2, runs with A above 3.4 wt%",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/cycle1-runs.csv",
+      "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+      "size": 356,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "raw"
+     },
+     {
+      "path": "data/cycle2-runs.csv",
+      "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+      "size": 365,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "raw"
+     }
+    ]
+   },
+   "no": 11
+  },
   "C3": {
    "id": "C3",
-   "no": 7,
+   "no": 12,
    "title": "Cycle 3: concentrate on A 1.9–3.31 wt%",
    "kind": "attempt",
    "parent": "C2",
@@ -304,11 +500,15 @@
       "note": "cycles 1 to 3, combined"
      }
     ]
+   },
+   "mark": {
+    "kind": "good",
+    "note": "14 of 15 runs scored 0.7 or more."
    }
   },
   "AUD": {
    "id": "AUD",
-   "no": 8,
+   "no": 13,
    "title": "Recompute the top five from the raw files",
    "kind": "audit",
    "parent": "C3",
@@ -349,17 +549,107 @@
     ]
    }
   },
+  "X5": {
+   "id": "X5",
+   "parent": "C3",
+   "title": "Follow the impedance drift as a second score",
+   "kind": "attempt",
+   "status": "done",
+   "group": "X",
+   "outcome": "inconclusive",
+   "trigger": {
+    "kind": "data"
+   },
+   "when": "4/27",
+   "at": "2026-04-27",
+   "by": "claude",
+   "cause": "measurement",
+   "causeConfirmed": false,
+   "why": "The best runs of cycle 3 may differ in how stable they are, which the score alone does not show.",
+   "reason": "The impedance cell was not calibrated, so a drift cannot be told from noise. The idea was not really tested.",
+   "result": {
+    "text": "A drift of about 12 % over five cycles was seen, but it cannot be trusted."
+   },
+   "population": "The five best runs of cycle 3",
+   "mark": {
+    "kind": "interesting",
+    "note": "Worth repeating once the cell is calibrated."
+   },
+   "evidence": {
+    "steps": [],
+    "noData": "Measured on the bench; the calibration log was not kept.",
+    "files": [],
+    "checks": [
+     {
+      "claim": "Impedance drift over five cycles",
+      "recorded": "12 %",
+      "recomputed": null,
+      "match": "not-reproducible",
+      "population": "The five best runs of cycle 3",
+      "note": "The measurement file was overwritten; only the number in the notes is left."
+     }
+    ]
+   },
+   "no": 14
+  },
+  "R2": {
+   "id": "R2",
+   "parent": "X4",
+   "title": "Repeat at 60 °C with the calibrated oven",
+   "kind": "correction",
+   "status": "done",
+   "group": "R",
+   "outcome": "success",
+   "trigger": {
+    "kind": "data"
+   },
+   "when": "4/29",
+   "at": "2026-04-29",
+   "by": "user",
+   "why": "X4 failed because of the oven, not because of the idea; the idea deserves a fair test.",
+   "result": {
+    "text": "Measured 59.8 to 60.2 °C; scores 0.86, 0.88 and 0.85.",
+    "n": 3
+   },
+   "note": "60 °C does not hurt and does not help: the median is the same as at room temperature (cycle 3, 0.85). Temperature is not a lever.",
+   "population": "Three repeats of the same formulation as in X4",
+   "links": [
+    {
+     "type": "corrects",
+     "to": "X4"
+    }
+   ],
+   "milestone": {
+    "kind": "root-cause",
+    "reason": "The oven, not the temperature, ruined X4."
+   },
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "files": [
+     {
+      "path": "data/oven-repeat.csv",
+      "sha256": "c5b7936dde7049ebca5f91336e8bead0d8739db36114cbe940debc814ed90a34",
+      "size": 106,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "raw",
+      "note": "set and measured temperature of each run"
+     }
+    ]
+   },
+   "no": 15
+  },
   "C4": {
    "id": "C4",
-   "no": 9,
+   "no": 16,
    "title": "Cycle 4: confirm the region (A 1.97–2.88 wt%)",
    "kind": "attempt",
    "parent": "C3",
    "group": "C",
-   "status": "active",
+   "status": "done",
    "why": "Repeat inside the region with new formulations, to see whether the scores hold.",
    "result": {
-    "text": "Measured, not in the report yet: median 0.87, best 0.96.",
+    "text": "All 15 runs scored 0.7 or more; median 0.87, best 0.96 at A 2.64, B 1.37 wt%.",
     "value": 0.962,
     "n": 15
    },
@@ -378,32 +668,437 @@
       "path": "data/cycle4-runs.csv",
       "sha256": "90914930196853d3ce400ce26d293e79fcac4c7d0d25f9ec3bff6c0499d4ca1b",
       "size": 365,
-      "modified": "2026-09-25T14:09:51.938672Z",
+      "modified": "2026-10-01T03:54:15Z",
       "role": "raw"
      }
     ]
-   }
+   },
+   "outcome": "success",
+   "milestone": {
+    "kind": "champion",
+    "reason": "The best formulation so far: A 2.64, B 1.37 wt%, score 0.962."
+   },
+   "mark": {
+    "kind": "good"
+   },
+   "note": "The high-scoring region holds with new formulations."
   },
-  "P1": {
-   "id": "P1",
-   "no": 10,
-   "title": "Region A 2–3, B 1.8–3.4 wt%",
+  "P2": {
+   "id": "P2",
+   "parent": "X5",
+   "title": "Recalibrate the impedance cell, then repeat",
    "kind": "attempt",
-   "parent": "C4",
-   "group": "C",
    "status": "planned",
-   "why": "The next steps of the report: look for higher scores at larger B inside the good A range.",
+   "group": "P",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/04",
+   "at": "2026-05-04",
+   "by": "user",
+   "why": "A calibrated cell would tell whether the drift is real.",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Planned: not run yet.",
+    "files": []
+   },
+   "no": 17
+  },
+  "AUD2": {
+   "id": "AUD2",
+   "parent": "C4",
+   "title": "Recompute the summary of all cycles from the raw files",
+   "kind": "audit",
+   "status": "done",
+   "group": "A",
+   "outcome": "success",
+   "trigger": {
+    "kind": "self"
+   },
+   "when": "5/04",
+   "at": "2026-05-04",
+   "by": "claude",
+   "why": "The numbers of the earlier cycles went into slides and texts by hand. Recompute them once, from the raw files.",
+   "result": {
+    "text": "The summary of six cycles comes out of the raw files; one number in an earlier slide does not match.",
+    "n": 6
+   },
+   "population": "Cycles 1 to 6",
+   "links": [
+    {
+     "type": "supports",
+     "to": "C4"
+    }
+   ],
+   "evidence": {
+    "steps": [
+     "s-summarise-cycles"
+    ],
+    "files": [
+     {
+      "path": "derived_data/cycle-summary.csv",
+      "sha256": "8e1341be7f3768720b0264cd7ebc7511ed19477ff8e73f3f77c517ef2d0cd364",
+      "size": 253,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "table",
+      "note": "one row per cycle"
+     },
+     {
+      "path": "derived_data/figures/cycle-scores.png",
+      "sha256": "b9db4c3755166fceace79a6ba8a9d552b10ddfa6e003372075095ad57d91eabf",
+      "size": 19204,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "figure",
+      "note": "the scores of every cycle; the red line is the median"
+     }
+    ],
+    "checks": [
+     {
+      "claim": "Cycle 3: runs scoring 0.7 or more",
+      "recorded": 14,
+      "recomputed": 14,
+      "match": "yes",
+      "population": "Cycle 3, all 15 runs",
+      "step": "s-summarise-cycles"
+     },
+     {
+      "claim": "Cycle 4: median score",
+      "recorded": 0.87,
+      "recomputed": 0.866,
+      "match": "yes",
+      "population": "Cycle 4, all 15 runs",
+      "step": "s-summarise-cycles"
+     },
+     {
+      "claim": "Cycle 2: runs at A below 1 or above 3 wt%",
+      "recorded": 6,
+      "recomputed": 6,
+      "match": "yes",
+      "population": "Cycle 2, all 15 runs",
+      "step": "s-summarise-cycles"
+     },
+     {
+      "claim": "Cycle 4: best score (earlier slide)",
+      "recorded": 0.97,
+      "recomputed": 0.962,
+      "match": "no",
+      "population": "Cycle 4, all 15 runs",
+      "step": "s-summarise-cycles",
+      "note": "The slide rounded the best run up; the raw file gives 0.962."
+     }
+    ]
+   },
+   "no": 18
+  },
+  "X7": {
+   "id": "X7",
+   "parent": "C4",
+   "title": "Pick the runs of cycle 6 by hand, on a grid",
+   "kind": "attempt",
+   "status": "paused",
+   "group": "X",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/05",
+   "at": "2026-05-05",
+   "by": "claude",
+   "cause": "superseded",
+   "causeConfirmed": false,
+   "why": "A grid around the best run would be easy to explain.",
+   "reason": "Replaced by cycle 6, which takes the model's suggestions on a grid, so the choice of runs is not biased by hand.",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Dropped before any run.",
+    "files": []
+   },
+   "no": 19
+  },
+  "U2": {
+   "id": "U2",
+   "parent": "C4",
+   "title": "Run the best formulation on the second instrument",
+   "kind": "attempt",
+   "status": "active",
+   "group": "U",
+   "trigger": {
+    "kind": "user"
+   },
+   "when": "5/06",
+   "at": "2026-05-06",
+   "by": "user",
+   "why": "Check that the score does not depend on the instrument.",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Started: no result yet.",
+    "files": []
+   },
+   "no": 20
+  },
+  "C5": {
+   "id": "C5",
+   "parent": "C4",
+   "title": "Cycle 5: larger B inside the good A range (B 1.8–3.4 wt%)",
+   "kind": "attempt",
+   "status": "done",
+   "group": "C",
+   "outcome": "failure",
    "trigger": {
     "kind": "plan"
    },
    "when": "5/08",
+   "at": "2026-05-08",
    "by": "user",
+   "cause": "idea",
+   "causeConfirmed": true,
+   "why": "The next steps of the report: look for higher scores at larger B inside the good A range.",
+   "reason": "The score falls as B grows: the five runs with the smallest B had a median of 0.69, the five with the largest B only 0.16.",
+   "result": {
+    "text": "Median 0.48, best 0.84 at B 1.82 wt%; 2 of 15 runs scored 0.7 or more.",
+    "value": 0.843,
+    "n": 15
+   },
+   "population": "Cycle 5, all 15 runs",
+   "evidence": {
+    "steps": [
+     "s-summarise-cycles",
+     "s-make-figures"
+    ],
+    "files": [
+     {
+      "path": "data/cycle5-runs.csv",
+      "sha256": "74363e3a68b3a433f5e7f770ac9ee087167d265896aa6b0acc0096b1f550fb20",
+      "size": 365,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "raw"
+     },
+     {
+      "path": "derived_data/cycle-summary.csv",
+      "sha256": "8e1341be7f3768720b0264cd7ebc7511ed19477ff8e73f3f77c517ef2d0cd364",
+      "size": 253,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "table",
+      "note": "one row per cycle"
+     },
+     {
+      "path": "derived_data/figures/region-map.png",
+      "sha256": "29c7e05817a277733a28d0aeea08e9c8016df1c6d360ec7b9e65ecea34b6dc05",
+      "size": 34769,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "figure",
+      "note": "every run of the search in the A-B plane, coloured by score"
+     }
+    ],
+    "checks": [
+     {
+      "claim": "Cycle 5: median score",
+      "recorded": 0.48,
+      "recomputed": 0.481,
+      "match": "yes",
+      "population": "Cycle 5, all 15 runs",
+      "step": "s-summarise-cycles"
+     }
+    ]
+   },
+   "no": 21
+  },
+  "C6": {
+   "id": "C6",
+   "parent": "C4",
+   "title": "Cycle 6: a fine grid around A 2.6, B 1.4 wt%",
+   "kind": "attempt",
+   "status": "active",
+   "group": "C",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/13",
+   "at": "2026-05-13",
+   "by": "user",
+   "why": "Cycle 5 closed the road to larger B; spend the next cycle on a fine grid around the best run of cycle 4.",
+   "result": {
+    "text": "8 of 15 runs measured: best 0.97 so far, the lowest 0.89.",
+    "value": 0.975,
+    "n": 8
+   },
+   "population": "Cycle 6, the 8 runs measured so far",
+   "evidence": {
+    "steps": [
+     "s-summarise-cycles"
+    ],
+    "files": [
+     {
+      "path": "data/cycle6-runs.csv",
+      "sha256": "f24cad1472588669ea8be2f0deaead22c5ea23eb84a9b93c7d49f951979eb3fc",
+      "size": 218,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "raw"
+     },
+     {
+      "path": "derived_data/cycle-summary.csv",
+      "sha256": "8e1341be7f3768720b0264cd7ebc7511ed19477ff8e73f3f77c517ef2d0cd364",
+      "size": 253,
+      "modified": "2026-10-01T03:54:15Z",
+      "role": "table",
+      "note": "one row per cycle"
+     }
+    ],
+    "checks": [
+     {
+      "claim": "Cycle 6: median score so far",
+      "recorded": 0.952,
+      "recomputed": 0.946,
+      "match": "close",
+      "population": "Cycle 6, 6 runs when written, 8 now",
+      "step": "s-summarise-cycles",
+      "note": "Two runs were added after the number was written."
+     }
+    ]
+   },
+   "no": 22
+  },
+  "P3": {
+   "id": "P3",
+   "parent": "C6",
+   "title": "Repeat the best formulation 15 times",
+   "kind": "attempt",
+   "status": "planned",
+   "group": "P",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/14",
+   "at": "2026-05-14",
+   "by": "user",
+   "why": "To know the spread of the best formulation itself.",
    "evidence": {
     "steps": [],
     "checks": [],
-    "noData": "Planned: not run yet."
-   }
+    "noData": "Planned: not run yet.",
+    "files": []
+   },
+   "no": 23
+  },
+  "P4": {
+   "id": "P4",
+   "parent": "C6",
+   "title": "Scale the best formulation up to a 10× batch",
+   "kind": "attempt",
+   "status": "planned",
+   "group": "P",
+   "trigger": {
+    "kind": "supervisor"
+   },
+   "when": "5/14",
+   "at": "2026-05-14",
+   "by": "user",
+   "why": "The question that follows from the result.",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Planned: not run yet.",
+    "files": []
+   },
+   "no": 24
+  },
+  "K1": {
+   "id": "K1",
+   "parent": "C6",
+   "title": "Use A 2.6, B 1.4 wt% for the next stage",
+   "kind": "conclusion",
+   "status": "planned",
+   "group": "C",
+   "trigger": {
+    "kind": "plan"
+   },
+   "when": "5/20",
+   "at": "2026-05-20",
+   "by": "user",
+   "why": "What the search is meant to deliver.",
+   "evidence": {
+    "steps": [],
+    "checks": [],
+    "noData": "Planned: waits for cycle 6.",
+    "files": []
+   },
+   "no": 25
   }
  },
- "changes": {}
+ "changes": {
+  "k-01": {
+   "id": "k-01",
+   "by": "claude",
+   "at": "2026-04-27T15:00:00Z",
+   "move": "X5",
+   "field": "reason",
+   "before": null,
+   "after": "The impedance cell was not calibrated, so a drift cannot be told from noise. The idea was not really tested."
+  },
+  "k-02": {
+   "id": "k-02",
+   "by": "claude",
+   "at": "2026-04-27T15:00:00Z",
+   "move": "X5",
+   "field": "cause",
+   "before": null,
+   "after": "measurement"
+  },
+  "k-03": {
+   "id": "k-03",
+   "by": "claude",
+   "at": "2026-05-04T11:00:00Z",
+   "move": "AUD2",
+   "field": "result.text",
+   "before": null,
+   "after": "The summary of six cycles comes out of the raw files; one number in an earlier slide does not match."
+  },
+  "k-04": {
+   "id": "k-04",
+   "by": "claude",
+   "at": "2026-05-05T10:00:00Z",
+   "move": "X7",
+   "field": "reason",
+   "before": null,
+   "after": "Replaced by cycle 6, which takes the model's suggestions on a grid, so the choice of runs is not biased by hand."
+  },
+  "k-05": {
+   "id": "k-05",
+   "by": "user",
+   "at": "2026-05-01T09:00:00Z",
+   "move": "C4",
+   "field": "title",
+   "before": "Cycle 4: confirm the region",
+   "after": "Cycle 4: confirm the region (A 1.97–2.88 wt%)"
+  },
+  "k-06": {
+   "id": "k-06",
+   "by": "user",
+   "at": "2026-05-09T09:00:00Z",
+   "move": "C5",
+   "field": "cause",
+   "before": null,
+   "after": "idea"
+  },
+  "k-07": {
+   "id": "k-07",
+   "by": "user",
+   "at": "2026-04-20T17:00:00Z",
+   "move": "X4",
+   "field": "causeConfirmed",
+   "before": false,
+   "after": true
+  },
+  "k-08": {
+   "id": "k-08",
+   "by": "user",
+   "at": "2026-04-22T09:00:00Z",
+   "move": "X8",
+   "field": "causeConfirmed",
+   "before": false,
+   "after": true
+  }
+ }
 }

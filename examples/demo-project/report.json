@@ -1,9 +1,9 @@
 {
- "schema": "duetsheet/0.6",
+ "schema": "duetsheet/0.7",
  "blocks": {
   "b-intro": {
    "id": "b-intro",
-   "title": "NIMO optimisation report (demo)",
+   "title": "Formulation search report (demo)",
    "caption": "",
    "breakBefore": "auto",
    "type": "text",
@@ -95,7 +95,7 @@
    "type": "text",
    "text": "Run additional experiments in the region A = 2–3 and B = 1.8–3.4 wt% to check whether higher scores exist.",
    "createdAt": "2026-09-22T00:00:00.000Z",
-   "move": "P1"
+   "move": "C6"
   }
  },
  "datasets": {
@@ -453,7 +453,7 @@
  },
  "report": {
   "meta": {
-   "title": "NIMO demo report",
+   "title": "Demo report",
    "order": [
     "b-intro",
     "b-fig1",
@@ -512,6 +512,138 @@
    "at": "2026-09-24T07:46:42.914Z",
    "by": "claude",
    "note": "Combines the run files of cycles 1 to 3 into one table."
+  },
+  "s-summarise-cycles": {
+   "id": "s-summarise-cycles",
+   "script": {
+    "path": "scripts/summarise_cycles.py",
+    "sha256": "4220e8ec5b93913d192ae73b614cd3f956fe46f4f61dbbd61c47dfcf079c930a",
+    "size": 1382,
+    "modified": "2026-10-01T03:54:15.992Z"
+   },
+   "command": "python scripts/summarise_cycles.py",
+   "params": {},
+   "inputs": [
+    {
+     "path": "data/cycle1-runs.csv",
+     "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+     "size": 356,
+     "modified": "2026-09-25T14:09:51.912Z"
+    },
+    {
+     "path": "data/cycle2-runs.csv",
+     "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.923Z"
+    },
+    {
+     "path": "data/cycle3-runs.csv",
+     "sha256": "91ad19632d9a4b69ee60e91c403f6d5c5a674514f7d799395099d755df438423",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.930Z"
+    },
+    {
+     "path": "data/cycle4-runs.csv",
+     "sha256": "90914930196853d3ce400ce26d293e79fcac4c7d0d25f9ec3bff6c0499d4ca1b",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.938Z"
+    },
+    {
+     "path": "data/cycle5-runs.csv",
+     "sha256": "74363e3a68b3a433f5e7f770ac9ee087167d265896aa6b0acc0096b1f550fb20",
+     "size": 365,
+     "modified": "2026-10-01T03:54:15.967Z"
+    },
+    {
+     "path": "data/cycle6-runs.csv",
+     "sha256": "f24cad1472588669ea8be2f0deaead22c5ea23eb84a9b93c7d49f951979eb3fc",
+     "size": 218,
+     "modified": "2026-10-01T03:54:15.974Z"
+    }
+   ],
+   "outputs": [
+    {
+     "path": "derived_data/cycle-summary.csv",
+     "sha256": "8e1341be7f3768720b0264cd7ebc7511ed19477ff8e73f3f77c517ef2d0cd364",
+     "size": 253,
+     "modified": "2026-10-01T03:54:16.153Z"
+    }
+   ],
+   "inputPatterns": [
+    "data/cycle*-runs.csv"
+   ],
+   "at": "2026-10-01T03:54:17.716Z",
+   "by": "claude",
+   "note": "One row per cycle, cycles 1 to 6."
+  },
+  "s-make-figures": {
+   "id": "s-make-figures",
+   "script": {
+    "path": "scripts/make_figures.py",
+    "sha256": "c84bd380288b88a4b4e18f12d87a8c52cc237a20135b16830c1b46423e6fb232",
+    "size": 1976,
+    "modified": "2026-10-01T03:54:15.999Z"
+   },
+   "command": "python scripts/make_figures.py",
+   "params": {},
+   "inputs": [
+    {
+     "path": "data/cycle1-runs.csv",
+     "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+     "size": 356,
+     "modified": "2026-09-25T14:09:51.912Z"
+    },
+    {
+     "path": "data/cycle2-runs.csv",
+     "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.923Z"
+    },
+    {
+     "path": "data/cycle3-runs.csv",
+     "sha256": "91ad19632d9a4b69ee60e91c403f6d5c5a674514f7d799395099d755df438423",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.930Z"
+    },
+    {
+     "path": "data/cycle4-runs.csv",
+     "sha256": "90914930196853d3ce400ce26d293e79fcac4c7d0d25f9ec3bff6c0499d4ca1b",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.938Z"
+    },
+    {
+     "path": "data/cycle5-runs.csv",
+     "sha256": "74363e3a68b3a433f5e7f770ac9ee087167d265896aa6b0acc0096b1f550fb20",
+     "size": 365,
+     "modified": "2026-10-01T03:54:15.967Z"
+    },
+    {
+     "path": "data/cycle6-runs.csv",
+     "sha256": "f24cad1472588669ea8be2f0deaead22c5ea23eb84a9b93c7d49f951979eb3fc",
+     "size": 218,
+     "modified": "2026-10-01T03:54:15.974Z"
+    }
+   ],
+   "outputs": [
+    {
+     "path": "derived_data/figures/cycle-scores.png",
+     "sha256": "b9db4c3755166fceace79a6ba8a9d552b10ddfa6e003372075095ad57d91eabf",
+     "size": 19204,
+     "modified": "2026-10-01T03:54:17.259Z"
+    },
+    {
+     "path": "derived_data/figures/region-map.png",
+     "sha256": "29c7e05817a277733a28d0aeea08e9c8016df1c6d360ec7b9e65ecea34b6dc05",
+     "size": 34769,
+     "modified": "2026-10-01T03:54:17.331Z"
+    }
+   ],
+   "inputPatterns": [
+    "data/cycle*-runs.csv"
+   ],
+   "at": "2026-10-01T03:54:18.152Z",
+   "by": "claude",
+   "note": "Scores per cycle, and the A-B plane."
   }
  }
 }

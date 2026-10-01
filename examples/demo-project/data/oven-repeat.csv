@@ -1,0 +1,4 @@
+Run,Set temperature (C),Measured temperature (C),Score
+T4,60,59.8,0.861
+T5,60,60.2,0.878
+T6,60,60.0,0.849
