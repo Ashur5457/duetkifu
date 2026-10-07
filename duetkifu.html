@@ -186,6 +186,15 @@ main{min-width:0}
 .page .inner{position:absolute;inset:0;padding:var(--py) var(--px);overflow:hidden;display:flex;flex-direction:column;gap:var(--gap)}
 .page.scrolls .inner{overflow:auto}
 .page .pno{position:absolute;right:14px;bottom:8px;font-size:12px;color:var(--muted)}
+/* View: the page is scaled as a whole; a bar above it moves it, its corner resizes it */
+#pagehost{position:relative;margin:0 auto}
+.pgbox{position:relative}.pgbox .page{margin:0;transform-origin:0 0}
+.pgbar{height:16px;margin:0 0 3px;display:flex;justify-content:center;align-items:center;color:var(--muted);font-size:12px;letter-spacing:2px;
+  cursor:move;user-select:none;touch-action:none;border-radius:6px;opacity:.55}
+.pgbar:hover{opacity:1;background:var(--soft)}
+.pgrip{position:absolute;right:-6px;bottom:-6px;width:18px;height:18px;cursor:nwse-resize;touch-action:none;border-radius:0 0 8px 0;opacity:.6;
+  background:linear-gradient(135deg,transparent 0 55%,var(--muted) 55% 62%,transparent 62% 72%,var(--muted) 72% 79%,transparent 79%)}
+.pgrip:hover{opacity:1}
 .pager{display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0 10px}
 .pager .cnt{min-width:96px;text-align:center;color:var(--muted);font-variant-numeric:tabular-nums}
 .thumbs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
@@ -641,7 +650,7 @@ details.round summary{cursor:pointer;font-size:13.5px}
 #qa .qah button{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:6px;min-width:26px;height:24px;cursor:pointer;font:inherit}
 #qa .qab{flex:1;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:8px}
 #qa .qaf{border-top:1px solid var(--line);padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
-#qa .qaf .sp{flex:1}#qa .qaf .ast{font-size:12px;color:var(--muted)}
+#qa .qaf .sp{flex:1}#qa .qaf .ast{font-size:12px;color:var(--muted)}#qa .conn{display:inline-flex;gap:6px;align-items:center}
 #qa .anno{margin:0}#qa .empty{color:var(--muted);font-size:12.5px;margin:4px 0}
 #qa .where{margin:2px 0}
 .savest{font-size:12px;color:var(--muted);white-space:nowrap;cursor:help}.savest.ok::before{content:"\2713  ";color:var(--ok)}
@@ -1531,6 +1540,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開",
  "Drag to resize; double-click to reset": "拖拉可調整大小；按兩下還原",
  "Reset layout": "還原版面",
+ "Drag to move the page. Drag its corner to make it larger or smaller. Double-click here to put it back.": "拖曳可移動頁面；拖右下角可放大縮小；按兩下這裡還原。",
+ "Drag to make the page larger or smaller": "拖曳可放大或縮小頁面",
  "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu 把你的研究記成一份報告，加上一份記錄每一步的棋譜，由你和 AI agent 一起寫。每一個改動都會記下是誰做的。",
  "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "閱覽模式把報告分頁顯示，用方向鍵翻頁。想問 agent 圖表或段落的問題，在圖上圈出一塊，或選取文字。",
  "Follow the research.": "跟著研究走。",
@@ -2557,6 +2568,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展开",
  "Drag to resize; double-click to reset": "拖动可调整大小；双击还原",
  "Reset layout": "还原版面",
+ "Drag to move the page. Drag its corner to make it larger or smaller. Double-click here to put it back.": "拖动可移动页面；拖右下角可放大缩小；双击这里还原。",
+ "Drag to make the page larger or smaller": "拖动可放大或缩小页面",
  "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu 把你的研究记成一份报告，加上一份记录每一步的棋谱，由你和 AI agent 一起写。每一个改动都会记下是谁做的。",
  "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "阅览模式把报告分页显示，用方向键翻页。想问 agent 图表或段落的问题，在图上圈出一块，或选取文字。",
  "Follow the research.": "跟着研究走。",
@@ -3583,6 +3596,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "展開する",
  "Drag to resize; double-click to reset": "ドラッグでサイズ変更、ダブルクリックで元に戻す",
  "Reset layout": "レイアウトを元に戻す",
+ "Drag to move the page. Drag its corner to make it larger or smaller. Double-click here to put it back.": "ドラッグでページを移動、右下の角をドラッグで拡大・縮小、ここをダブルクリックで元に戻す。",
+ "Drag to make the page larger or smaller": "ドラッグでページを拡大・縮小",
  "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu は、研究をレポートと、すべての手を記した棋譜として残し、あなたと AI agent が一緒に書き進めます。変更はすべて、誰が行ったかとともに記録されます。",
  "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "閲覧モードではレポートがページで表示され、矢印キーでめくれます。図や文章について agent に聞くには、図の一部を囲むか、文章を選びます。",
  "Follow the research.": "研究の流れを追う。",
@@ -4609,6 +4624,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "펼치기",
  "Drag to resize; double-click to reset": "드래그하여 크기 조절, 더블클릭하면 원래대로",
  "Reset layout": "레이아웃 초기화",
+ "Drag to move the page. Drag its corner to make it larger or smaller. Double-click here to put it back.": "드래그하여 페이지 이동, 오른쪽 아래 모서리를 드래그하여 확대·축소, 여기를 더블클릭하면 원래대로.",
+ "Drag to make the page larger or smaller": "드래그하여 페이지 확대·축소",
  "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu는 연구를 보고서와 모든 수를 담은 기보로 기록하며, 당신과 AI agent가 함께 씁니다. 모든 변경은 누가 했는지와 함께 기록됩니다.",
  "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "보기 모드는 보고서를 페이지로 보여 주며 화살표 키로 넘깁니다. 그림이나 문단에 대해 agent에게 물으려면 그림의 일부를 둘러싸거나 텍스트를 선택하세요.",
  "Follow the research.": "연구의 흐름을 따라가기.",
@@ -5635,6 +5652,8 @@ body.readonly #modes button[data-mode="edit"],body.readonly #togglePanel,body.re
  "Expand": "Expandir",
  "Drag to resize; double-click to reset": "Arrastra para cambiar el tamaño; doble clic para restablecer",
  "Reset layout": "Restablecer el diseño",
+ "Drag to move the page. Drag its corner to make it larger or smaller. Double-click here to put it back.": "Arrastra para mover la página; arrastra su esquina para agrandarla o reducirla; doble clic aquí para restablecerla.",
+ "Drag to make the page larger or smaller": "Arrastra para agrandar o reducir la página",
  "Duetkifu keeps your research as a report and a record of every move, which you and an AI agent write together. Every change is recorded with who made it.": "Duetkifu guarda tu investigación como un informe y un registro de cada jugada, que escribes junto con un agente de IA. Cada cambio queda anotado con quién lo hizo.",
  "View shows the report as pages. Turn pages with the arrow keys. To ask the agent about a figure or a passage, draw around part of the figure or select the text.": "La vista muestra el informe por páginas; pasa de página con las flechas. Para preguntar al agente por una figura o un pasaje, rodea parte de la figura o selecciona el texto.",
  "Follow the research.": "Sigue la investigación.",
@@ -6128,9 +6147,11 @@ const S={mode:'view',page:0,tab:'annos',filter:'all',showHist:false,histRound:nu
 let db=null;
 
 /* ---------- Sizes ---------- */
+// Pages are always laid out at the same width, so a page holds the same blocks on every screen; View scales the
+// whole page to fit (placePage), the way a slide is zoomed, instead of cutting the pages again.
+const PAGE_W=1080;
 function layoutVars(){
-  const host=$('main');const avail=Math.max(480,host.clientWidth);
-  const pw=Math.min(avail,1080),ph=Math.round(pw*9/16);
+  const pw=PAGE_W,ph=Math.round(pw*9/16);
   const px=Math.round(pw*0.045),py=Math.round(pw*0.035),gap=14;
   const r=document.documentElement.style;
   r.setProperty('--pw',pw+'px');r.setProperty('--ph',ph+'px');r.setProperty('--px',px+'px');r.setProperty('--py',py+'px');
@@ -7172,7 +7193,7 @@ function paginate(){
     if(cur.length&&(g.force||need>L.innerH+1)){pages.push(cur);cur=[];hsum=0}
     hsum=cur.length?hsum+L.gap+gh:gh;cur.push(...g.blocks)});
   if(cur.length)pages.push(cur);
-  S.pages=pages;S.heights=hts;S.innerH=L.innerH;
+  S.pages=pages;S.heights=hts;S.innerH=L.innerH;S.pw=L.pw;S.ph=L.ph;
   S.starts=new Map();pages.forEach((p,i)=>S.starts.set(p[0].id,i));
   S.page=clamp(S.page,0,Math.max(0,pages.length-1));
 }
@@ -7185,8 +7206,10 @@ function renderView(){
   const pg=h('div',{class:'page'});const inner=h('div',{class:'inner'});pg.append(inner);
   blockGroups(blocks).forEach(g=>inner.append(...buildGroup(g,!S.readonly))); // interactive: draw on a figure to ask about it
   pg.append(h('span',{class:'pno',text:`${S.page+1} / ${S.pages.length}`}));
-  host.append(pg);
-  fitPage(inner,blocks);
+  const bar=h('div',{class:'pgbar',title:tr('Drag to move the page. Drag its corner to make it larger or smaller. Double-click here to put it back.')},[h('span',{text:'⠿'})]);
+  const grip=h('div',{class:'pgrip',title:tr('Drag to make the page larger or smaller')});
+  host.append(bar,h('div',{class:'pgbox'},[pg]),grip);bindPage(bar,grip);
+  fitPage(inner,blocks);placePage();
   $('#pcount').textContent=S.pages.length?tr('Page {a} of {b}',{a:S.page+1,b:S.pages.length}):tr('No content');
   $('#prev').disabled=S.page<=0;$('#next').disabled=S.page>=S.pages.length-1;
   const th=$('#thumbs');th.replaceChildren();
@@ -8242,7 +8265,7 @@ function setMode(btn){leaveField();if(btn!=='kifu-view'&&btn!=='kifu-edit'&&$('#
 $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
 // The side panel (comments, changes, style, folder) is for editing: the view modes read at full width without it
 const editingMode=()=>S.mode==='edit'||(S.mode==='tree'&&!!kifuView().edit);
-function showPanel(){const ed=editingMode();document.body.classList.toggle('nopanel',!ed||!!S.panelHidden);$('#togglePanel').hidden=!ed;renderAgentBar();placePanel()}
+function showPanel(){const ed=editingMode();document.body.classList.toggle('nopanel',!ed||!!S.panelHidden);$('#togglePanel').hidden=!ed;renderAgentBar();placePanel();dockQA()} // Kifu view: the report page's room is given back
 const PN_KEY='duetkifu-panel';
 let PN=(()=>{const d={pin:false,min:false,x:null,y:null,w:0,h:0};try{const v=JSON.parse(localStorage.getItem(PN_KEY)||'null');
   if(v&&typeof v==='object'){d.pin=v.pin===true;d.min=v.min===true;['x','y'].forEach(k=>{if(Number.isFinite(v[k]))d[k]=v[k]});['w','h'].forEach(k=>{if(Number.isFinite(v[k])&&v[k]>0)d[k]=v[k]})}}catch(e){}return d})();
@@ -8256,10 +8279,10 @@ function placePanel(){const b=$('#panel'),fl=!PN.pin;document.body.classList.tog
   if(PN.x==null||PN.y==null){b.style.left='';b.style.top='';b.style.right='';b.style.maxHeight='';return}
   const w=b.offsetWidth||380,y=clamp(PN.y,4,Math.max(4,innerHeight-60));b.style.right='auto';b.style.left=clamp(PN.x,4,Math.max(4,innerWidth-w-4))+'px';b.style.top=y+'px';
   b.style.maxHeight=(innerHeight-y-8)+'px'} // the whole panel stays in the window, so its corner can be reached
-addEventListener('resize',()=>{placePanel();const q=$('#qa');if(q&&!q.hidden)placeQA(q)});
+addEventListener('resize',()=>{placePanel();const q=$('#qa');if(q&&!q.hidden){placeQA(q);dockQA()}});
 $('#pnPin').addEventListener('click',()=>{PN.pin=!PN.pin;savePN();placePanel()});
 $('#pnMin').addEventListener('click',()=>{PN.min=!PN.min;savePN();placePanel()});
-$('#pnh').addEventListener('pointerdown',e=>{if(PN.pin||e.button!==0||e.target.closest('button'))return;e.preventDefault();const head=$('#pnh'),b=$('#panel');head.setPointerCapture(e.pointerId);
+$('#pnh').addEventListener('pointerdown',e=>{if(PN.pin||e.button!==0||e.target.closest('button'))return;e.preventDefault();const head=$('#pnh'),b=$('#panel');try{head.setPointerCapture(e.pointerId)}catch(x){}
   const r=b.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;
   const mv=ev=>{PN.x=ev.clientX-dx;PN.y=ev.clientY-dy;placePanel()};
   const up=()=>{head.removeEventListener('pointermove',mv);head.removeEventListener('pointerup',up);head.removeEventListener('pointercancel',up);savePN()};
@@ -8270,20 +8293,64 @@ if(window.ResizeObserver)new ResizeObserver(()=>{const b=$('#panel');if(PN.pin||
 /* ---------- The questions panel (view modes) ----------
    What was asked while reading (annotations with from: "view") and the agent's answers, with a reply box to go on;
    the questions are sent together with its "Ask the agent" button. It floats, can be moved by its header, resized
-   from its corner and folded to one line; where it sits is kept in this browser. */
+   from its corner and folded to one line; where it sits is kept in this browser. In its own corner it does not
+   cover the report page: the page makes room for it (dockQA). */
 const QA_KEY='duetkifu-qa';
 let QA=(()=>{const d={min:false,x:null,y:null,w:0,h:0};try{const v=JSON.parse(localStorage.getItem(QA_KEY)||'null');
   if(v&&typeof v==='object'){d.min=v.min===true;['x','y'].forEach(k=>{if(Number.isFinite(v[k]))d[k]=v[k]});['w','h'].forEach(k=>{if(Number.isFinite(v[k])&&v[k]>0)d[k]=v[k]})}}catch(e){}return d})();
 function saveQA(){try{localStorage.setItem(QA_KEY,JSON.stringify(QA))}catch(e){}}
 const viewQuestions=()=>S.annos.filter(a=>a.from==='view').sort((p,q)=>(q.no||0)-(p.no||0));
 function placeQA(box){ // keep it on screen
-  if(QA.x==null||QA.y==null){box.style.left='';box.style.top='';box.style.right='';box.style.maxHeight='';return}
+  if(QA.x==null||QA.y==null){box.style.left='';box.style.top='';box.style.right='';box.style.bottom='';box.style.maxHeight='';return}
   box.style.bottom='auto';
   const w=box.offsetWidth||360,y=clamp(QA.y,4,Math.max(4,innerHeight-60));
   box.style.right='auto';box.style.left=clamp(QA.x,4,Math.max(4,innerWidth-w-4))+'px';box.style.top=y+'px';box.style.maxHeight=(innerHeight-y-8)+'px'}
+// The page moves left (and shrinks if it must) so that the open panel, in its corner, does not cover it. Not when the
+// panel was moved elsewhere or is folded, nor in a window too narrow to leave a readable page beside it.
+function dockQA(){
+  const box=$('#qa'),m=$('main');if(!box||!m)return;
+  let need=0;
+  if(!box.hidden&&!QA.min&&QA.x==null&&!pageSet()&&S.mode==='view'){const old=m.style.marginRight;m.style.marginRight='';
+    const r=m.getBoundingClientRect(),edge=innerWidth-box.offsetWidth-16-12;
+    need=Math.max(0,Math.ceil(r.right-edge));if(edge-r.left<640)need=0;m.style.marginRight=old}
+  const v=need?need+'px':'';if(m.style.marginRight===v)return;
+  m.style.marginRight=v;clearTimeout(S.dockT);S.dockT=setTimeout(()=>{if(S.mode==='view')render()},0)} // the page is scaled to the new width
+/* ---------- The page in View: moved and scaled by the reader ----------
+   s is the scale of the page (0 = fit the width, and make room for the questions panel); dx, dy move it, with the page
+   bar and the thumbnails, from where it would be. Kept in this browser, never in the report. */
+const PG_KEY='duetkifu-page';
+let PG=(()=>{const d={s:0,dx:0,dy:0};try{const v=JSON.parse(localStorage.getItem(PG_KEY)||'null');
+  if(v&&typeof v==='object'){if(Number.isFinite(v.s)&&v.s>0)d.s=clamp(v.s,.3,2);['dx','dy'].forEach(k=>{if(Number.isFinite(v[k]))d[k]=v[k]})}}catch(e){}return d})();
+function savePG(){try{localStorage.setItem(PG_KEY,JSON.stringify(PG))}catch(e){}}
+const pageSet=()=>PG.s>0; // the reader has moved or resized the page
+function pageScale(){return PG.s||clamp(($('#view').clientWidth||PAGE_W)/(S.pw||PAGE_W),.3,1)}
+function placePage(){
+  const host=$('#pagehost'),pg=$('.pgbox .page',host);if(!pg)return;
+  const s=pageScale(),w=Math.round(S.pw*s),hh=Math.round(S.ph*s);
+  pg.style.transform=s===1?'':`scale(${s})`;$('.pgbox',host).style.height=hh+'px';host.style.width=w+'px';
+  // once placed by the reader, the page column (page, page buttons, thumbnails) is as wide as the page, from the left
+  host.style.margin=pageSet()?'0':'';$('#view').style.width=pageSet()?w+'px':'';
+  $('#view').style.transform=PG.dx||PG.dy?`translate(${Math.round(PG.dx)}px,${Math.round(PG.dy)}px)`:''}
+function takePage(){ // the first move or resize: keep the page where and as large as it is now, then follow the reader
+  if(pageSet())return;const r0=$('#pagehost').getBoundingClientRect();
+  PG.s=pageScale();$('main').style.marginRight='';placePage();
+  const r1=$('#pagehost').getBoundingClientRect();PG.dx+=r0.left-r1.left;PG.dy+=r0.top-r1.top;placePage()}
+function keepPageReachable(){ // the bar above the page stays in the window, so it can be grabbed again
+  const r=$('#pagehost .pgbar').getBoundingClientRect();
+  if(r.right<60)PG.dx+=60-r.right;if(r.left>innerWidth-60)PG.dx-=r.left-(innerWidth-60);if(r.top+scrollY<0)PG.dy-=r.top+scrollY;placePage()}
+function bindPage(bar,grip){
+  const track=(el,onMove)=>el.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(x){}
+    takePage();const x0=e.clientX,y0=e.clientY;let st=null;
+    const move=ev=>{st=st||{...PG};onMove(ev.clientX-x0,ev.clientY-y0,st)};
+    const up=()=>{el.removeEventListener('pointermove',move);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);keepPageReachable();savePG()};
+    el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)});
+  track(bar,(dx,dy,st)=>{PG.dx=st.dx+dx;PG.dy=st.dy+dy;placePage()});
+  // the corner: the page grows or shrinks from its top left corner
+  track(grip,(dx,dy,st)=>{const w0=S.pw*st.s;PG.s=clamp(st.s*(w0+dx)/w0,.3,2);placePage()});
+  bar.addEventListener('dblclick',()=>{PG={s:0,dx:0,dy:0};savePG();placePage();dockQA();render()})}
 function renderQA(force){
   const box=$('#qa');if(!box)return;
-  const show=!!S.meta&&!S.readonly&&!editingMode();box.hidden=!show;if(!show){box.dataset.key='';return}
+  const show=!!S.meta&&!S.readonly&&!editingMode();box.hidden=!show;if(!show){box.dataset.key='';dockQA();return}
   const qs=viewQuestions(),open=openCount(),v=agentView(),busy=v.state==='sent'||v.state==='working',listening=!!(S.agent&&S.agent.listening);
   const key=JSON.stringify([QA.min,open,v.state,v.text,listening,!!S.server,document.documentElement.lang,qs.map(a=>[a.id,a.status,a.text,threadOf(a).length])]);
   if(!force&&key===box.dataset.key)return;
@@ -8319,17 +8386,21 @@ function renderQA(force){
         title:listening?tr('An agent is listening and will revise the report now.'):tr('No agent is listening. You will get a prompt to paste into your agent.'),onclick:askAgent})]);
     kids.push(body,foot);
     requestAnimationFrame(()=>{body.scrollTop=scroll})}
-  box.replaceChildren(...kids);placeQA(box)}
+  box.replaceChildren(...kids);placeQA(box);dockQA()}
 document.addEventListener('focusout',()=>setTimeout(()=>{if(S.qaLater&&!($('#qa').contains(document.activeElement)))renderQA()},0));
 function dragQA(head,box){
-  head.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('button'))return;e.preventDefault();head.setPointerCapture(e.pointerId);
+  head.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.closest('button'))return;e.preventDefault();try{head.setPointerCapture(e.pointerId)}catch(x){}
     const r=box.getBoundingClientRect(),dx=e.clientX-r.left,dy=e.clientY-r.top;
     const mv=ev=>{QA.x=ev.clientX-dx;QA.y=ev.clientY-dy;placeQA(box)};
-    const up=()=>{head.removeEventListener('pointermove',mv);head.removeEventListener('pointerup',up);head.removeEventListener('pointercancel',up);saveQA()};
+    const up=()=>{head.removeEventListener('pointermove',mv);head.removeEventListener('pointerup',up);head.removeEventListener('pointercancel',up);saveQA();dockQA()};
     head.addEventListener('pointermove',mv);head.addEventListener('pointerup',up);head.addEventListener('pointercancel',up)})}
-if(window.ResizeObserver)new ResizeObserver(()=>{const box=$('#qa');if(box.hidden||QA.min||!box.style.width&&!box.style.height&&!box.dataset.resized)return;
+let qaRz;
+if(window.ResizeObserver)new ResizeObserver(()=>{const box=$('#qa');if(box.hidden||QA.min)return;clearTimeout(qaRz);qaRz=setTimeout(dockQA,150);
+  if(!box.style.width&&!box.style.height&&!box.dataset.resized)return;
   QA.w=Math.round(box.offsetWidth);QA.h=Math.round(box.offsetHeight);saveQA()}).observe($('#qa'));
 $('#qa').addEventListener('pointerdown',e=>{const b=$('#qa'),r=b.getBoundingClientRect();if(e.clientX>r.right-18&&e.clientY>r.bottom-18)b.dataset.resized='1'}); // the resize corner
+// Double-clicking the header puts the panel back in its corner
+$('#qa').addEventListener('dblclick',e=>{if(!e.target.closest('.qah')||e.target.closest('button'))return;QA.x=null;QA.y=null;saveQA();placeQA($('#qa'));dockQA()});
 /* In the view modes, selecting text shows a button that asks the agent about it (a report block, or the selected move) */
 function selectionAsk(){
   const btn=$('#asksel'),sel=getSelection(),txt=sel&&!sel.isCollapsed?sel.toString().trim():'';
