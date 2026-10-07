@@ -7345,7 +7345,7 @@ function showSave(){const n=$('#savest');if(!n)return;
   const err=SAVE.err||(S.saveState==='error'?S.saveError||tr('Could not save'):'');
   if(err){n.className='savest bad';n.textContent=tr('Could not save');n.title=err;return}
   if(SAVE.busy||S.saveState==='pending'){n.className='savest busy';n.textContent=tr('Saving…');n.title='';return}
-  n.className='savest ok';n.textContent=SAVE.at?tr('Saved automatically {t}',{t:SAVE.at.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}):tr('Saved automatically');
+  n.className='savest ok';n.textContent=SAVE.at?tr('Saved automatically {t}',{t:SAVE.at.toLocaleTimeString(document.documentElement.lang||[],{hour:'2-digit',minute:'2-digit'})}):tr('Saved automatically');
   n.title=tr('Every change is written at once to {where}. There is no Save button; take a snapshot or export a copy from the File menu.',{where:where||tr('the report')})}
 
 /* ---------- Change log: field definitions ---------- */
