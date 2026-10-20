@@ -12,7 +12,7 @@ Why the name: a **kifu** is the record of a game of shogi or go, move by move. P
 
 ![The research loop: open a move, compute with recorded scripts, close it (dead ends too, with why), decide on the tree, tell it in the report](docs/research-loop.svg)
 
-![The research record of the demo project as a tree, with one move open](docs/kifu-tree.png)
+![The research record of the demo project, 54 moves: the main path turns where repeats showed the best runs could not be told apart; side branches, dead ends and corrections that point back across the tree](docs/kifu-tree.png)
 
 ![Reading the record: click the moves of the tree](docs/kifu-read.gif)
 
@@ -50,7 +50,7 @@ Editing a move and taking a change back: ![Change the cause of a dead end, then 
 - `extract FOLDER report.html`: the figures and tables of an HTML report or a slide deck, written out with their section and caption, so moves can point at them.
 
 **The report (from Duetsheet)**
-- Paginated view; edit text, charts, tables and images in place; comment on any block; draw around data points free-hand or click one point, stored as data ranges and row ids, not pixels.
+- Paginated view, laid out at one width and scaled like slides, so a page holds the same blocks on every screen; move the page by the bar above it and resize it from its corner. Edit text, charts, tables and images in place, with the side panel pinned on the right or floating; comment on any block; draw around data points free-hand or click one point, stored as data ranges and row ids, not pixels.
 - **Ask the agent to revise**: one button hands your comments to the agent waiting in the background; it answers under each comment.
 - Change log with inline diffs, rounds and a timeline; human and agent edits kept apart.
 - The data chain: every chart traced through the scripts that made it back to its raw files, with fingerprints; everything computed from a changed file turns red.
@@ -105,7 +105,7 @@ Duetkifu does not call any AI model. Your agent reads and writes plain JSON:
 - [`duetkifu.py`](duetkifu.py): the launcher and checker (`check`, `kifu check|tree|show`), the data chain (`step`), search (`index`, `find`), `extract`, and the helpers for the review loop (`annotations`, `wait`, `agent-status`).
 - [`skills/duetkifu/SKILL.md`](skills/duetkifu/SKILL.md): the `/duetkifu` skill for Claude Code.
 - [`schema/kifu.schema.json`](schema/kifu.schema.json) and [`schema/report.schema.json`](schema/report.schema.json): the JSON Schemas.
-- [`examples/demo-project/`](examples/demo-project/): a complete project folder with a record of 25 moves.
+- [`examples/demo-project/`](examples/demo-project/): a complete project folder with a record of 54 moves.
 - [`llms.txt`](llms.txt): a short index for LLMs.
 
 Prompts that work well:

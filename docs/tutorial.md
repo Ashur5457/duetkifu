@@ -4,7 +4,7 @@ Duetkifu keeps a research project as two files that you and an AI agent write to
 
 ![The research loop: open a move, compute with recorded scripts, close it (dead ends too, with why), decide on the tree, tell it in the report](research-loop.svg)
 
-This tutorial uses the demo project in [`examples/demo-project`](../examples/demo-project): a search for the best mix of two additives over six cycles, with synthetic data (not experimental results) and a record of 25 moves: the cycles, ideas that were wrong, an oven that failed, a measurement that could not be trusted, two corrections, two independent re-checks and the next steps.
+This tutorial uses the demo project in [`examples/demo-project`](../examples/demo-project): a search for the best mix of two additives over six cycles, with synthetic data (not experimental results) and a record of 54 moves: six cycles, a turn halfway through when repeats showed that the best runs could not be told apart, side branches several moves deep (a second instrument, an impedance cell, batches of an additive, an oven, two papers), ideas that were wrong, measurements that could not be trusted, corrections that point back at earlier moves, a clue noticed too late, independent re-checks and the next steps.
 
 1. [Install](#1-install) (once)
 2. [Start](#2-start)
@@ -82,23 +82,28 @@ A folder you already review with Duetsheet has a `duetsheet/` subfolder instead:
 
 Click **Kifu view**. The research question is on the left; each move follows the move it was based on.
 
-![The record of the demo as a tree, with the move "Cycle 5" open beside it](kifu-tree.png)
+![The record of the demo as a tree in full screen, with the turning point "Repeat the best run of cycle 4 six times" open beside it](kifu-tree.png)
 
-![Clicking moves of the tree: a wrong idea, an oven that failed, the correction that points back at it, data that cannot be trusted, and a re-check against the raw files](kifu-read.gif)
+![Clicking moves of the tree in full screen: the turning point, the surface that follows it, a clue noticed too late, an oven that failed and the correction that points back at it, data that cannot be trusted, and a correction found weeks later](kifu-read.gif)
 
-- **The shape says how a move ended**: a filled dot holds, a crossed circle is a dead end, an orange diamond corrects an earlier move, a hexagon is an independent audit, an open circle is not resolved yet, a dashed square is planned. The legend above the tree lists them all.
-- **Arrows**: a dotted arrow is a clue (the good run of cycle 1 pointed at the region cycle 3 found), a dashed orange arrow a correction, a grey dashed arrow support.
+- **The main path** is the thick line: the moves the report tells, from the question to the latest cycle. It is not straight. Where a move on it came before its siblings, the line goes up; where it came after them, down.
+- **The shape says how a move ended**: a filled dot holds, a crossed circle is a dead end, an orange diamond corrects an earlier move, a hexagon is an independent audit, an open circle is not resolved yet, a dashed square is planned, a ringed dot is a turning point. The legend above the tree lists them all.
+- **Arrows**: a dotted arrow is a clue (the good run of cycle 1 pointed at the region cycle 3 found), a dashed orange arrow a correction, a grey dashed arrow support. Arrows cross the whole tree: a correction found late points back at the move it corrects, however far up it is.
 - **The small dot at the lower left of a move** is its data chain: filled green when its numbers are recomputed from the raw files and nothing changed, red when something changed, a ring when its sources are named.
 - **Click a move** to read it in **This move**: why it was made, the result, what it means, the population its numbers refer to, where it sits in the record, its source, its figures and tables, its data chain, and the checks against recomputed numbers.
 - **Highlight** shows only the main path (the moves the report tells), the dead ends, the corrections and open questions, the moves you started, the checks that do not match, or the moves with no data chain yet. **Timeline** puts the moves on their dates; **List** shows them as cards.
+
+**The turn.** After cycle 4 the search was chasing the highest single run. *Repeat the best run of cycle 4 six times* (the ringed dot) showed that one formulation scatters as much as the best runs differ, so ranking single runs was ranking noise. From there the main path changes its goal: *Rank by a surface fitted to all runs* finds the best region, and cycle 6 follows it. The same fit had been tried weeks earlier on cycles 1 and 2 (*Fit the log of the score*, down among the side branches of cycle 2), and nobody used it: the dotted clue arrow from it to the surface is the record of a clue noticed too late.
 
 Dead ends in the demo are worth reading, because they are not all the same:
 
 - *High additive B* and *Cycle 5* failed because **the idea was wrong**: the runs were made and scored low.
 - *Repeat at 60 °C* failed because **the oven did not reach 60 °C**; the correction *Repeat at 60 °C with the calibrated oven* (orange arrow) did the test properly, and the first move now shows the orange dot "corrected later".
-- *Follow the impedance drift* has no result you can use, because the cell was not calibrated: the **data cannot be trusted**, so the idea was never really tested. That is a different dead end from a wrong idea, and the cause says so.
+- *Follow the impedance drift* has no result you can use, because the cell was not calibrated: the **data cannot be trusted**, so the idea was never really tested. That is a different dead end from a wrong idea, and the cause says so. The branch goes on for four more moves (recalibrate, the room temperature, take the temperature out, a climate chamber planned), and still ends without a conclusion: that is recorded too.
+- *Cycles 3 and 4 used different batches of B* found no difference: the idea was wrong. The next move, *measure its purity*, could not be done (the meter was broken): the question is open, not answered.
 - *Add a third additive C* was dropped for its **cost**, without a single run.
 - The independent re-check *Recompute the summary of all cycles* lists one number from an earlier slide that does **not** match the raw files. It is listed, not rewritten.
+- *Five runs of cycle 2 were measured on instrument 2* was found three weeks later, on the branch of the second instrument; its orange arrow goes back up to cycle 2, which now shows "corrected later".
 
 ### Arrange the page
 
@@ -114,7 +119,7 @@ The Kifu view is made of blocks with names: **Question and counts**, **Kifu tree
 - **Reset layout** (above the tree) brings everything back.
 - **Full screen**: **⛶ Full screen** in the toolbar of the tree fills the window with the tree and floats *This move* on its right, where you can fold it. Esc leaves.
 
-![The tree in full screen, with This move floating beside it](kifu-fullscreen.png)
+![The tree in full screen, with This move folded to one row at its top right](kifu-fullscreen.png)
 
 ## 4. Ask while you read
 
@@ -129,7 +134,7 @@ A small window opens. Pick one of the **Ask** tags (*What does this mean?*, *Whe
 
 ![Asking while reading: draw around the low scores of cycle 5, pick a question, send it, and the answer comes back into the panel](ask-while-reading.gif)
 
-Your questions wait in the **Questions panel**, which floats over the page. Drag its header to move it, drag its corner to resize it, and click **–** to fold it to one line; it remembers where you left it. It lists each question with what it points at (click it to jump there), and the agent's answer under it; **Reply** goes on with the conversation. **Ask the agent (n)** sends all open questions at once, and the answers come back into the same panel. A question can also be marked done, reopened or deleted.
+Your questions wait in the **Questions panel**, which floats over the page. Drag its header to move it, drag its corner to resize it, and click **–** to fold it to one line; it remembers where you left it. In Report view, while it sits in a corner, the page makes room for it. It lists each question with what it points at (click it to jump there), and the agent's answer under it; **Reply** goes on with the conversation. **Ask the agent (n)** sends all open questions at once, and the answers come back into the same panel. A question can also be marked done, reopened or deleted.
 
 The agent answers a question tag in words: where the number comes from and through which steps, how it was computed, how far it can be trusted. It changes the report or the record only if you also asked for a change.
 
@@ -174,7 +179,7 @@ While you work with the agent, it keeps the record by itself: it opens a move be
 
 Every move says where its numbers come from, at one of three levels:
 
-- **Recomputed**: steps of the data chain recompute them from the raw files. Each number the move states can have a **check**: the stated number, the recomputed one, and whether they match (yes, close, no, or not reproducible). A mismatch is listed for you; nothing is rewritten to agree. The counts of the checks are above the tree (in the demo: four match, one is close, one does not match, one cannot be reproduced).
+- **Recomputed**: steps of the data chain recompute them from the raw files. Each number the move states can have a **check**: the stated number, the recomputed one, and whether they match (yes, close, no, or not reproducible). A mismatch is listed for you; nothing is rewritten to agree. The counts of the checks are above the tree (in the demo: six match, one is close, one does not match, one cannot be reproduced).
 - **Sourced**: the report, table, figure or slides the numbers were taken from, each with a fingerprint. If a file changes or goes missing, the move shows it.
 - **No data**: a sentence saying why, for example "only discussed in a meeting" or "planned, not run yet".
 
@@ -198,9 +203,13 @@ The report works as in [Duetsheet](https://github.com/Ashur5457/duetsheet): the 
 
 ![Report view](view-mode.png)
 
-**Read** (**Report view**): the report is shown as pages; turn them with the arrow keys. There is no side panel here, so the page gets the whole width; to ask something, see [section 4](#4-ask-while-you-read).
+**Read** (**Report view**): the report is shown as 16:9 pages, like slides; turn them with the arrow keys. There is no side panel here; to ask something, see [section 4](#4-ask-while-you-read).
 
-**Review** (**Report edit**): change titles, text and captions directly; under **Quick adjustments and download**, change a chart's type, axes or scale. On a chart, hold the mouse button and draw around the points you mean, as in a paint program, or click one point; **Box on figure** draws a rectangle. The comment stores the data range and the ids of the points, which is what the agent reads. Under every block, write a comment with tags (*Ask* tags for questions, *Change* tags for edits) or an **Example request**. The **side panel** lists the comments: drag its header to float it where you like, drag its corner to resize, **–** folds it to a line, **Pin on the right** puts it back at the side.
+**Place the page where you like.** Drag the thin bar above the page to move it (the page buttons and thumbnails come along), and drag its bottom right corner to make it smaller or larger. The page is scaled as a whole, so it always holds the same blocks: what is on page 3 for you is on page 3 for your agent and for everyone else, whatever the size of their window. Double-click the bar to put the page back; until you move it, it fits the window and makes room for the questions panel. Where you put it is kept in this browser, not in the report.
+
+![Moving the page by its bar, making it smaller from its corner, and putting it back](move-page.gif)
+
+**Review** (**Report edit**): change titles, text and captions directly; under **Quick adjustments and download**, change a chart's type, axes or scale. On a chart, hold the mouse button and draw around the points you mean, as in a paint program, or click one point; **Box on figure** draws a rectangle. The comment stores the data range and the ids of the points, which is what the agent reads. Under every block, write a comment with tags (*Ask* tags for questions, *Change* tags for edits) or an **Example request**. The **side panel** on the right lists the comments. **Float** in its header lets it float over the page instead: drag its header to move it, drag its corner to resize, **–** folds it to a line, and **Pin on the right** puts it back at the side.
 
 ![A free-hand region and a data point marked on a chart, with the comments in the side panel](edit-annotate.png)
 

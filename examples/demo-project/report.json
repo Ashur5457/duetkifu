@@ -644,6 +644,67 @@
    "at": "2026-10-01T03:54:18.152Z",
    "by": "claude",
    "note": "Scores per cycle, and the A-B plane."
+  },
+  "s-fit-surface": {
+   "id": "s-fit-surface",
+   "script": {
+    "path": "scripts/fit_surface.py",
+    "sha256": "d82a850d09e672ba0d70aad1b5da902e1ea95213278f2c0f5b9f0862657552e0",
+    "size": 1906,
+    "modified": "2026-10-14T05:23:06.750Z"
+   },
+   "command": "python scripts/fit_surface.py",
+   "params": {},
+   "inputs": [
+    {
+     "path": "data/cycle1-runs.csv",
+     "sha256": "5d87791ad7a78658f84e5108039b57d0c6d6414d68340dd3fd6f02eb047ad2af",
+     "size": 356,
+     "modified": "2026-09-25T14:09:51.912Z"
+    },
+    {
+     "path": "data/cycle2-runs.csv",
+     "sha256": "0e532fdbefa0cf066fd58fe461f7cc5ecd7f103a7faf2570171f7bbc6345d8e0",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.923Z"
+    },
+    {
+     "path": "data/cycle3-runs.csv",
+     "sha256": "91ad19632d9a4b69ee60e91c403f6d5c5a674514f7d799395099d755df438423",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.930Z"
+    },
+    {
+     "path": "data/cycle4-runs.csv",
+     "sha256": "90914930196853d3ce400ce26d293e79fcac4c7d0d25f9ec3bff6c0499d4ca1b",
+     "size": 365,
+     "modified": "2026-09-25T14:09:51.938Z"
+    },
+    {
+     "path": "data/cycle5-runs.csv",
+     "sha256": "74363e3a68b3a433f5e7f770ac9ee087167d265896aa6b0acc0096b1f550fb20",
+     "size": 365,
+     "modified": "2026-10-01T03:54:15.967Z"
+    }
+   ],
+   "outputs": [
+    {
+     "path": "derived_data/surface.csv",
+     "sha256": "63ba32f570784e9edef2de285a387aba066dfac43e27c1793a74f834fab88d69",
+     "size": 237,
+     "modified": "2026-10-14T05:23:08.165Z"
+    }
+   ],
+   "inputPatterns": [
+    "data/cycle1-runs.csv",
+    "data/cycle2-runs.csv",
+    "data/cycle3-runs.csv",
+    "data/cycle4-runs.csv",
+    "data/cycle5-runs.csv"
+   ],
+   "at": "2026-10-14T05:23:09.048Z",
+   "by": "claude",
+   "note": "Quadratic surface of log(score), cycles 1 to 5; then without each cycle."
   }
  }
 }
